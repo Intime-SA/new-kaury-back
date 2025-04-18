@@ -160,6 +160,11 @@ export function OrdersTable({
   const content = (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       <div className="flex-none">
+      {!selectedDate && (
+              <span className="text-sm text-muted-foreground">
+                Últimas horas
+              </span>
+            )}
         <OrdersKPIs 
           reports={reports} 
           loading={loading} 
@@ -200,6 +205,7 @@ export function OrdersTable({
                 />
               </PopoverContent>
             </Popover>
+            
           </div>
 
           <div className="flex justify-end flex-1 items-center space-x-2">

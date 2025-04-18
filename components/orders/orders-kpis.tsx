@@ -32,6 +32,7 @@ export function OrdersKPIs({ reports = {
   previous: { totalSales: 0, totalAmount: 0, averageSale: 0 },
   percentageChange: { totalSales: 0, totalAmount: 0, averageSale: 0 }
 }, loading, hasDateFilter = false }: OrdersKPIsProps) {
+  
   return (
     <div className="grid gap-4 md:grid-cols-3 mb-4">
       <Card>
