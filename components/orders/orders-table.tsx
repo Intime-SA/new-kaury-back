@@ -15,8 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
@@ -27,290 +25,362 @@ import type { Order } from "@/types/orders"
 import { formatFirebaseTimestamp } from "@/lib/utils"
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/app/store/store'
-import { setStatus, setSelectedDate } from '@/app/store/slices/ordersSlice'
+import { setStatus, setSelectedDate, setSearchNumber } from '@/app/store/slices/ordersSlice'
+import { Skeleton } from "@/components/ui/skeleton"
+import { useInView } from "react-intersection-observer"
+import { useEffect, useState } from "react"
+import { OrdersTabs } from "./orders-tabs"
+import { useDebounce } from 'use-debounce'
+import { OrdersKPIs } from "./orders-kpis"
 
 interface OrdersTableProps {
   orders: Order[]
-  currentOrders: Order[]
-  ordersLength: number
-  currentPage: number
-  ordersPerPage: number
-  searchTerm: string
   loading: boolean
-  setSearchTerm: (term: string) => void
-  paginate: (pageNumber: number) => void
+  searchTerm: string
+  setSearchTerm: (value: string) => void
+  fetchNextPage: () => void
+  hasNextPage?: boolean
+  isFetchingNextPage: boolean
+  onSelectOrder?: (order: Order | null) => void
+  selectedOrderId?: string
+  reports: {
+    current: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+    previous: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+    percentageChange: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+  }
+}
+
+interface OrderAction {
+  label: string
+  action: string
+  className?: string
 }
 
 export function OrdersTable({
   orders,
-  currentOrders,
-  ordersLength,
-  currentPage,
-  ordersPerPage,
-  searchTerm,
   loading,
+  searchTerm,
   setSearchTerm,
-  paginate,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+  onSelectOrder,
+  selectedOrderId,
+  reports
 }: OrdersTableProps) {
   const dispatch = useDispatch()
   const { status, selectedDate } = useSelector((state: RootState) => state.orders)
+  const { ref, inView } = useInView()
+  const [isSearching, setIsSearching] = useState(false)
+  const [debouncedValue] = useDebounce(searchTerm, 2000)
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Órdenes</h1>
-        <p className="text-muted-foreground">Gestiona y monitorea todas las órdenes de compra.</p>
-      </div>
+  useEffect(() => {
+    if (searchTerm !== debouncedValue) {
+      setIsSearching(true)
+    } else {
+      setIsSearching(false)
+    }
+  }, [searchTerm, debouncedValue])
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total de órdenes</CardTitle>
-            <CardDescription>Últimos 30 días</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{ordersLength}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-emerald-500">↑ 12.5%</span> vs. mes anterior
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Órdenes pendientes</CardTitle>
-            <CardDescription>Requieren atención</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-amber-500">↑ 8.2%</span> vs. mes anterior
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
-            <CardDescription>Últimos 30 días</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$245,680.00</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-emerald-500">↑ 18.3%</span> vs. mes anterior
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Ticket promedio</CardTitle>
-            <CardDescription>Últimos 30 días</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$196.86</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-emerald-500">↑ 5.1%</span> vs. mes anterior
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-      <div className="mt-8">
-        <Tabs value={status} onValueChange={(value) => dispatch(setStatus(value as OrderStatusType))}>
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="nueva">Nuevas</TabsTrigger>
-              <TabsTrigger value="empaquetada">Empaquetadas</TabsTrigger>
-              <TabsTrigger value="pagoRecibido">Pago Recibido</TabsTrigger>
-              <TabsTrigger value="enviada">Enviadas</TabsTrigger>
-              <TabsTrigger value="cancelada">Canceladas</TabsTrigger>
-              <TabsTrigger value="archivada">Archivadas</TabsTrigger>
-            </TabsList>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva orden
-            </Button>
-          </div>
+  useEffect(() => {
+    dispatch(setSearchNumber(debouncedValue))
+  }, [debouncedValue, dispatch])
 
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-8 w-[180px] justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {selectedDate ? (
-                      format(new Date(selectedDate), "PPP", { locale: es })
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedDate ? new Date(selectedDate) : undefined}
-                    onSelect={(date) => {
-                      const event = {
-                        target: {
-                          value: date ? date.toISOString() : ''
-                        }
+  const getOrderActions = (status: OrderStatusType): OrderAction[] => {
+    const baseActions: OrderAction[] = [
+      { label: 'Ver detalles', action: 'view' },
+      { label: 'Editar', action: 'edit' },
+    ]
+
+    switch (status) {
+      case 'nueva':
+        return [
+          ...baseActions,
+          { label: 'Marcar como empaquetada', action: 'empaquetar' },
+          { label: 'Marcar como pago recibido', action: 'pago' },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+        ]
+      case 'empaquetada':
+        return [
+          ...baseActions,
+          { label: 'Marcar como pago recibido', action: 'pago' },
+          { label: 'Marcar como enviada', action: 'enviar' },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+        ]
+      case 'pagoRecibido':
+        return [
+          ...baseActions,
+          { label: 'Marcar como enviada', action: 'enviar' },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+        ]
+      case 'enviada':
+        return [
+          ...baseActions,
+          { label: 'Archivar orden', action: 'archivar' }
+        ]
+      case 'cancelada':
+        return [
+          ...baseActions,
+          { label: 'Archivar orden', action: 'archivar' }
+        ]
+      case 'archivada':
+        return baseActions
+      default:
+        return baseActions
+    }
+  }
+
+  // Calcular el conteo de órdenes por estado
+  const ordersCount = orders.reduce((acc, order) => {
+    if (order.status) {
+      acc[order.status] = (acc[order.status] || 0) + 1
+    }
+    return acc
+  }, {} as Record<string, number>)
+
+  const content = (
+    <div className="flex flex-col h-[calc(100vh-200px)]">
+      <div className="flex-none">
+        <OrdersKPIs 
+          reports={reports} 
+          loading={loading} 
+          hasDateFilter={!!selectedDate}
+        />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-8 w-[180px] justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {selectedDate ? (
+                    format(new Date(selectedDate), "PPP", { locale: es })
+                  ) : (
+                    <span>Seleccionar fecha</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate ? new Date(selectedDate) : undefined}
+                  onSelect={(date) => {
+                    const event = {
+                      target: {
+                        value: date ? date.toISOString() : ''
                       }
-                      dispatch(setSelectedDate(event.target.value))
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select>
-                <SelectTrigger className="h-8 w-[180px]">
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="processing">En proceso</SelectItem>
-                  <SelectItem value="completed">Completada</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="relative ml-auto">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar orden..."
-                className="h-8 w-[200px] pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+                    }
+                    dispatch(setSelectedDate(event.target.value))
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <TabsContent value={status} className="mt-4">
-            <Card>
-              <CardContent className="p-0">
-                {loading ? (
-                  <div className="flex justify-center items-center p-8">
-                    <p>Cargando órdenes...</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader className="bg-muted/50">
-                      <TableRow>
-                        <TableHead className="w-12">
-                          <Checkbox />
-                        </TableHead>
-                        <TableHead>
-                          <div className="flex items-center gap-1">
-                            ID
-                            <ArrowUpDown className="h-3 w-3" />
-                          </div>
-                        </TableHead>
-                        <TableHead>
-                          <div className="flex items-center gap-1">
-                            Fecha
-                            <ArrowUpDown className="h-3 w-3" />
-                          </div>
-                        </TableHead>
-                        <TableHead>
-                          <div className="flex items-center gap-1">
-                            Total
-                            <ArrowUpDown className="h-3 w-3" />
-                          </div>
-                        </TableHead>
-                        <TableHead>Productos</TableHead>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {currentOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell>
+          <div className="flex justify-end flex-1 items-center space-x-2">
+            <Input
+              placeholder="Buscar órdenes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 w-[150px] lg:w-[250px]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <Card className="h-full">
+          <CardContent className="p-0 h-full relative">
+            <div className="sticky top-0 z-10 bg-background border-b">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="bg-transparent w-[40px]">
+                      <Checkbox />
+                    </TableHead>
+                    <TableHead className="bg-transparent w-[120px]">ID</TableHead>
+                    <TableHead className="bg-transparent w-[180px]">Fecha</TableHead>
+                    <TableHead className="bg-transparent w-[180px]">Total</TableHead>
+                    <TableHead className="bg-transparent w-[120px]">Productos</TableHead>
+                    <TableHead className="bg-transparent flex-1">Cliente</TableHead>
+                    <TableHead className="bg-transparent w-[100px]">Estado</TableHead>
+                    <TableHead className="bg-transparent w-[80px] text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </div>
+            <div className="h-full overflow-auto [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 pt-[49px]">
+              <Table>
+                <TableBody>
+                  {isSearching ? (
+                    <TableRow>
+                      <TableCell className="w-[40px]">
+                        <Skeleton className="h-4 w-4" />
+                      </TableCell>
+                      <TableCell className="w-[120px]">
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell className="w-[120px]">
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                      </TableCell>
+                      <TableCell className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[150px]">
+                        <Skeleton className="h-6 w-24 rounded-full" />
+                      </TableCell>
+                      <TableCell className="w-[80px] text-right">
+                        <Skeleton className="h-8 w-8 rounded-full ml-auto" />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <>
+                      {orders.map((order) => (
+                        <TableRow 
+                          key={order.id}
+                          className={cn(
+                            "cursor-pointer hover:bg-muted/50",
+                            selectedOrderId === order.id && "bg-muted"
+                          )}
+                          onClick={() => onSelectOrder?.(order)}
+                        >
+                          <TableCell className="w-[40px]">
                             <Checkbox />
                           </TableCell>
-                          <TableCell className="font-medium">#{order.numberOrder}</TableCell>
-                          <TableCell>{formatFirebaseTimestamp(order.date)}</TableCell>
-                          <TableCell>${order.total.toLocaleString("es-ES", {
+                          <TableCell className="w-[120px] font-medium">#{order.numberOrder}</TableCell>
+                          <TableCell className="w-[180px]">{formatFirebaseTimestamp(order.date)}</TableCell>
+                          <TableCell className="w-[180px] font-bold">${order.total.toLocaleString("es-ES", {
                             style: "currency",
                             currency: "ARS",
                           })}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{order.orderItems.length} items</Badge>
+                          <TableCell className="w-[120px]">
+                            <Badge variant="outline" className="bg-muted-foreground text-muted-foreground-foreground">{order.orderItems.length} items</Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="flex-1">
                             <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarFallback>{order.infoEntrega.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-primary/10 text-primary">
+                                  {order.infoEntrega.name.charAt(0)}
+                                  {order.infoEntrega.apellido.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
                               <span>{order.infoEntrega.name} {order.infoEntrega.apellido}</span>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="w-[150px]">
                             <OrderStatus status={order.status as OrderStatusType} />
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="w-[80px] text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" className="h-8 w-8 p-0">
                                   <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Acciones</span>
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                                <DropdownMenuItem>Editar</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>Marcar como completada</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">Cancelar</DropdownMenuItem>
+                                {getOrderActions(order.status as OrderStatusType).map((action) => (
+                                  <DropdownMenuItem 
+                                    key={action.action}
+                                    className={action.className}
+                                    onClick={() => {
+                                      switch (action.action) {
+                                        case 'view':
+                                          onSelectOrder?.(order)
+                                          break
+                                        case 'edit':
+                                          // Implementar edición
+                                          break
+                                        case 'empaquetar':
+                                          // Implementar cambio de estado a empaquetada
+                                          break
+                                        case 'pago':
+                                          // Implementar cambio de estado a pago recibido
+                                          break
+                                        case 'enviar':
+                                          // Implementar cambio de estado a enviada
+                                          break
+                                        case 'cancelar':
+                                          // Implementar cancelación
+                                          break
+                                        case 'archivar':
+                                          // Implementar archivado
+                                          break
+                                      }
+                                    }}
+                                  >
+                                    {action.label}
+                                  </DropdownMenuItem>
+                                ))}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Mostrando <strong>{currentOrders.length}</strong> de <strong>{orders.length}</strong> resultados
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => paginate(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Página anterior</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => paginate(currentPage + 1)}
-                  disabled={currentPage === Math.ceil(orders.length / ordersPerPage)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                  <span className="sr-only">Página siguiente</span>
-                </Button>
-              </div>
+                    </>
+                  )}
+                  {isFetchingNextPage && searchTerm === "" && (
+                    <>
+                      {[...Array(5)].map((_, i) => (
+                        <TableRow key={`skeleton-${i}`}>
+                          <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                        </TableRow>
+                      ))}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+              <div ref={ref} className="w-full h-4" />
             </div>
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
+  )
+
+  return (
+    <OrdersTabs
+      orders={{
+        nueva: ordersCount['nueva'] || 0,
+        empaquetada: ordersCount['empaquetada'] || 0,
+        pagoRecibido: ordersCount['pagoRecibido'] || 0,
+        enviada: ordersCount['enviada'] || 0,
+        cancelada: ordersCount['cancelada'] || 0,
+        archivada: ordersCount['archivada'] || 0
+      }}
+      content={content}
+    />
   )
 }

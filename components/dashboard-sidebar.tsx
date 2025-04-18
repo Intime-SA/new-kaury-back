@@ -3,28 +3,29 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, ShoppingBag, Package, Users, BarChart2, Settings, HelpCircle } from 'lucide-react'
+import { Badge } from "@/components/ui/badge"
 
 const navigation = [
   {
     title: 'PRINCIPAL',
     items: [
-      { name: 'Dashboard', href: '/', icon: Home },
-      { name: 'Órdenes', href: '/orders', icon: ShoppingBag },
-      { name: 'Productos', href: '/products', icon: Package },
-      { name: 'Clientes', href: '/customers', icon: Users },
+      { name: 'Dashboard', href: '/', icon: Home, enabled: true },
+      { name: 'Órdenes', href: '#', icon: ShoppingBag, enabled: false },
+      { name: 'Productos', href: '#', icon: Package, enabled: false },
+      { name: 'Clientes', href: '#', icon: Users, enabled: false },
     ],
   },
   {
     title: 'ANÁLISIS',
     items: [
-      { name: 'Reportes', href: '/reports', icon: BarChart2 },
+      { name: 'Reportes', href: '#', icon: BarChart2, enabled: false },
     ],
   },
   {
     title: 'SISTEMA',
     items: [
-      { name: 'Configuración', href: '/settings', icon: Settings },
-      { name: 'Ayuda', href: '/help', icon: HelpCircle },
+      { name: 'Configuración', href: '#', icon: Settings, enabled: false },
+      { name: 'Ayuda', href: '#', icon: HelpCircle, enabled: false },
     ],
   },
 ]
@@ -57,22 +58,39 @@ export function DashboardSidebar({ isCollapsed = false }: DashboardSidebarProps)
                 const isActive = pathname === item.href
                 const Icon = item.icon
                 return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`
-                      flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors
-                      ${isActive 
-                        ? 'bg-[#1F1F1F] text-gray-100' 
-                        : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
-                      }
-                    `}
-                  >
-                    <Icon className="w-5 h-5 min-w-[20px]" />
-                    <span className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
-                      {item.name}
-                    </span>
-                  </Link>
+                  item.enabled ? (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`
+                        flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors
+                        ${isActive 
+                          ? 'bg-[#1F1F1F] text-gray-100' 
+                          : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                        }
+                      `}
+                    >
+                      <Icon className="w-5 h-5 min-w-[20px]" />
+                      <span className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                        {item.name}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div
+                      key={item.name}
+                      className="flex items-center gap-3 px-2 py-2 text-sm rounded-lg text-gray-500 cursor-not-allowed"
+                    >
+                      <Icon className="w-5 h-5 min-w-[20px]" />
+                      <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                        {item.name}
+                      </span>
+                      {!isCollapsed && (
+                        <Badge variant="outline" className="text-[10px] h-4 bg-transparent border-gray-800 text-gray-500">
+                          Próximamente
+                        </Badge>
+                      )}
+                    </div>
+                  )
                 )
               })}
             </div>

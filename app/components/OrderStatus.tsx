@@ -3,57 +3,65 @@
 import { cn } from "@/lib/utils"
 import { Clock, Package, CreditCard, Truck, XCircle, Archive } from "lucide-react"
 
-export type OrderStatusType = 'nueva' | 'empaquetada' | 'pagoRecibido' | 'enviada' | 'cancelada' | 'archivada'
+export type OrderStatusType = 'nueva' | 'empaquetada' | 'pagoRecibido' | 'enviada' | 'cancelada' | 'archivada' | 'todas' | null
 
 export interface OrderStatusProps {
   status: OrderStatusType
 }
 
 const statusConfig = {
+  todas: {
+    label: 'Todas',
+    icon: Clock,
+    className: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 border-secondary/30 shadow-secondary/30',
+  },
   nueva: {
     label: 'Pendiente',
     icon: Clock,
-    className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200',
+    className: 'bg-yellow-500/90 text-white hover:bg-yellow-500 border-yellow-600/30 shadow-yellow-500/30',
   },
   empaquetada: {
     label: 'Empaquetada',
     icon: Package,
-    className: 'bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200',
+    className: 'bg-blue-500/90 text-white hover:bg-blue-500 border-blue-600/30 shadow-blue-500/30',
   },
   pagoRecibido: {
-    label: 'Pago Recibido',
+    label: 'Recibido',
     icon: CreditCard,
-    className: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200',
+    className: 'bg-green-500/90 text-white hover:bg-green-500 border-green-600/30 shadow-green-500/30',
   },
   enviada: {
     label: 'En Distribución',
     icon: Truck,
-    className: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200',
+    className: 'bg-green-500/90 text-white hover:bg-green-500 border-green-600/30 shadow-green-500/30',
   },
   cancelada: {
     label: 'Cancelada',
     icon: XCircle,
-    className: 'bg-red-100 text-red-800 hover:bg-red-100 border-red-200',
+    className: 'bg-red-500/90 text-white hover:bg-red-500 border-red-600/30 shadow-red-500/30',
   },
   archivada: {
     label: 'Archivada',
     icon: Archive,
-    className: 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-gray-200',
+    className: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 border-secondary/30 shadow-secondary/30',
   },
 }
 
 export function OrderStatus({ status }: OrderStatusProps) {
+  if (!status) return null
   const config = statusConfig[status]
 
   return (
-    <div 
-      className={cn(
-        "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 select-none gap-1",
-        config.className
-      )}
-    >
-      <config.icon className="h-3 w-3" />
-      <span>{config.label}</span>
+    <div className="flex items-center justify-center">
+      <div 
+        className={cn(
+          "inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 select-none gap-2 shadow-[0_2px_10px] cursor-default",
+          config.className
+        )}
+      >
+        <config.icon className="h-4 w-4" />
+        <span>{config.label}</span>
+      </div>
     </div>
   )
 } 

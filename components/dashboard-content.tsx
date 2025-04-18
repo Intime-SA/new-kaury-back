@@ -3,38 +3,54 @@
 import { useState } from "react"
 import { OrdersTable } from "@/components/orders/orders-table"
 import { useOrders } from "@/app/hooks/useOrders"
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/app/store/store'
-import { setCurrentPage } from '@/app/store/slices/ordersSlice'
+import { OrderDetails } from "@/components/orders/order-details"
+import { Order } from "@/types/orders"
 
 export function DashboardContent() {
-  const [ordersPerPage] = useState(10)
   const [searchTerm, setSearchTerm] = useState("")
-  const dispatch = useDispatch()
-  const { currentPage } = useSelector((state: RootState) => state.orders)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const { 
+    data, 
+    isLoading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = useOrders()
 
-  const { data: orders = [], isLoading } = useOrders()
-
-  const indexOfLastOrder = currentPage * ordersPerPage
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder)
-
-  const paginate = (pageNumber: number) => dispatch(setCurrentPage(pageNumber))
+  const orders = data?.pages.flatMap(page => page.data) || []
+  const reports = data?.pages[0]?.reports || {
+    current: { totalSales: 0, totalAmount: 0, averageSale: 0 },
+    previous: { totalSales: 0, totalAmount: 0, averageSale: 0 },
+    percentageChange: { totalSales: 0, totalAmount: 0, averageSale: 0 }
+  }
 
   return (
     <div className="flex-1 overflow-auto">
       <div className="p-6">
-        <OrdersTable
-          orders={orders}
-          currentOrders={currentOrders}
-          ordersLength={orders.length}
-          currentPage={currentPage}
-          ordersPerPage={ordersPerPage}
-          searchTerm={searchTerm}
-          loading={isLoading}
-          setSearchTerm={setSearchTerm}
-          paginate={paginate}
-        />
+        <div className="flex gap-6">
+          <div className="flex-1">
+            <OrdersTable
+              orders={orders}
+              loading={isLoading}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              fetchNextPage={fetchNextPage}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              reports={reports}
+              onSelectOrder={setSelectedOrder}
+              selectedOrderId={selectedOrder?.id}
+            />
+          </div>
+          {selectedOrder && (
+            <div className="w-[30%]">
+              <OrderDetails
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

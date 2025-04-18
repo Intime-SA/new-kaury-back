@@ -3,13 +3,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface OrdersState {
   status: OrderStatusType
-  selectedDate: string
+  selectedDate: string | null
+  searchNumber: string
   currentPage: number
 }
 
 const initialState: OrdersState = {
-  status: 'nueva',
-  selectedDate: '',
+  status: 'todas',
+  selectedDate: null,
+  searchNumber: '',
   currentPage: 1
 }
 
@@ -21,8 +23,10 @@ export const ordersSlice = createSlice({
       state.status = action.payload
     },
     setSelectedDate: (state, action: PayloadAction<string>) => {
-      console.log(action.payload, 'action.payload')
       state.selectedDate = action.payload
+    },
+    setSearchNumber: (state, action: PayloadAction<string>) => {
+      state.searchNumber = action.payload
     },
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload
@@ -30,5 +34,5 @@ export const ordersSlice = createSlice({
   }
 })
 
-export const { setStatus, setSelectedDate, setCurrentPage } = ordersSlice.actions
+export const { setStatus, setSelectedDate, setSearchNumber, setCurrentPage } = ordersSlice.actions
 export default ordersSlice.reducer 
