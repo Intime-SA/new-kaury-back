@@ -66,6 +66,7 @@ interface OrderAction {
   label: string
   action: string
   className?: string
+  isComingSoon?: boolean
 }
 
 export function OrdersTable({
@@ -107,39 +108,39 @@ export function OrdersTable({
   const getOrderActions = (status: OrderStatusType): OrderAction[] => {
     const baseActions: OrderAction[] = [
       { label: 'Ver detalles', action: 'view' },
-      { label: 'Editar', action: 'edit' },
+      { label: 'Editar', action: 'edit', isComingSoon: true },
     ]
 
     switch (status) {
       case 'nueva':
         return [
           ...baseActions,
-          { label: 'Marcar como empaquetada', action: 'empaquetar' },
-          { label: 'Marcar como pago recibido', action: 'pago' },
-          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+          { label: 'Marcar como empaquetada', action: 'empaquetar', isComingSoon: true },
+          { label: 'Marcar como pago recibido', action: 'pago', isComingSoon: true },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive', isComingSoon: true }
         ]
       case 'empaquetada':
         return [
           ...baseActions,
-          { label: 'Marcar como pago recibido', action: 'pago' },
-          { label: 'Marcar como enviada', action: 'enviar' },
-          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+          { label: 'Marcar como pago recibido', action: 'pago', isComingSoon: true },
+          { label: 'Marcar como enviada', action: 'enviar', isComingSoon: true },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive', isComingSoon: true }
         ]
       case 'pagoRecibido':
         return [
           ...baseActions,
-          { label: 'Marcar como enviada', action: 'enviar' },
-          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive' }
+          { label: 'Marcar como enviada', action: 'enviar', isComingSoon: true },
+          { label: 'Cancelar orden', action: 'cancelar', className: 'text-destructive', isComingSoon: true }
         ]
       case 'enviada':
         return [
           ...baseActions,
-          { label: 'Archivar orden', action: 'archivar' }
+          { label: 'Archivar orden', action: 'archivar', isComingSoon: true }
         ]
       case 'cancelada':
         return [
           ...baseActions,
-          { label: 'Archivar orden', action: 'archivar' }
+          { label: 'Archivar orden', action: 'archivar', isComingSoon: true }
         ]
       case 'archivada':
         return baseActions
@@ -307,34 +308,44 @@ export function OrdersTable({
                                 {getOrderActions(order.status as OrderStatusType).map((action) => (
                                   <DropdownMenuItem 
                                     key={action.action}
-                                    className={action.className}
+                                    className={cn(
+                                      "flex items-center justify-between",
+                                      action.className
+                                    )}
                                     onClick={() => {
-                                      switch (action.action) {
-                                        case 'view':
-                                          onSelectOrder?.(order)
-                                          break
-                                        case 'edit':
-                                          // Implementar edición
-                                          break
-                                        case 'empaquetar':
-                                          // Implementar cambio de estado a empaquetada
-                                          break
-                                        case 'pago':
-                                          // Implementar cambio de estado a pago recibido
-                                          break
-                                        case 'enviar':
-                                          // Implementar cambio de estado a enviada
-                                          break
-                                        case 'cancelar':
-                                          // Implementar cancelación
-                                          break
-                                        case 'archivar':
-                                          // Implementar archivado
-                                          break
+                                      if (!action.isComingSoon) {
+                                        switch (action.action) {
+                                          case 'view':
+                                            onSelectOrder?.(order)
+                                            break
+                                          case 'edit':
+                                            // Implementar edición
+                                            break
+                                          case 'empaquetar':
+                                            // Implementar cambio de estado a empaquetada
+                                            break
+                                          case 'pago':
+                                            // Implementar cambio de estado a pago recibido
+                                            break
+                                          case 'enviar':
+                                            // Implementar cambio de estado a enviada
+                                            break
+                                          case 'cancelar':
+                                            // Implementar cancelación
+                                            break
+                                          case 'archivar':
+                                            // Implementar archivado
+                                            break
+                                        }
                                       }
                                     }}
                                   >
                                     {action.label}
+                                    {action.isComingSoon && (
+                                      <Badge variant="outline" className="ml-2 bg-muted text-muted-foreground">
+                                        Próximamente
+                                      </Badge>
+                                    )}
                                   </DropdownMenuItem>
                                 ))}
                               </DropdownMenuContent>
