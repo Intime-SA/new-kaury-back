@@ -214,26 +214,26 @@ export function OrdersTable({
 
       <div className="flex-1 min-h-0">
         <Card className="h-full">
-          <CardContent className="p-0 h-full relative">
+          <CardContent className="p-0 h-full flex flex-col">
             <div className="sticky top-0 z-10 bg-background border-b">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="bg-transparent w-[40px]">
+                    <TableHead className="w-[40px]">
                       <Checkbox />
                     </TableHead>
-                    <TableHead className="bg-transparent w-[120px]">ID</TableHead>
-                    <TableHead className="bg-transparent w-[180px]">Fecha</TableHead>
-                    <TableHead className="bg-transparent w-[180px]">Total</TableHead>
-                    <TableHead className="bg-transparent w-[120px]">Productos</TableHead>
-                    <TableHead className="bg-transparent flex-1">Cliente</TableHead>
-                    <TableHead className="bg-transparent w-[100px]">Estado</TableHead>
-                    <TableHead className="bg-transparent w-[80px] text-right">Acciones</TableHead>
+                    <TableHead className="w-[120px]">ID</TableHead>
+                    <TableHead className="w-[180px]">Fecha</TableHead>
+                    <TableHead className="w-[180px]">Total</TableHead>
+                    <TableHead className="w-[120px]">Productos</TableHead>
+                    <TableHead className="flex-1">Cliente</TableHead>
+                    <TableHead className="w-[100px]">Estado</TableHead>
+                    <TableHead className="w-[80px] text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
               </Table>
             </div>
-            <div className="h-full overflow-auto [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 pt-[49px]">
+            <div className="flex-1 overflow-auto">
               <Table>
                 <TableBody>
                   {isSearching ? (

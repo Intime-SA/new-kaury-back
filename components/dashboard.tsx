@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 
 export default function Dashboard() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <SidebarProvider>
         <div className="flex min-h-screen bg-background w-[90vw]">
           <DashboardContent />

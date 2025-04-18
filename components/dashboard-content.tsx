@@ -25,7 +25,7 @@ export function DashboardContent() {
   }
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto dark">
       <div className="p-6">
         <div className="flex gap-6">
           <div className="flex-1">
