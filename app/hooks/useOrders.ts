@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store/store'
 import { OrderStatusType } from "@/app/components/OrderStatus"
 
-const API_BASE_URL = "http://localhost:3000/api"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface PaginatedResponse {
   success: boolean
