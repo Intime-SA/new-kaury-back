@@ -8,34 +8,37 @@ interface TableSkeletonProps {
 export function TableSkeleton({ rows = 10 }: TableSkeletonProps) {
   return (
     <>
-    {[...Array(10)].map((_, i) => (
-      <TableRow key={`skeleton-${i}`}>
-        <TableCell>
-          <Skeleton className="h-4 w-4" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-20" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-24" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-16" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-12" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-32" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-20" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-8" />
-        </TableCell>
-      </TableRow>
-    ))}
-  </>
+      {[...Array(rows)].map((_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          <TableCell className="w-[40px]">
+            <Skeleton className="h-4 w-4" />
+          </TableCell>
+          <TableCell className="w-[120px]">
+            <Skeleton className="h-4 w-full" />
+          </TableCell>
+          <TableCell className="w-[180px]">
+            <Skeleton className="h-4 w-full" />
+          </TableCell>
+          <TableCell className="w-[180px]">
+            <Skeleton className="h-4 w-full" />
+          </TableCell>
+          <TableCell className="w-[120px]">
+            <Skeleton className="h-4 w-full" />
+          </TableCell>
+          <TableCell className="flex-1">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </TableCell>
+          <TableCell className="w-[150px]">
+            <Skeleton className="h-4 w-full" />
+          </TableCell>
+          <TableCell className="w-[80px]">
+            <Skeleton className="h-8 w-8" />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   )
 } 

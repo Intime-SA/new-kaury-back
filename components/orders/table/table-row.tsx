@@ -12,6 +12,8 @@ import { OrderAction } from "@/hooks/useOrderStateManagement"
 import { formatFirebaseTimestamp } from "@/lib/utils"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { OrderActions } from "./table-actions"
+import { useDispatch } from "react-redux"
+import { clearSelectedOrders } from "@/app/store/slices/ordersSlice"
 
 interface TableRowProps {
   order: Order
@@ -32,18 +34,33 @@ export function OrderTableRow({
   isSelected,
   onToggleSelection
 }: TableRowProps) {
+  const dispatch = useDispatch();
+
+  const handleOrderClick = () => {
+    dispatch(clearSelectedOrders());
+    onSelectOrder?.(order);
+  };
+
+  const handleCheckboxChange = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedOrderId) {
+      onSelectOrder?.(null);
+    }
+    onToggleSelection();
+  };
+
   return (
     <TableRow
       className={cn(
         "cursor-pointer hover:bg-muted/50",
         selectedOrderId === order.id && "bg-muted"
       )}
-      onClick={() => onSelectOrder?.(order)}
+      onClick={handleOrderClick}
     >
-      <TableCell className="w-[40px]" onClick={(e) => e.stopPropagation()}>
+      <TableCell className="w-[40px]" onClick={handleCheckboxChange}>
         <Checkbox 
           checked={isSelected}
-          onCheckedChange={onToggleSelection}
+          onCheckedChange={() => {}}
         />
       </TableCell>
       <TableCell className="w-[120px] font-medium">

@@ -19,12 +19,27 @@ const actionIcons = {
   cancelar: XCircle,
 }
 
-const actionColors = {
-  view: "text-muted-foreground",
-  pago: "text-green-500",
-  empaquetar: "text-blue-500",
-  archivar: "text-white-500",
-  cancelar: "text-red-500",
+const actionStyles = {
+  view: {
+    base: "text-muted-foreground",
+    hover: "hover:bg-slate-200 hover:text-slate-900"
+  },
+  pago: {
+    base: "text-green-500 bg-green-500/20",
+    hover: "hover:bg-green-600 hover:text-white"
+  },
+  empaquetar: {
+    base: "text-blue-500 bg-blue-500/20",
+    hover: "hover:bg-blue-600 hover:text-white"
+  },
+  archivar: {
+    base: "text-yellow-600 bg-yellow-500/20",
+    hover: "hover:bg-yellow-600 hover:text-white"
+  },
+  cancelar: {
+    base: "text-red-500 bg-red-500/20",
+    hover: "hover:bg-red-600 hover:text-white"
+  }
 }
 
 interface OrderActionsProps {
@@ -44,19 +59,24 @@ export function OrderActions({
 
   if (variant === 'inline') {
     return (
-      <div className="flex items-center border rounded-md bg-muted/50">
+      <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/50">
+        {selectedCount && (
+          <span className="text-sm text-muted-foreground">
+            {selectedCount} {selectedCount === 1 ? 'orden seleccionada' : 'órdenes seleccionadas'}
+          </span>
+        )}
         <div className="flex items-center gap-1">
           {actions.map((action) => {
             const Icon = actionIcons[action.action as keyof typeof actionIcons]
-            const color = actionColors[action.action as keyof typeof actionColors]
+            const styles = actionStyles[action.action as keyof typeof actionStyles]
             
             return (
               <button
                 key={action.action}
                 className={cn(
                   "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
-                  `hover:bg-${action.action === 'cancelar' ? 'red' : 'green'}-500 hover:text-white`,
-                  color,
+                  styles.base,
+                  styles.hover,
                   action.className
                 )}
                 onClick={() => onActionClick(action.action)}
@@ -75,14 +95,14 @@ export function OrderActions({
     <>
       {actions.map((action) => {
         const Icon = actionIcons[action.action as keyof typeof actionIcons]
-        const color = actionColors[action.action as keyof typeof actionColors]
+        const styles = actionStyles[action.action as keyof typeof actionStyles]
         
         return (
           <DropdownMenuItem
             key={action.action}
             className={cn(
               "flex items-center gap-2 px-4 py-2",
-              color,
+              styles.base,
               action.className
             )}
             onClick={() => onActionClick(action.action)}
