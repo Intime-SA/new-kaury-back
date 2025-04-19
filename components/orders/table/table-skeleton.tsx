@@ -31,7 +31,7 @@ export function TableSkeleton({ rows = 10 }: TableSkeletonProps) {
               <Skeleton className="h-4 w-[150px]" />
             </div>
           </TableCell>
-          <TableCell className="w-[150px]">
+          <TableCell className="w-[100px]">
             <Skeleton className="h-[22px] w-[100px] rounded-full" />
           </TableCell>
           <TableCell className="w-[80px] text-right">

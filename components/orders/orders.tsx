@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { OrdersTableProps } from "@/types/orders";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setSelectedDate,
   setSearchNumber,
@@ -14,6 +14,7 @@ import { useDebounce } from "use-debounce";
 import { useOrderStateManagement } from "@/hooks/useOrderStateManagement";
 import { TableHeader as OrdersTableHeader } from "./table/table-header";
 import { TableContent } from "./table/table-content";
+import { RootState } from "@/app/store/store";
 
 export function Orders({
   orders,
@@ -34,6 +35,7 @@ export function Orders({
   const { handleOrderAction, getOrderActions } = useOrderStateManagement({
     onSelectOrder,
   });
+  const status = useSelector((state: RootState) => state.orders.status);
 
   useEffect(() => {
     if (searchTerm !== debouncedValue) {
@@ -53,6 +55,11 @@ export function Orders({
   useEffect(() => {
     dispatch(setSearchNumber(debouncedValue));
   }, [debouncedValue, dispatch]);
+
+  // Limpiar el término de búsqueda cuando cambia el estado
+  useEffect(() => {
+    setSearchTerm("");
+  }, [status, setSearchTerm]);
 
   // Calcular el conteo de órdenes por estado
   const ordersCount = orders.reduce((acc, order) => {
@@ -83,6 +90,7 @@ export function Orders({
                 onSelectOrder={onSelectOrder}
                 getOrderActions={getOrderActions}
                 handleOrderAction={handleOrderAction}
+                loading={loading}
               />
               <div className="flex-1">
                 <div ref={ref} className="w-full" />

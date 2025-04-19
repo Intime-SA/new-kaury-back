@@ -18,6 +18,7 @@ interface TableContentProps {
   onSelectOrder?: (order: Order | null) => void
   getOrderActions: (status: OrderStatusType) => OrderAction[]
   handleOrderAction: (order: Order, action: string) => void
+  loading?: boolean
 }
 
 export function TableContent({
@@ -28,7 +29,8 @@ export function TableContent({
   selectedOrderId,
   onSelectOrder,
   getOrderActions,
-  handleOrderAction
+  handleOrderAction,
+  loading = false
 }: TableContentProps) {
   const dispatch = useDispatch()
   const { selectedOrders, isAllSelected } = useSelector((state: RootState) => state.orders)
@@ -54,8 +56,8 @@ export function TableContent({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isSearching ? (
-            <TableSkeleton rows={1} />
+          {loading || isSearching ? (
+            <TableSkeleton rows={10} />
           ) : (
             <>
               {orders.map((order) => (
@@ -73,7 +75,7 @@ export function TableContent({
             </>
           )}
           {isFetchingNextPage && searchTerm === "" && (
-            <TableSkeleton />
+            <TableSkeleton rows={10} />
           )}
         </TableBody>
       </Table>

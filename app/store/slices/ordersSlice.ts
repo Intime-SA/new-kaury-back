@@ -26,6 +26,7 @@ export const ordersSlice = createSlice({
   reducers: {
     setStatus: (state, action: PayloadAction<OrderStatusType>) => {
       state.status = action.payload
+      state.searchNumber = ''
     },
     setSelectedDate: (state, action: PayloadAction<string>) => {
       state.selectedDate = action.payload
