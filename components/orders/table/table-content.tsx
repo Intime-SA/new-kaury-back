@@ -63,6 +63,7 @@ export function TableContent({
         {isFetchingNextPage && searchTerm === "" && (
           <TableSkeleton />
         )}
+        
       </TableBody>
     </Table>
   )

@@ -84,9 +84,9 @@ export function Orders({
                 getOrderActions={getOrderActions}
                 handleOrderAction={handleOrderAction}
               />
-            </div>
-            <div className="flex-1 overflow-auto">
-              <div ref={ref} className="w-full h-4" />
+              <div className="flex-1">
+                <div ref={ref} className="w-full h-4" />
+              </div>
             </div>
           </CardContent>
         </Card>
