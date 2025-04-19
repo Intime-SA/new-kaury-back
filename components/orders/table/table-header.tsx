@@ -11,6 +11,8 @@ import { RootState } from "@/app/store/store"
 import { setSelectedDate } from "@/app/store/slices/ordersSlice"
 import { OrdersKPIs } from "../kpis/orders-kpis"
 import * as XLSX from 'xlsx'
+import { OrderActions } from "./table-actions"
+import { useOrderStateManagement } from "@/hooks/useOrderStateManagement"
 
 interface TableHeaderProps {
   searchTerm: string
@@ -22,6 +24,18 @@ interface TableHeaderProps {
 export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: TableHeaderProps) {
   const dispatch = useDispatch()
   const { selectedDate, selectedOrders } = useSelector((state: RootState) => state.orders)
+
+  const { 
+    handleBulkOrderAction, 
+    getBulkOrderActions,
+    selectedOrdersCount 
+  } = useOrderStateManagement({ selectedOrders });
+
+  // Verificar si todas las órdenes seleccionadas tienen el mismo estado
+  const allSameStatus = selectedOrders.length > 0 && 
+    selectedOrders.every(order => order.status === selectedOrders[0].status);
+
+  const bulkActions = allSameStatus ? getBulkOrderActions(selectedOrders[0].status) : [];
 
   const handleDownloadExcel = () => {
     if (selectedOrders.length === 0) return
@@ -175,6 +189,14 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
                 />
               </div>
             </PopoverContent>
+            {selectedOrders.length > 0 && (
+            <OrderActions
+              actions={bulkActions}
+              onActionClick={handleBulkOrderAction}
+              variant="inline"
+              selectedCount={selectedOrdersCount}
+            />
+          )}
             {selectedDate && (
               <div className="flex justify-end p-2">
                 <Button
@@ -198,6 +220,7 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-8 w-[150px] lg:w-[250px]"
           />
+          
           <Button 
             variant="outline" 
             size="sm"

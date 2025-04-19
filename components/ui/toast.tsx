@@ -4,7 +4,6 @@ import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
 const ToastProvider = ToastPrimitives.Provider
@@ -31,10 +30,10 @@ const toastVariants = cva(
       variant: {
         default: "border bg-background text-foreground",
         destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
-        success: "border-green-200 bg-green-50 text-green-600 dark:border-green-900 dark:bg-green-900/20 dark:text-green-400",
-        info: "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900 dark:bg-blue-900/20 dark:text-blue-400",
-        warning: "border-yellow-200 bg-yellow-50 text-yellow-600 dark:border-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-400",
-        error: "border-red-200 bg-red-50 text-red-600 dark:border-red-900 dark:bg-red-900/20 dark:text-red-400",
+        success: "border-green-200 bg-green-200 text-green-700 dark:border-green-900 dark:bg-green-900/70 dark:text-green-300",
+        info: "border-blue-200 bg-blue-200 text-blue-700 dark:border-blue-900 dark:bg-blue-900/70 dark:text-blue-300",
+        warning: "border-yellow-200 bg-yellow-200 text-yellow-700 dark:border-yellow-900 dark:bg-yellow-900/70 dark:text-yellow-300",
+        error: "border-red-200 bg-red-200 text-red-700 dark:border-red-900 dark:bg-red-900/70 dark:text-red-300",
       },
     },
     defaultVariants: {

@@ -55,6 +55,9 @@ export const ordersSlice = createSlice({
     clearSelectedOrders: (state) => {
       state.selectedOrders = []
       state.isAllSelected = false
+    },
+    updateSelectedOrders: (state, action: PayloadAction<Order[]>) => {
+      state.selectedOrders = action.payload
     }
   }
 })
@@ -66,7 +69,8 @@ export const {
   setCurrentPage,
   toggleOrderSelection,
   toggleAllOrders,
-  clearSelectedOrders
+  clearSelectedOrders,
+  updateSelectedOrders
 } = ordersSlice.actions
 
 export default ordersSlice.reducer 

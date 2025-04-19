@@ -77,6 +77,11 @@ const requestCache = new Map<string, {
 // Tiempo de expiración del caché (2 segundos)
 const CACHE_EXPIRY = 2000
 
+interface UpdateBulkStatusParams {
+  orderIds: string[];
+  newStatus: OrderStatusType;
+}
+
 export const useOrders = () => {
   const status = useSelector((state: RootState) => state.orders.status)
   const selectedDate = useSelector((state: RootState) => state.orders.selectedDate)
@@ -127,6 +132,48 @@ export const useOrders = () => {
       },
     }
   )
+
+  const updateBulkOrderStatus = useMutation({
+    mutationFn: async ({ orderIds, newStatus }: UpdateBulkStatusParams) => {
+      const response = await fetch(`${API_BASE_URL}/userOrders/bulk/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderIds,
+          status: newStatus
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al actualizar el estado de las órdenes');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data, { orderIds, newStatus }) => {
+      queryClient.setQueryData(
+        ['orders', status, selectedDate, searchNumber],
+        (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((order: any) => 
+                orderIds.includes(order.id) 
+                  ? { ...order, status: newStatus }
+                  : order
+              )
+            }))
+          };
+        }
+      );
+    },
+  });
 
   return {
     ...useInfiniteQuery(
@@ -201,6 +248,7 @@ export const useOrders = () => {
         refetchOnReconnect: false
       }
     ),
-    updateOrderStatus
+    updateOrderStatus,
+    updateBulkOrderStatus
   }
 }

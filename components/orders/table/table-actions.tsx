@@ -30,9 +30,47 @@ const actionColors = {
 interface OrderActionsProps {
   actions: OrderAction[]
   onActionClick: (action: string) => void
+  variant?: 'dropdown' | 'inline'
+  selectedCount?: number
 }
 
-export function OrderActions({ actions, onActionClick }: OrderActionsProps) {
+export function OrderActions({ 
+  actions, 
+  onActionClick, 
+  variant = 'dropdown',
+  selectedCount 
+}: OrderActionsProps) {
+  if (actions.length === 0) return null;
+
+  if (variant === 'inline') {
+    return (
+      <div className="flex items-center border rounded-md bg-muted/50">
+        <div className="flex items-center gap-1">
+          {actions.map((action) => {
+            const Icon = actionIcons[action.action as keyof typeof actionIcons]
+            const color = actionColors[action.action as keyof typeof actionColors]
+            
+            return (
+              <button
+                key={action.action}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
+                  `hover:bg-${action.action === 'cancelar' ? 'red' : 'green'}-500 hover:text-white`,
+                  color,
+                  action.className
+                )}
+                onClick={() => onActionClick(action.action)}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{action.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       {actions.map((action) => {
