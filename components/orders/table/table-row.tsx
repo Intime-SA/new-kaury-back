@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { OrderStatus } from "../status/order-status"
 import { OrderStatusType } from "../status/order-status"
 import type { Order } from "@/types/orders"
-import { OrderAction } from "@/app/hooks/useOrderStateManagement"
+import { OrderAction } from "@/hooks/useOrderStateManagement"
 import { formatFirebaseTimestamp } from "@/lib/utils"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { OrderActions } from "./table-actions"
@@ -19,6 +19,8 @@ interface TableRowProps {
   onSelectOrder?: (order: Order | null) => void
   getOrderActions: (status: OrderStatusType) => OrderAction[]
   handleOrderAction: (order: Order, action: string) => void
+  isSelected: boolean
+  onToggleSelection: () => void
 }
 
 export function OrderTableRow({ 
@@ -26,7 +28,9 @@ export function OrderTableRow({
   selectedOrderId, 
   onSelectOrder, 
   getOrderActions,
-  handleOrderAction 
+  handleOrderAction,
+  isSelected,
+  onToggleSelection
 }: TableRowProps) {
   return (
     <TableRow
@@ -36,8 +40,11 @@ export function OrderTableRow({
       )}
       onClick={() => onSelectOrder?.(order)}
     >
-      <TableCell className="w-[40px]">
-        <Checkbox />
+      <TableCell className="w-[40px]" onClick={(e) => e.stopPropagation()}>
+        <Checkbox 
+          checked={isSelected}
+          onCheckedChange={onToggleSelection}
+        />
       </TableCell>
       <TableCell className="w-[120px] font-medium">
         #{order.numberOrder}
@@ -75,7 +82,7 @@ export function OrderTableRow({
       <TableCell className="w-[150px]">
         <OrderStatus status={order.status as OrderStatusType} />
       </TableCell>
-      <TableCell className="w-[80px] text-right">
+      <TableCell className="w-[80px] text-right" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">

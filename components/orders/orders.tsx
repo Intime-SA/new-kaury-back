@@ -11,7 +11,7 @@ import { useInView } from "react-intersection-observer";
 import { useEffect, useState } from "react";
 import { OrdersTabs } from "./tabs/orders-tabs";
 import { useDebounce } from "use-debounce";
-import { useOrderStateManagement } from "@/app/hooks/useOrderStateManagement";
+import { useOrderStateManagement } from "@/hooks/useOrderStateManagement";
 import { TableHeader as OrdersTableHeader } from "./table/table-header";
 import { TableContent } from "./table/table-content";
 

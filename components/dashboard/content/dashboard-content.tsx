@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Orders } from "@/components/orders/orders"; 
-import { useOrders } from "@/app/hooks/useOrders";
+import { useOrders } from "@/hooks/useOrders";
 import { Order } from "@/types/orders";
 import { OrderDetails } from "../../orders/detail/order-details";
 

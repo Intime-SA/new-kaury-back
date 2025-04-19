@@ -3,7 +3,7 @@
 import { OrderStatusType } from "@/components/orders/status/order-status";
 import { toast } from "@/components/ui/use-toast";
 import { Order } from "@/types/orders";
-import { useOrders } from "./useOrders";
+import { useOrders } from "@/hooks/useOrders";
 
 export interface OrderAction {
   label: string;

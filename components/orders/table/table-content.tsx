@@ -3,8 +3,11 @@ import { TableSkeleton } from "./table-skeleton"
 import { OrderTableRow } from "./table-row"
 import type { Order } from "@/types/orders"
 import { OrderStatusType } from "../status/order-status"
-import { OrderAction } from "@/app/hooks/useOrderStateManagement"
+import { OrderAction } from "@/hooks/useOrderStateManagement"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/app/store/store"
+import { toggleOrderSelection, toggleAllOrders } from "@/app/store/slices/ordersSlice"
 
 interface TableContentProps {
   orders: Order[]
@@ -27,44 +30,53 @@ export function TableContent({
   getOrderActions,
   handleOrderAction
 }: TableContentProps) {
+  const dispatch = useDispatch()
+  const { selectedOrders, isAllSelected } = useSelector((state: RootState) => state.orders)
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[40px]">
-            <Checkbox />
-          </TableHead>
-          <TableHead className="w-[120px]">ID</TableHead>
-          <TableHead className="w-[180px]">Fecha</TableHead>
-          <TableHead className="w-[180px]">Total</TableHead>
-          <TableHead className="w-[120px]">Productos</TableHead>
-          <TableHead className="flex-1">Cliente</TableHead>
-          <TableHead className="w-[100px]">Estado</TableHead>
-          <TableHead className="w-[80px] text-right">Acciones</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {isSearching ? (
-          <TableSkeleton rows={1} />
-        ) : (
-          <>
-            {orders.map((order) => (
-              <OrderTableRow
-                key={order.id}
-                order={order}
-                selectedOrderId={selectedOrderId}
-                onSelectOrder={onSelectOrder}
-                getOrderActions={getOrderActions}
-                handleOrderAction={handleOrderAction}
+    <div className="w-full">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[40px]">
+              <Checkbox 
+                checked={isAllSelected}
+                onCheckedChange={() => dispatch(toggleAllOrders(orders))}
               />
-            ))}
-          </>
-        )}
-        {isFetchingNextPage && searchTerm === "" && (
-          <TableSkeleton />
-        )}
-        
-      </TableBody>
-    </Table>
+            </TableHead>
+            <TableHead className="w-[120px]">ID</TableHead>
+            <TableHead className="w-[180px]">Fecha</TableHead>
+            <TableHead className="w-[180px]">Total</TableHead>
+            <TableHead className="w-[120px]">Productos</TableHead>
+            <TableHead className="flex-1">Cliente</TableHead>
+            <TableHead className="w-[100px]">Estado</TableHead>
+            <TableHead className="w-[80px] text-right">Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isSearching ? (
+            <TableSkeleton rows={1} />
+          ) : (
+            <>
+              {orders.map((order) => (
+                <OrderTableRow
+                  key={order.id}
+                  order={order}
+                  selectedOrderId={selectedOrderId}
+                  onSelectOrder={onSelectOrder}
+                  getOrderActions={getOrderActions}
+                  handleOrderAction={handleOrderAction}
+                  isSelected={selectedOrders.some(selected => selected.id === order.id)}
+                  onToggleSelection={() => dispatch(toggleOrderSelection(order))}
+                />
+              ))}
+            </>
+          )}
+          {isFetchingNextPage && searchTerm === "" && (
+            <TableSkeleton />
+          )}
+        </TableBody>
+      </Table>
+    </div>
   )
 } 
