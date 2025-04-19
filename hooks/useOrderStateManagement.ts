@@ -5,6 +5,8 @@ import { toast } from "@/components/ui/use-toast";
 import { Order } from "@/types/orders";
 import { useOrders } from "@/hooks/useOrders";
 
+type ToastVariant = "default" | "destructive" | "success" | "info" | "warning" | "error";
+
 export interface OrderAction {
   label: string;
   action: string;
@@ -18,37 +20,32 @@ interface UseOrderStateManagementProps {
 export const useOrderStateManagement = ({ onSelectOrder }: UseOrderStateManagementProps) => {
   const { updateOrderStatus } = useOrders();
 
-  const getToastStyles = (newStatus: OrderStatusType) => {
+  const getToastStyles = (newStatus: OrderStatusType): { title: string; variant: ToastVariant } => {
     switch (newStatus) {
       case 'pagoRecibido':
         return {
           title: "¡Pago Recibido!",
-          className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900",
-          textClass: "text-green-600 dark:text-green-400"
+          variant: "success",
         };
       case 'empaquetada':
         return {
           title: "¡Orden Empaquetada!",
-          className: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-900",
-          textClass: "text-blue-600 dark:text-blue-400"
+          variant: "info",
         };
       case 'cancelada':
         return {
           title: "Orden Cancelada",
-          className: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900",
-          textClass: "text-red-600 dark:text-red-400"
+          variant: "error",
         };
       case 'archivada':
         return {
           title: "Orden Archivada",
-          className: "bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-900",
-          textClass: "text-gray-600 dark:text-gray-400"
+          variant: "warning",
         };
       default:
         return {
           title: "¡Éxito!",
-          className: "",
-          textClass: ""
+          variant: "default",
         };
     }
   };
@@ -90,7 +87,7 @@ export const useOrderStateManagement = ({ onSelectOrder }: UseOrderStateManageme
     toast({
       title: styles.title,
       description: message,
-      className: `${styles.className} ${styles.textClass}`,
+      variant: styles.variant,
       duration: 3000,
     });
   };
