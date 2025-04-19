@@ -4,34 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShoppingBag, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { OrdersKPIsProps } from "@/types/orders"
+import { defaultReports } from "@/lib/constants"
 
-interface OrdersKPIsProps {
-  reports?: {
-    current: {
-      totalSales: number
-      totalAmount: number
-      averageSale: number
-    }
-    previous: {
-      totalSales: number
-      totalAmount: number
-      averageSale: number
-    }
-    percentageChange: {
-      totalSales: number
-      totalAmount: number
-      averageSale: number
-    }
-  }
-  loading: boolean
-  hasDateFilter?: boolean
-}
-
-export function OrdersKPIs({ reports = { 
-  current: { totalSales: 0, totalAmount: 0, averageSale: 0 },
-  previous: { totalSales: 0, totalAmount: 0, averageSale: 0 },
-  percentageChange: { totalSales: 0, totalAmount: 0, averageSale: 0 }
-}, loading, hasDateFilter = false }: OrdersKPIsProps) {
+export function OrdersKPIs({ 
+  reports = defaultReports,
+  loading = false,
+  hasDateFilter = false 
+}: OrdersKPIsProps) {
   
   return (
     <div className="grid gap-4 md:grid-cols-3 mb-4">

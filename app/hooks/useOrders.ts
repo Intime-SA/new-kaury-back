@@ -1,9 +1,9 @@
 "use client"
 
-import { useInfiniteQuery } from "react-query"
+import { useInfiniteQuery, useMutation, useQueryClient } from 'react-query'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store/store'
-import { OrderStatusType } from "@/app/components/OrderStatus"
+import { OrderStatusType } from "@/components/orders/status/order-status"
 import { useRef } from 'react'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -82,81 +82,125 @@ export const useOrders = () => {
   const selectedDate = useSelector((state: RootState) => state.orders.selectedDate)
   const searchNumber = useSelector((state: RootState) => state.orders.searchNumber)
   const activeRequestRef = useRef<string | null>(null)
+  const queryClient = useQueryClient()
 
-  return useInfiniteQuery<PaginatedResponse>({
-    queryKey: ['orders', status, selectedDate, searchNumber],
-    queryFn: async ({ pageParam = 1 }) => {
-      try {
-        const searchParams = new URLSearchParams()
-        
-        if (status) searchParams.append('status', status)
-        if (selectedDate) {
-          const date = new Date(selectedDate)
-          const formattedDate = date.toISOString().split('T')[0]
-          searchParams.append('date', formattedDate)
-          // Si hay fecha seleccionada, traer todas las órdenes (50 por página)
-          searchParams.append('limit', '50')
-        } else {
-          // Si no hay fecha, mantener paginación normal
-          searchParams.append('page', pageParam.toString())
-          searchParams.append('limit', '10')
+  const updateOrderStatus = useMutation(
+    async ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatusType }) => {
+      const response = await fetch(`${API_BASE_URL}/userOrders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw {
+          title: 'Error al actualizar estado',
+          description: data.message,
+          action: `${status} → ${newStatus}`
         }
-        if (searchNumber) searchParams.append('numberOrder', searchNumber)
+      }
 
-        const requestKey = searchParams.toString()
+      return data.data
+    },
+    {
+      onSuccess: (updatedOrder) => {
+        queryClient.setQueryData(
+          ['orders', status, selectedDate, searchNumber],
+          (oldData: any) => {
+            if (!oldData?.pages) return oldData
 
-        // Verificar caché reciente
-        const cached = requestCache.get(requestKey)
-        if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
-          return cached.data
-        }
-
-        // Marcar esta petición como activa
-        activeRequestRef.current = requestKey
-
-        const response = await fetch(`${API_BASE_URL}/userOrders?${requestKey}`)
-        const result = await response.json()
-
-        if (!result.success) throw new Error(result.message)
-
-        const finalResult = result.data?.length ? result : emptyResponse
-
-        // Guardar en caché
-        requestCache.set(requestKey, {
-          timestamp: Date.now(),
-          data: finalResult
-        })
-
-        // Limpiar referencia de petición activa
-        activeRequestRef.current = null
-
-        // Limpiar caché antiguo
-        Array.from(requestCache.entries()).forEach(([key, value]) => {
-          if (Date.now() - value.timestamp > CACHE_EXPIRY) {
-            requestCache.delete(key)
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any) => ({
+                ...page,
+                data: page.data.map((order: any) => 
+                  order.id === updatedOrder.id ? updatedOrder : order
+                )
+              }))
+            }
           }
-        })
+        )
+      },
+    }
+  )
 
-        return finalResult
-      } catch (error) {
-        console.error('Error fetching orders:', error)
-        activeRequestRef.current = null
-        return emptyResponse
+  return {
+    ...useInfiniteQuery(
+      ['orders', status, selectedDate, searchNumber],
+      async ({ pageParam = 1 }) => {
+        try {
+          const searchParams = new URLSearchParams()
+          
+          if (status) searchParams.append('status', status)
+          if (selectedDate) {
+            const date = new Date(selectedDate)
+            const formattedDate = date.toISOString().split('T')[0]
+            searchParams.append('date', formattedDate)
+            searchParams.append('limit', '50')
+          } else {
+            searchParams.append('page', pageParam.toString())
+            searchParams.append('limit', '10')
+          }
+          if (searchNumber) searchParams.append('numberOrder', searchNumber)
+
+          const requestKey = searchParams.toString()
+
+          const cached = requestCache.get(requestKey)
+          if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
+            return cached.data
+          }
+
+          activeRequestRef.current = requestKey
+
+          const response = await fetch(`${API_BASE_URL}/userOrders?${requestKey}`)
+          const result = await response.json()
+
+          if (!result.success) throw new Error(result.message)
+
+          const finalResult = result.data?.length ? result : emptyResponse
+
+          requestCache.set(requestKey, {
+            timestamp: Date.now(),
+            data: finalResult
+          })
+
+          activeRequestRef.current = null
+
+          Array.from(requestCache.entries()).forEach(([key, value]) => {
+            if (Date.now() - value.timestamp > CACHE_EXPIRY) {
+              requestCache.delete(key)
+            }
+          })
+
+          return finalResult
+        } catch (error) {
+          console.error('Error fetching orders:', error)
+          activeRequestRef.current = null
+          return emptyResponse
+        }
+      },
+      {
+        getNextPageParam: (lastPage: PaginatedResponse) => {
+          if (selectedDate) return undefined
+          
+          if (lastPage.pagination.page >= lastPage.pagination.totalPages) {
+            return undefined
+          }
+          return lastPage.pagination.page + 1
+        },
+        keepPreviousData: false,
+        refetchOnWindowFocus: false,
+        staleTime: CACHE_EXPIRY,
+        cacheTime: CACHE_EXPIRY,
+        // Evitar refetch automático después de la mutación
+        refetchOnMount: false,
+        refetchOnReconnect: false
       }
-    },
-    getNextPageParam: (lastPage) => {
-      // Si hay fecha seleccionada, no permitir más páginas
-      if (selectedDate) return undefined
-      
-      // Si no hay fecha, continuar con la paginación normal
-      if (lastPage.pagination.page >= lastPage.pagination.totalPages) {
-        return undefined
-      }
-      return lastPage.pagination.page + 1
-    },
-    keepPreviousData: false,
-    refetchOnWindowFocus: false,
-    staleTime: CACHE_EXPIRY,
-    cacheTime: CACHE_EXPIRY
-  })
+    ),
+    updateOrderStatus
+  }
 }

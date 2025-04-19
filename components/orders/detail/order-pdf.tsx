@@ -7,7 +7,7 @@ import {
   Text,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { OrderStatusType } from "@/app/components/OrderStatus";
+import { OrderStatusType } from "@/components/orders/status/order-status";
 
 const styles = StyleSheet.create({
   page: {

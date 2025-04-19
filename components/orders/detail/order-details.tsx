@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { OrderStatus, OrderStatusType } from "@/app/components/OrderStatus"
+import { OrderStatus, OrderStatusType } from "@/components/orders/status/order-status"
 import { formatFirebaseTimestamp } from "@/lib/utils"
 import { CustomerInfoCard } from "./customer-info-card"
 import { OrderProductsCard } from "./order-products-card"

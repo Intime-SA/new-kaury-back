@@ -4,23 +4,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/app/store/store'
 import { setStatus } from '@/app/store/slices/ordersSlice'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { OrderStatusType } from "@/app/components/OrderStatus"
-import { Package, CreditCard, Truck, Archive, XCircle, Plus, List } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ReactNode } from "react"
+import { OrderStatusType } from "@/components/orders/status/order-status"
+import { Package, CreditCard, Archive, XCircle, Plus, List } from "lucide-react"
+import { OrdersTabsProps } from '@/types/orders'
 
-interface OrdersTabsProps {
-  orders: {
-    nueva: number
-    empaquetada: number
-    pagoRecibido: number
-    enviada: number
-    cancelada: number
-    archivada: number
-  }
-  content: ReactNode
-}
 
 export function OrdersTabs({ orders, content }: OrdersTabsProps) {
   const dispatch = useDispatch()

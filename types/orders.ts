@@ -1,4 +1,72 @@
-import { OrderStatusType } from "@/app/components/OrderStatus"
+import { OrderStatusType } from "@/components/orders/status/order-status"
+import { ReactNode } from "react";
+
+// interface para el componente OrdersTable
+export interface OrdersTableProps {
+  orders: Order[];
+  loading: boolean;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  fetchNextPage: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage: boolean;
+  onSelectOrder?: (order: Order | null) => void;
+  selectedOrderId?: string;
+  reports: {
+    current: {
+      totalSales: number;
+      totalAmount: number;
+      averageSale: number;
+    };
+    previous: {
+      totalSales: number;
+      totalAmount: number;
+      averageSale: number;
+    };
+    percentageChange: {
+      totalSales: number;
+      totalAmount: number;
+      averageSale: number;
+    };
+  };
+}
+
+// interface para el componente OrdersKPIs
+export interface OrdersKPIsProps {
+  reports?: {
+    current: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+    previous: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+    percentageChange: {
+      totalSales: number
+      totalAmount: number
+      averageSale: number
+    }
+  }
+  loading: boolean
+  hasDateFilter?: boolean
+}
+
+
+// interface para el componente OrdersTabs
+export interface OrdersTabsProps {
+  orders: {
+    nueva: number
+    empaquetada: number
+    pagoRecibido: number
+    enviada: number
+    cancelada: number
+    archivada: number
+  }
+  content: ReactNode
+}
 
 export interface OrderItem {
   id: string

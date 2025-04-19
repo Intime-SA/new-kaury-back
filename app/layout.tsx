@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import "./globals.css"
 import { Providers } from "./providers"
-import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { DashboardLayout } from "@/components/dashboard/layout/dashboard-layout"
+import { Toaster } from "@/components/ui/toaster"
 
 const montserrat = Montserrat({ 
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
           <DashboardLayout>
             {children}
           </DashboardLayout>
+          <Toaster />
         </Providers>
       </body>
     </html>

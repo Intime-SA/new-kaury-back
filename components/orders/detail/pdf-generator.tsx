@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { OrderPDF } from "./order-pdf"
 import type { OrderItem } from "@/types/orders"
-import type { OrderStatusType } from "@/app/components/OrderStatus"
+import type { OrderStatusType } from "@/components/orders/status/order-status"
 
 interface Order {
   id: string
