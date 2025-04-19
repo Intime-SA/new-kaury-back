@@ -214,12 +214,27 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
         </div>
 
         <div className="flex justify-end flex-1 items-center space-x-2">
-          <Input
-            placeholder="Buscar órdenes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-8 w-[150px] lg:w-[250px]"
-          />
+          <div className="relative w-[150px] lg:w-[250px]">
+            <Input
+              placeholder="Buscar órdenes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 pr-8"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                onClick={() => {
+                  setSearchTerm("")
+                  dispatch(setSelectedDate(""))
+                }}
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            )}
+          </div>
           
           <Button 
             variant="outline" 

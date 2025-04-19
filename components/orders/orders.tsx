@@ -85,7 +85,7 @@ export function Orders({
                 handleOrderAction={handleOrderAction}
               />
               <div className="flex-1">
-                <div ref={ref} className="w-full h-4" />
+                <div ref={ref} className="w-full" />
               </div>
             </div>
           </CardContent>
