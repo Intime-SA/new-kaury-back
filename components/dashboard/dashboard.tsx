@@ -2,7 +2,7 @@
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContent } from "@/components/dashboard/content/dashboard-content"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/providers/theme-provider"
 
 export default function Dashboard() {
   return (

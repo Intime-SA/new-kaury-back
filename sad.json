@@ -1,0 +1,83 @@
+{
+    "id": "133209077",
+    "categories": [
+        {
+            "id": "14900929",
+            "name": {
+                "es": "Gift Cards"
+            },
+            "subcategories": [
+                {
+                    "id": "14900930",
+                    "name": {
+                        "es": "Gift Cards"
+                    },
+                    "subcategories": []
+                }
+            ]
+        }
+    ],
+    "description": {
+        "es": "Al comprar esta GiftCard, recibirás un código único en tu email para enviar y compartir con la persona que quieras"
+    },
+    "images": [
+        {
+            "id": 368803564,
+            "product_id": 133209077,
+            "src": "https://dcdn-us.mitiendanube.com/stores/002/393/463/products/premium2fblack-131370a7037fe8a7c916631597628563-1024-1024.pngaltmediatoken67795f95-bdea-41f0-b026-5cef45d9c5de",
+            "position": 1,
+            "alt": [],
+            "created_at": "2022-09-14T12:49:27+0000",
+            "updated_at": "2022-09-14T12:49:27+0000"
+        },
+        {
+            "id": 368803599,
+            "product_id": 133209077,
+            "src": "https://dcdn-us.mitiendanube.com/stores/002/393/463/products/instrucciones2fpasos-gifty-tiendanube-3fbd7f0fc5bd2717fe16631597676999-1024-1024.pngaltmediatokened68213c-3376-4044-980b-c2e7bc366a95",
+            "position": 2,
+            "alt": [],
+            "created_at": "2022-09-14T12:49:32+0000",
+            "updated_at": "2022-09-14T12:49:32+0000"
+        }
+    ],
+    "name": {
+        "es": "GIFT CARD"
+    },
+    "published": true,
+    "shooterCount": 1,
+    "targetCount": 0,
+    "urls": {
+        "canonicalURL": "https://demorafa2.mitiendanube.com/productos/gift-card/",
+        "videoURL": null
+    },
+    "variants": [
+        {
+            "id": "521165242",
+            "value": "",
+            "attr": {},
+            "stock": null,
+            "stockManagement": false,
+            "price": 0.46,
+            "promotionalPrice": null,
+            "imageId": "368803564",
+            "shooterCount": 0,
+            "targetCount": 0,
+            "productId": "133209077",
+            "sku": "GIFTY",
+            "ageGroup": "",
+            "gender": "",
+            "cost": 0
+        }
+    ],
+    "soldCount": 0,
+    "clickCount": 9,
+    "creationStoreDate": "2022-09-14T12:49:22.000Z",
+    "updateStoreDate": "2025-04-09T11:51:02.000Z",
+    "createdAt": "2024-10-16T14:23:00.905Z",
+    "updatedAt": "2025-04-09T11:51:08.200Z",
+    "freeShipping": false,
+    "tags": "",
+    "totalStock": null,
+    "extraProfits": 0,
+    "merchantPlatformRank": 2694
+}

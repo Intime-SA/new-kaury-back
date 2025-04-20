@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, ShoppingBag, Package, Users, BarChart2, Settings, HelpCircle } from 'lucide-react'
+import { Home, ShoppingBag, Package, Users, BarChart2, Settings, HelpCircle, Tag, List, Archive } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
 const navigation = [
   {
@@ -11,7 +13,17 @@ const navigation = [
     items: [
       { name: 'Dashboard', href: '/', icon: Home, enabled: true },
       { name: 'Órdenes', href: '#', icon: ShoppingBag, enabled: false },
-      { name: 'Productos', href: '#', icon: Package, enabled: false },
+      { 
+        name: 'Productos', 
+        href: '/products', 
+        icon: Package, 
+        enabled: true,
+        subItems: [
+          { name: 'Lista de productos', href: '/products/list', icon: List },
+          { name: 'Categorías', href: '/products/categories', icon: Tag },
+          { name: 'Inventario', href: '/products/create', icon: Archive },
+        ]
+      },
       { name: 'Clientes', href: '#', icon: Users, enabled: false },
     ],
   },
@@ -36,6 +48,15 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ isCollapsed = false }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
+
+  const toggleExpand = (itemName: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemName) 
+        ? prev.filter(item => item !== itemName)
+        : [...prev, itemName]
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -55,42 +76,78 @@ export function DashboardSidebar({ isCollapsed = false }: DashboardSidebarProps)
             </h2>
             <div className="space-y-1">
               {group.items.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                const isExpanded = expandedItems.includes(item.name)
                 const Icon = item.icon
+                
                 return (
-                  item.enabled ? (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`
-                        flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors
-                        ${isActive 
-                          ? 'bg-[#1F1F1F] text-gray-100' 
-                          : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
-                        }
-                      `}
-                    >
-                      <Icon className="w-5 h-5 min-w-[20px]" />
-                      <span className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
-                        {item.name}
-                      </span>
-                    </Link>
-                  ) : (
-                    <div
-                      key={item.name}
-                      className="flex items-center gap-3 px-2 py-2 text-sm rounded-lg text-gray-500 cursor-not-allowed"
-                    >
-                      <Icon className="w-5 h-5 min-w-[20px]" />
-                      <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
-                        {item.name}
-                      </span>
-                      {!isCollapsed && (
-                        <Badge variant="outline" className="text-[10px] h-4 bg-transparent border-gray-800 text-gray-500">
-                          Próximamente
-                        </Badge>
-                      )}
-                    </div>
-                  )
+                  <div key={item.name}>
+                    {item.enabled ? (
+                      <>
+                        <div
+                          className={cn(
+                            "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors cursor-pointer",
+                            isActive 
+                              ? 'bg-[#1F1F1F] text-gray-100' 
+                              : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                          )}
+                          onClick={() => item.subItems && toggleExpand(item.name)}
+                        >
+                          <Icon className="w-5 h-5 min-w-[20px]" />
+                          <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                            {item.name}
+                          </span>
+                          {item.subItems && !isCollapsed && (
+                            <svg
+                              className={`w-4 h-4 transition-transform ${isExpanded ? 'transform rotate-90' : ''}`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )}
+                        </div>
+                        
+                        {item.subItems && isExpanded && !isCollapsed && (
+                          <div className="ml-6 mt-1 space-y-1">
+                            {item.subItems.map((subItem) => {
+                              const SubIcon = subItem.icon
+                              const isSubActive = pathname === subItem.href
+                              
+                              return (
+                                <Link
+                                  key={subItem.name}
+                                  href={subItem.href}
+                                  className={cn(
+                                    "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors",
+                                    isSubActive
+                                      ? 'bg-[#1F1F1F] text-gray-100'
+                                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                                  )}
+                                >
+                                  <SubIcon className="w-4 h-4" />
+                                  <span>{subItem.name}</span>
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-3 px-2 py-2 text-sm rounded-lg text-gray-500 cursor-not-allowed">
+                        <Icon className="w-5 h-5 min-w-[20px]" />
+                        <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                          {item.name}
+                        </span>
+                        {!isCollapsed && (
+                          <Badge variant="outline" className="text-[10px] h-4 bg-transparent border-gray-800 text-gray-500">
+                            Próximamente
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </div>

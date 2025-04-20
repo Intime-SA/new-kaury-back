@@ -3,9 +3,9 @@
 import { OrderStatusType } from "@/components/orders/status/order-status";
 import { toast } from "@/components/ui/use-toast";
 import { Order } from "@/types/orders";
-import { useOrders } from "@/hooks/useOrders";
+import { useOrders } from "@/hooks/orders/useOrders";
 import { useDispatch } from "react-redux";
-import { updateSelectedOrders } from "@/app/store/slices/ordersSlice";
+import { updateSelectedOrders } from "@/store/slices/ordersSlice";
 import { useQueryClient } from "react-query";
 
 type ToastVariant = "default" | "destructive" | "success" | "info" | "warning" | "error";

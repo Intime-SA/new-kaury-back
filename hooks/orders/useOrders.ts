@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery, useMutation, useQueryClient } from 'react-query'
 import { useSelector } from 'react-redux'
-import { RootState } from '@/app/store/store'
+import { RootState } from '@/store/store'
 import { OrderStatusType } from "@/components/orders/status/order-status"
 import { useRef } from 'react'
 

@@ -2,9 +2,10 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import "./globals.css"
-import { Providers } from "./providers"
+import { Providers } from "../providers/providers"
 import { DashboardLayout } from "@/components/dashboard/layout/dashboard-layout"
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/providers/theme-provider"
 
 const montserrat = Montserrat({ 
   subsets: ["latin"],
@@ -31,12 +32,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${montserrat.variable} font-sans antialiased bg-background text-foreground`}>
-        <Providers>
-          <DashboardLayout>
-            {children}
-          </DashboardLayout>
-          <Toaster />
-        </Providers>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <Providers>
+            <DashboardLayout>
+              {children}
+            </DashboardLayout>
+            <Toaster />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   )

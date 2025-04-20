@@ -1,8 +1,8 @@
 "use client"
 
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/app/store/store'
-import { setStatus } from '@/app/store/slices/ordersSlice'
+import { RootState } from '@/store/store'
+import { setStatus } from '@/store/slices/ordersSlice'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { OrderStatusType } from "@/components/orders/status/order-status"
 import { Package, CreditCard, Archive, XCircle, Plus, List } from "lucide-react"

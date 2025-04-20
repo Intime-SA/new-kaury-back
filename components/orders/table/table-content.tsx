@@ -3,11 +3,11 @@ import { TableSkeleton } from "./table-skeleton"
 import { OrderTableRow } from "./table-row"
 import type { Order } from "@/types/orders"
 import { OrderStatusType } from "../status/order-status"
-import { OrderAction } from "@/hooks/useOrderStateManagement"
+import { OrderAction } from "@/hooks/orders/useOrderStateManagement"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "@/app/store/store"
-import { toggleOrderSelection, toggleAllOrders } from "@/app/store/slices/ordersSlice"
+import { RootState } from "@/store/store"
+import { toggleOrderSelection, toggleAllOrders } from "@/store/slices/ordersSlice"
 
 interface TableContentProps {
   orders: Order[]

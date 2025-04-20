@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils"
 import { OrderStatus } from "../status/order-status"
 import { OrderStatusType } from "../status/order-status"
 import type { Order } from "@/types/orders"
-import { OrderAction } from "@/hooks/useOrderStateManagement"
+import { OrderAction } from "@/hooks/orders/useOrderStateManagement"
 import { formatFirebaseTimestamp } from "@/lib/utils"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { OrderActions } from "./table-actions"
 import { useDispatch } from "react-redux"
-import { clearSelectedOrders } from "@/app/store/slices/ordersSlice"
+import { clearSelectedOrders } from "@/store/slices/ordersSlice"
 
 interface TableRowProps {
   order: Order

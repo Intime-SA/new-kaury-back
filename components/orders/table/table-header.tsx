@@ -7,12 +7,12 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "@/app/store/store"
-import { setSelectedDate } from "@/app/store/slices/ordersSlice"
+import { RootState } from "@/store/store"
+import { setSelectedDate } from "@/store/slices/ordersSlice"
 import { OrdersKPIs } from "../kpis/orders-kpis"
 import * as XLSX from 'xlsx'
 import { OrderActions } from "./table-actions"
-import { useOrderStateManagement } from "@/hooks/useOrderStateManagement"
+import { useOrderStateManagement } from "@/hooks/orders/useOrderStateManagement"
 
 interface TableHeaderProps {
   searchTerm: string
