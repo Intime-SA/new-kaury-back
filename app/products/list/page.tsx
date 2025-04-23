@@ -16,12 +16,15 @@ import { RootState } from '@/store/store'
 import { setCategories } from '@/store/slices/productsSlice'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useQuery } from 'react-query'
+import { ProductTableSkeleton } from '@/components/products/list/product-table-skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Category {
   id: string
   name: {
     es: string
   }
+  subcategories: Category[]
 }
 
 interface Product {
@@ -108,7 +111,15 @@ function ProductListContent() {
   console.log(products?.[0]?.images[0].src)
 
   if (isLoading) {
-    return <div>Cargando productos...</div>
+    return (
+      <div className="container mx-auto py-6 max-w-7xl">
+        <div className="flex justify-between items-center mb-6">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <ProductTableSkeleton rows={10} />
+      </div>
+    )
   }
 
   if (error) {
@@ -185,7 +196,7 @@ function ProductListContent() {
                     <TableCell>
                       {product.categories.map((category: Category) => (
                         <Badge key={category.id} variant="secondary" className="mr-1">
-                          {category.name.es}
+                          {category.name.es} / {category.subcategories[0].name.es}
                         </Badge>
                       ))}
                     </TableCell>

@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SelectedCategory } from "@/store/slices/productsSlice"
+import { Badge } from "@/components/ui/badge"
 
 interface CategoriesSelectorProps {
   selectedCategories: SelectedCategory[]
@@ -189,22 +190,24 @@ export function CategoriesSelector({
         </Table>
       </ScrollArea>
 
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground min-h-[40px] pt-2">
         {selectedCategories.length > 0 ? (
-          <div>
-            <p>Categorías seleccionadas:</p>
-            <ul className="mt-2">
-              {selectedCategories.map(category => (
-                <li key={category.id} className="flex items-center gap-2">
-                  <span>{category.name.es}</span>
-                  {category.parentId && (
-                    <span className="text-xs text-muted-foreground">
-                      (Subcategoría de {categories.find(c => c.id === category.parentId)?.name.es})
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-wrap gap-2">
+            {selectedCategories
+              .filter(cat => !cat.parentId)
+              .map(mainCategory => {
+                const subCategory = selectedCategories.find(sub => sub.parentId === mainCategory.id)
+                
+                const badgeText = subCategory
+                  ? `${mainCategory.name.es} / ${subCategory.name.es}`
+                  : mainCategory.name.es
+
+                return (
+                  <Badge key={mainCategory.id} variant="secondary">
+                    {badgeText}
+                  </Badge>
+                )
+              })}
           </div>
         ) : (
           <p>Selecciona una categoría para tu producto</p>
