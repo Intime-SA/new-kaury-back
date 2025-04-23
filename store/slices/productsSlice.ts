@@ -41,7 +41,7 @@ export interface ProductFormState {
   showInStore: boolean
 }
 
-const initialState: ProductFormState = {
+export const initialState: ProductFormState = {
   name: {
     es: ''
   },

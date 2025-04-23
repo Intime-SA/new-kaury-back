@@ -61,4 +61,16 @@ export interface Product {
   updatedAt: string
   freeShipping: boolean
   tags: string[]
+  sku?: string
+  barcode?: string
+  dimensions?: {
+    weight?: string
+    width?: string
+    height?: string
+    depth?: string
+  }
+  mpn?: string
+  ageRange?: string
+  gender?: string
+  showInStore?: boolean
 }

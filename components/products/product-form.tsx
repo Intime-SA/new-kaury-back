@@ -48,10 +48,10 @@ interface Product {
   sku?: string
   barcode?: string
   dimensions?: {
-    weight: string
-    width: string
-    height: string
-    depth: string
+    weight?: string
+    width?: string
+    height?: string
+    depth?: string
   }
   mpn?: string
   ageRange?: string
