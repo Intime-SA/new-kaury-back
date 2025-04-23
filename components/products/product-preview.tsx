@@ -1,19 +1,28 @@
 "use client"
 
+import React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tag } from "lucide-react"
-import { ExternalLink, PlayCircle } from "lucide-react"
+import { Tag, ExternalLink, PlayCircle } from "lucide-react"
 import Image from "next/image"
-import { ProductImage, ProductVariant } from "@/types/types"
+import type { ProductImage, ProductVariant } from "@/types/types"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import Autoplay from "embla-carousel-autoplay"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/store"
 
 interface ProductPreviewProps {
   name: string
   description: string
   price: number
   discountPrice: number | null
-  images: ProductImage[]
   tags: string[]
   categories: { name: { es: string } }[]
   freeShipping: boolean
@@ -26,13 +35,14 @@ export function ProductPreview({
   description,
   price,
   discountPrice,
-  images,
   tags,
   categories,
   freeShipping,
   variants,
   videoURL
 }: ProductPreviewProps) {
+  const images = useSelector((state: RootState) => state.products.images);
+
   const hasVideo = videoURL && videoURL.trim() !== ""
   
   const openVideo = () => {
@@ -41,16 +51,15 @@ export function ProductPreview({
     }
   }
 
-  // Determinar la imagen principal
-  const mainImage = images && images.length > 0 ? images[0].src : "/placeholderkaury2.png"
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+  )
 
-  // Calcular el descuento si existe
   const hasDiscount = discountPrice !== undefined && discountPrice !== null && discountPrice < price
   const discountPercentage = hasDiscount ? Math.round(((price - discountPrice!) / price) * 100) : 0
 
-  console.log("Video URL:", videoURL) // Para debug
+  console.log("Video URL:", videoURL)
 
-  // Agrupar variantes por tipo de atributo
   const variantAttributes: Record<string, Set<string>> = {}
 
   if (variants && variants.length > 0) {
@@ -67,19 +76,47 @@ export function ProductPreview({
   return (
     <div className="sticky top-6">
       <Card className="overflow-hidden">
-        <div className="relative aspect-square">
-          {images.length > 0 ? (
-            <Image
-              src={images[0].src}
-              alt={name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <Image src="/placeholderkaury2.png" alt="Sin imagen" fill className="object-cover" />
-          )}
+        <div className="relative">
+          <Carousel
+            plugins={[autoplayPlugin.current]}
+            className="w-full"
+            opts={{
+              loop: images.length > 1,
+            }}
+          >
+            <CarouselContent className="-ml-0">
+              {images.length > 0 ? (
+                images.map((image, index) => (
+                  <CarouselItem key={image.id || index} className="pl-0">
+                    <div className="relative aspect-square">
+                      <Image
+                        src={image.src}
+                        alt={name || `Imagen ${index + 1}`}
+                        fill
+                        priority={index === 0}
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))
+              ) : (
+                <CarouselItem className="pl-0">
+                   <div className="relative aspect-square">
+                      <Image src="/placeholderkaury2.png" alt="Sin imagen" fill className="object-cover" />
+                   </div>
+                </CarouselItem>
+              )}
+            </CarouselContent>
+            {images.length > 1 && (
+               <>
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:inline-flex" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:inline-flex" />
+               </>
+             )}
+          </Carousel>
           {freeShipping && (
-            <Badge className="absolute top-2 right-2">
+            <Badge className="absolute top-2 right-2 z-20">
               Envío gratis
             </Badge>
           )}
@@ -161,7 +198,7 @@ export function ProductPreview({
           <div className="flex">
             <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden">
               <Image
-                src={mainImage || "/placeholderkaury2.png"}
+                src={images[0]?.src || "/placeholderkaury2.png"}
                 alt={name || "Vista previa del producto"}
                 fill
                 className="object-cover"

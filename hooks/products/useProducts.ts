@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { ProductFormState } from '@/store/slices/productsSlice'
 import { Product } from '@/types/types'
 
@@ -20,6 +20,11 @@ interface ApiResponse {
 interface ApiResponseSingleProduct {
   status: 'success' | 'error';
   data?: Product;
+  message?: string;
+}
+
+interface DeleteApiResponse {
+  status: 'success' | 'error';
   message?: string;
 }
 
@@ -86,29 +91,71 @@ const updateProductMutationFn = async ({ productId, productData }: { productId: 
   return data;
 };
 
+const deleteProductRequest = async (productId: string): Promise<DeleteApiResponse> => {
+  console.log("Deleting product (request function):", productId);
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products/${productId}`, {
+   method: 'DELETE',
+   headers: {
+     'Content-Type': 'application/json',
+   },
+ });
+
+ if (response.status === 204) {
+   console.log(`Product ${productId} deleted successfully (204 No Content)`);
+   return { status: 'success', message: 'Producto eliminado (204)' };
+ }
+
+ const data = await response.json().catch(() => null);
+
+ if (!response.ok) {
+   throw new Error(data?.message || `Error deleting product ${productId}: ${response.statusText}`);
+ }
+
+ return data || { status: 'success', message: 'Producto eliminado' };
+}
+
 export const useProducts = () => {
+  const queryClient = useQueryClient();
+
   const createProduct = useMutation({
     mutationFn: createProductRequest,
     onError: (error: Error) => {
       console.error('Error creating product:', error);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries('products');
+    }
   });
 
   const updateProduct = useMutation({
     mutationFn: updateProductMutationFn,
     onSuccess: (data, variables) => {
-      console.log("Product updated successfully (mutation hook):", variables.productId, data);
+      console.log("Product updated successfully:", variables.productId, data);
+      queryClient.invalidateQueries(['product', variables.productId]);
+      queryClient.invalidateQueries('products');
     },
     onError: (error: Error, variables) => {
-      console.error('Error updating product (mutation hook):', variables.productId, error);
+      console.error('Error updating product:', variables.productId, error);
     },
   });
+
+  const deleteProduct = useMutation({
+    mutationFn: deleteProductRequest,
+    onSuccess: (data, productId) => {
+      console.log("Product deleted successfully (mutation hook):", productId, data);
+      queryClient.invalidateQueries('products');
+    },
+    onError: (error: Error, productId) => {
+     console.error('Error deleting product (mutation hook):', productId, error);
+   },
+ });
 
   const getProductById = getProductByIdRequest;
 
   return {
     createProduct,
     updateProduct,
+    deleteProduct,
     getProductById,
   };
 }; 

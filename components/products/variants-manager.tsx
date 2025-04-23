@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/store"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -48,14 +50,14 @@ interface VariantsManagerProps {
   variants: ProductVariant[]
   onChange: (variants: ProductVariant[]) => void
   stockManagement: boolean
-  images: ProductImage[]
 }
 
 const isVariantConfirmed = (variant: ProductVariant) => {
   return !variant.id.toString().startsWith('temp_');
 };
 
-export function VariantsManager({ variants, onChange, stockManagement, images }: VariantsManagerProps) {
+export function VariantsManager({ variants, onChange, stockManagement }: VariantsManagerProps) {
+  const images = useSelector((state: RootState) => state.products.images);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false)
   const [currentVariant, setCurrentVariant] = useState<ProductVariant | null>(null)
@@ -626,6 +628,32 @@ export function VariantsManager({ variants, onChange, stockManagement, images }:
               </div>
             </div>
 
+            {/* --- Input de Stock (Condicional) --- */}
+            {stockManagement && (
+              <div>
+                <Label htmlFor="stock" className="text-base font-medium block mb-3">Stock</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  min="0"
+                  step="1" // Stock usualmente son enteros
+                  className="bg-background border-muted"
+                  placeholder="Cantidad disponible"
+                  value={currentVariant?.stock ?? ""} // Usar ?? para mostrar string vacío si es null
+                  onChange={(e) => {
+                    // Convertir a número o null si está vacío
+                    const value = e.target.value === '' ? null : Number.parseInt(e.target.value, 10);
+                    // Asegurarse de que no sea NaN, si lo es, mantener null o 0? Optemos por null.
+                    const stockValue = isNaN(value as number) ? null : value;
+                    updateVariantField("stock", stockValue)
+                  }}
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Cantidad de unidades disponibles para esta variante específica.
+                </p>
+              </div>
+            )}
+            {/* --- Fin Input de Stock --- */}
 
             <div>
               <Label htmlFor="cost" className="text-base font-medium block mb-3">Costo</Label>

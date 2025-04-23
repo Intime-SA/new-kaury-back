@@ -2,22 +2,21 @@
 
 import type React from "react"
 import { useRef, useState } from "react"
+import { useDispatch } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Upload, Loader2, AlertCircle } from "lucide-react"
 import type { ProductImage } from "@/types/types"
 import { toast } from "@/components/ui/use-toast"
-import { uploadImageToFirebase, createProductImage, IMAGE_SIZES } from "@/lib/image-processor"
+import { uploadImageToFirebase, createProductImage } from "@/lib/image-processor"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import Image from "next/image"
+import { addImage } from "@/store/slices/productsSlice"
 
-interface ImageUploaderProps {
-  images: ProductImage[]
-  onChange: (images: ProductImage[]) => void
-}
-
-export function ImageUploader({ images, onChange }: ImageUploaderProps) {
+export function ImageUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const dispatch = useDispatch()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
@@ -41,13 +40,13 @@ export function ImageUploader({ images, onChange }: ImageUploaderProps) {
       const uploadResult = await uploadImageToFirebase(file)
       console.log(`Procesamiento completado. URL original: ${uploadResult.originalUrl}, Filename: ${uploadResult.filename}`)
 
-      const newImage = createProductImage(uploadResult, images.length + 1)
+      const newImage = createProductImage(uploadResult, 0)
 
-      onChange([...images, newImage])
+      dispatch(addImage(newImage))
 
       toast({
         title: "Imagen subida",
-        description: "Imagen optimizada y subida correctamente.",
+        description: "Imagen optimizada y añadida al estado.",
       })
 
     } catch (error) {
@@ -111,6 +110,11 @@ export function ImageUploader({ images, onChange }: ImageUploaderProps) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* --- Eliminar Sección de Previsualización de Imágenes Adicionales --- */}
+      {/* Ya no es necesaria aquí, ImagesSection la maneja */}
+      {/* {images.length > 1 && ( ... )} */}
+
     </div>
   )
 }

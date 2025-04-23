@@ -9,10 +9,9 @@ interface VariantsSectionProps {
   variants: ProductVariant[]
   onVariantsChange: (variants: ProductVariant[]) => void
   stockManagement: boolean
-  images: ProductImage[]
 }
 
-export function VariantsSection({ variants, onVariantsChange, stockManagement, images }: VariantsSectionProps) {
+export function VariantsSection({ variants, onVariantsChange, stockManagement }: VariantsSectionProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
@@ -27,7 +26,6 @@ export function VariantsSection({ variants, onVariantsChange, stockManagement, i
           variants={variants}
           onChange={onVariantsChange}
           stockManagement={stockManagement}
-          images={images}
         />
       </CardContent>
     </Card>

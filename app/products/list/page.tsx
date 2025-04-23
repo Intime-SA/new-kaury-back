@@ -9,15 +9,24 @@ import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from "lucide-r
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
 import Link from 'next/link'
-import { ProductImage, ProductVariant } from '@/types/types'
+import { ProductImage, ProductVariant, ProductCategory } from '@/types/types'
 import { useSearchParams } from 'next/navigation'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
-import { setCategories } from '@/store/slices/productsSlice'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useQuery } from 'react-query'
 import { ProductTableSkeleton } from '@/components/products/list/product-table-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useProducts } from '@/hooks/products/useProducts'
+import { toast } from "@/components/ui/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface Category {
   id: string
@@ -54,10 +63,9 @@ interface ApiResponse {
 }
 
 function ProductListContent() {
-  const dispatch = useDispatch()
-  const selectedCategories = useSelector((state: RootState) => state.products.categories)
   const searchParams = useSearchParams()
   const [expandedProducts, setExpandedProducts] = React.useState<Set<string>>(new Set())
+  const { deleteProduct } = useProducts();
 
   const page = searchParams.get('page') || '1'
   const limit = searchParams.get('limit') || '10'
@@ -95,20 +103,17 @@ function ProductListContent() {
     }).format(price)
   }
 
-  const handleCategoryToggle = (category: Category) => {
-    const isSelected = selectedCategories.some(cat => cat.id === category.id)
-    
-    if (isSelected) {
-      dispatch(setCategories(selectedCategories.filter(cat => cat.id !== category.id)))
-    } else {
-      dispatch(setCategories([...selectedCategories, {
-        id: category.id,
-        name: category.name
-      }]))
-    }
-  }
-
-  console.log(products?.[0]?.images[0].src)
+  const handleDelete = (product: Product) => {
+    console.log("Confirmado eliminar:", product.id, product.name.es);
+    deleteProduct.mutate(product.id, {
+      onSuccess: () => {
+        toast({ title: "Éxito", description: `Producto "${product.name.es}" eliminado.` });
+      },
+      onError: (error: Error) => {
+        toast({ title: "Error", description: `No se pudo eliminar el producto: ${error.message}`, variant: "destructive" });
+      }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -194,9 +199,9 @@ function ProductListContent() {
                       {formatPrice(product.variants[0]?.unit_price || 0)}
                     </TableCell>
                     <TableCell>
-                      {product.categories.map((category: Category) => (
+                      {product.categories.map((category: ProductCategory) => (
                         <Badge key={category.id} variant="secondary" className="mr-1">
-                          {category.name.es} / {category.subcategories[0].name.es}
+                          {category.name.es} {category.subcategories?.[0]?.name?.es ? `/ ${category.subcategories[0].name.es}` : ''}
                         </Badge>
                       ))}
                     </TableCell>
@@ -209,14 +214,37 @@ function ProductListContent() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Link href={`/products/${product.id}/edit`}>
+                        <Link href={`/products/edit/${product.id}`}>
                           <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="icon" className="text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={deleteProduct.isLoading}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Estás realmente seguro?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente el producto
+                                <span className="font-medium"> "{product.name.es}"</span>.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={deleteProduct.isLoading}>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(product)}
+                                disabled={deleteProduct.isLoading}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {deleteProduct.isLoading ? "Eliminando..." : "Confirmar Eliminación"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </TableCell>
                   </TableRow>

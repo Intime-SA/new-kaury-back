@@ -9,7 +9,6 @@ interface PreviewSectionProps {
   description: string
   price: number
   discountPrice: number | null
-  images: ProductImage[]
   tags: string[]
   categories: SelectedCategory[]
   freeShipping: boolean
@@ -22,7 +21,6 @@ export function PreviewSection({
   description,
   price,
   discountPrice,
-  images,
   tags,
   categories,
   freeShipping,
@@ -44,7 +42,6 @@ export function PreviewSection({
           description={description}
           price={price}
           discountPrice={discountPrice}
-          images={images}
           tags={tags}
           categories={categories}
           freeShipping={freeShipping}

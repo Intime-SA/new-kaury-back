@@ -1,67 +1,67 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Form } from "@/components/ui/form"
-import { useDispatch, useSelector } from "react-redux"
-import type { RootState } from "@/store/store"
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form } from "@/components/ui/form";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 import {
   setCategories,
   addCategory,
   removeCategory,
   type SelectedCategory,
   type ProductFormState,
-} from "@/store/slices/productsSlice"
-import { useProducts } from "@/hooks/products/useProducts"
-import type { ProductImage, ProductVariant } from "@/types/types"
-import { toast } from "@/components/ui/use-toast"
+} from "@/store/slices/productsSlice";
+import { useProducts } from "@/hooks/products/useProducts";
+import type { ProductImage, ProductVariant } from "@/types/types";
+import { toast } from "@/components/ui/use-toast";
 
 // Import all the form section components
-import { HeaderSection } from "@/components/products/form-sections/header-section"
-import { BasicInfoSection } from "@/components/products/form-sections/basic-info-section"
-import { ImagesSection } from "@/components/products/form-sections/images-section"
-import { VariantsSection } from "@/components/products/form-sections/variants-section"
-import { CodesSection } from "@/components/products/form-sections/codes-section"
-import { DimensionsSection } from "@/components/products/form-sections/dimensions-section"
-import { SocialSection } from "@/components/products/form-sections/social-section"
-import { CategoriesSection } from "@/components/products/form-sections/categories-section"
-import { TagsSection } from "@/components/products/form-sections/tags-section"
-import { OptionsSection } from "@/components/products/form-sections/options-section"
-import { PreviewSection } from "@/components/products/form-sections/preview-section"
+import { HeaderSection } from "@/components/products/form-sections/header-section";
+import { BasicInfoSection } from "@/components/products/form-sections/basic-info-section";
+import { ImagesSection } from "@/components/products/form-sections/images-section";
+import { VariantsSection } from "@/components/products/form-sections/variants-section";
+import { CodesSection } from "@/components/products/form-sections/codes-section";
+import { DimensionsSection } from "@/components/products/form-sections/dimensions-section";
+import { SocialSection } from "@/components/products/form-sections/social-section";
+import { CategoriesSection } from "@/components/products/form-sections/categories-section";
+import { TagsSection } from "@/components/products/form-sections/tags-section";
+import { OptionsSection } from "@/components/products/form-sections/options-section";
+import { PreviewSection } from "@/components/products/form-sections/preview-section";
 
 // Define types for Product, ProductImage, ProductCategory, and ProductVariant
 interface Product {
-  id: string
-  name: { es: string }
-  description: { es: string }
-  published: boolean
-  freeShipping: boolean
-  variants: ProductVariant[]
-  images: ProductImage[]
-  categories: ProductCategory[]
-  tags: string[]
+  id: string;
+  name: { es: string };
+  description: { es: string };
+  published: boolean;
+  freeShipping: boolean;
+  variants: ProductVariant[];
+  images: ProductImage[];
+  categories: ProductCategory[];
+  tags: string[];
   urls: {
-    videoURL: string | null
-  }
-  sku?: string
-  barcode?: string
+    videoURL: string | null;
+  };
+  sku?: string;
+  barcode?: string;
   dimensions?: {
-    weight?: string
-    width?: string
-    height?: string
-    depth?: string
-  }
-  mpn?: string
-  ageRange?: string
-  gender?: string
-  showInStore?: boolean
+    weight?: string;
+    width?: string;
+    height?: string;
+    depth?: string;
+  };
+  mpn?: string;
+  ageRange?: string;
+  gender?: string;
+  showInStore?: boolean;
 }
 
 interface ProductCategory {
-  id: string
-  name: { es: string }
+  id: string;
+  name: { es: string };
 }
 
 const productSchema = z.object({
@@ -94,39 +94,48 @@ const productSchema = z.object({
   ageRange: z.string().optional(),
   gender: z.string().optional(),
   showInStore: z.boolean().default(true),
-})
+});
 
-type ProductFormValues = z.infer<typeof productSchema>
+type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
-  context: "create" | "edit"
-  product?: Product | null
-  onSaveComplete?: () => void
+  context: "create" | "edit";
+  product?: Product | null;
+  onSaveComplete?: () => void;
 }
 
-export function ProductForm({ context, product, onSaveComplete }: ProductFormProps) {
-  const [images, setImages] = useState<ProductImage[]>(product?.images || [])
-  const [variants, setVariants] = useState<ProductVariant[]>(product?.variants || [])
-  const dispatch = useDispatch()
-  const selectedCategories = useSelector((state: RootState) => state.products.categories)
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { createProduct } = useProducts()
+export function ProductForm({
+  context,
+  product,
+  onSaveComplete,
+}: ProductFormProps) {
+  const [variants, setVariants] = useState<ProductVariant[]>(
+    product?.variants || []
+  );
+  const dispatch = useDispatch();
+  const selectedCategories = useSelector(
+    (state: RootState) => state.products.categories
+  );
+  const uploadedImages = useSelector(
+    (state: RootState) => state.products.images
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createProduct } = useProducts();
 
   // Manejador para agregar categoría
   const handleAddCategory = (category: SelectedCategory) => {
-    dispatch(addCategory(category))
-  }
+    dispatch(addCategory(category));
+  };
 
   // Manejador para remover categoría
   const handleRemoveCategory = (categoryId: string) => {
-    dispatch(removeCategory(categoryId))
-  }
+    dispatch(removeCategory(categoryId));
+  };
 
   // Manejador para establecer categorías
   const handleSetCategories = (categories: SelectedCategory[]) => {
-    dispatch(setCategories(categories))
-  }
+    dispatch(setCategories(categories));
+  };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -135,8 +144,12 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
       description: product?.description || { es: "" },
       published: product?.published ?? true,
       freeShipping: product?.freeShipping ?? false,
-      productType: (product?.variants[0]?.stockManagement ? "physical" : "digital") as "physical" | "digital",
-      stockManagement: (product?.variants[0]?.stockManagement ? "limited" : "infinite") as "infinite" | "limited",
+      productType: (product?.variants[0]?.stockManagement
+        ? "physical"
+        : "digital") as "physical" | "digital",
+      stockManagement: (product?.variants[0]?.stockManagement
+        ? "limited"
+        : "infinite") as "infinite" | "limited",
       tags: product?.tags || [],
       urls: product?.urls || { videoURL: null },
       sku: product?.sku || "",
@@ -152,20 +165,15 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
       gender: product?.gender || "",
       showInStore: product?.showInStore ?? true,
     },
-  })
-
-  // Manejadores de cambios
-  const handleImagesChange = (newImages: ProductImage[]) => {
-    setImages(newImages)
-  }
+  });
 
   const handleVariantsChange = (newVariants: ProductVariant[]) => {
-    setVariants(newVariants)
-  }
+    setVariants(newVariants);
+  };
 
   // Función para transformar las categorías al formato esperado por la API
   const transformCategoriesForApi = (categories: SelectedCategory[]) => {
-    const mainCategories = categories.filter((cat) => !cat.parentId)
+    const mainCategories = categories.filter((cat) => !cat.parentId);
 
     return mainCategories.map((mainCat) => {
       const subcategories = categories
@@ -173,80 +181,93 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
         .map((subCat) => ({
           id: subCat.id,
           name: subCat.name,
-        }))
+        }));
 
       return {
         id: mainCat.id,
         name: mainCat.name,
         subcategories: subcategories.length > 0 ? subcategories : undefined,
-      }
-    })
-  }
+      };
+    });
+  };
 
   const onSubmit = async (data: ProductFormValues) => {
-    try {
-      setIsSubmitting(true)
+    // Log 1: Estado de Redux al inicio de onSubmit
 
-      const transformedCategories = transformCategoriesForApi(selectedCategories)
+    try {
+      setIsSubmitting(true);
+      const transformedCategories =
+        transformCategoriesForApi(selectedCategories);
 
       const productData = {
         ...data,
-        images,
+        weight: undefined,
+        dimensions: data.dimensions,
+        images: uploadedImages, // Usar la variable leída
         variants,
         categories: transformedCategories,
-      }
+      };
+      // Log 3: Objeto final a enviar
+      console.log("onSubmit - Final productData for API:", productData);
 
       if (context === "edit" && product) {
         /* await updateProduct(product.id, productData); */
         toast({
           title: "Éxito",
           description: "Producto actualizado correctamente",
-        })
+        });
       } else {
-        const result = await createProduct.mutateAsync(productData as ProductFormState)
+        const result = await createProduct.mutateAsync(
+          productData as ProductFormState
+        );
 
         if (result.status === "success") {
           toast({
             title: "Éxito",
             description: "Producto creado correctamente",
-          })
+          });
           // Resetear el formulario y el estado de Redux
-          form.reset()
-          setImages([])
-          setVariants([])
-          dispatch(setCategories([]))
+          form.reset();
+          setVariants([]);
+          dispatch(setCategories([]));
         } else {
-          throw new Error(result.message || "Error al crear el producto")
+          throw new Error(result.message || "Error al crear el producto");
         }
       }
 
-      onSaveComplete?.()
+      onSaveComplete?.();
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Hubo un problema al guardar el producto",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Hubo un problema al guardar el producto",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Modificar los campos de dimensiones para usar el formulario directamente
-  const handleDimensionChange = (field: "weight" | "depth" | "width" | "height", value: string) => {
-    form.setValue(`dimensions.${field}`, value)
-  }
+  const handleDimensionChange = (
+    field: "weight" | "depth" | "width" | "height",
+    value: string
+  ) => {
+    form.setValue(`dimensions.${field}`, value);
+  };
 
   const generateDescription = () => {
-    const productName = form.getValues("name").es
+    const productName = form.getValues("name").es;
     if (!productName) {
       toast({
         title: "Error",
         description: "Primero debes ingresar un nombre de producto",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Simulación de generación con IA
@@ -254,17 +275,19 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
       `Este ${productName} de alta calidad está diseñado para ofrecer máxima durabilidad y estilo. Perfecto para uso diario.`,
       `Nuestro ${productName} premium combina funcionalidad y diseño elegante. Fabricado con los mejores materiales.`,
       `Descubre la calidad superior de este ${productName}, creado pensando en la comodidad y resistencia que necesitas.`,
-    ]
+    ];
 
-    const randomDescription = descriptions[Math.floor(Math.random() * descriptions.length)]
-    form.setValue("description", { es: randomDescription })
-  }
+    const randomDescription =
+      descriptions[Math.floor(Math.random() * descriptions.length)];
+    form.setValue("description", { es: randomDescription });
+  };
 
   // Obtener el precio para la vista previa
-  const previewPrice = variants.length > 0 ? variants[0].unit_price : 0
-  const previewDiscountPrice = variants.length > 0 ? variants[0].promotionalPrice : null
+  const previewPrice = variants.length > 0 ? variants[0].unit_price : 0;
+  const previewDiscountPrice =
+    variants.length > 0 ? variants[0].promotionalPrice : null;
 
-  const handleFormSubmit = form.handleSubmit(onSubmit)
+  const handleFormSubmit = form.handleSubmit(onSubmit);
 
   return (
     <div className="container mx-auto max-w-7xl">
@@ -280,26 +303,30 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
         <div className="lg:col-span-2">
           <Form {...form}>
             <form onSubmit={handleFormSubmit} className="space-y-8">
-              
               {/* Información básica */}
-              <BasicInfoSection control={form.control} generateDescription={generateDescription} />
+              <BasicInfoSection
+                control={form.control}
+                generateDescription={generateDescription}
+              />
 
               {/* Imágenes */}
-              <ImagesSection images={images} onImagesChange={handleImagesChange} />
+              <ImagesSection />
 
               {/* Variantes y precios */}
               <VariantsSection
                 variants={variants}
                 onVariantsChange={handleVariantsChange}
                 stockManagement={form.watch("stockManagement") === "limited"}
-                images={images}
               />
 
               {/* Códigos */}
               <CodesSection control={form.control} />
 
               {/* Peso y dimensiones */}
-              <DimensionsSection control={form.control} handleDimensionChange={handleDimensionChange} />
+              <DimensionsSection
+                control={form.control}
+                handleDimensionChange={handleDimensionChange}
+              />
 
               {/* Instagram y Google Shopping */}
               <SocialSection control={form.control} />
@@ -329,7 +356,6 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
               description={form.watch("description.es") || ""}
               price={previewPrice}
               discountPrice={previewDiscountPrice}
-              images={images}
               tags={form.watch("tags") || []}
               categories={selectedCategories}
               freeShipping={form.watch("freeShipping")}
@@ -340,7 +366,7 @@ export function ProductForm({ context, product, onSaveComplete }: ProductFormPro
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ProductForm
+export default ProductForm;
