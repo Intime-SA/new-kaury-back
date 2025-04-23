@@ -1,6 +1,8 @@
 export interface ProductImage {
   id: string | number
   src: string
+  filename?: string
+  isUploading?: boolean
   position?: number
   product_id?: number
   url?: string

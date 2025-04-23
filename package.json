@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "latest",
     "@react-pdf/renderer": "^4.3.0",
     "@reduxjs/toolkit": "^2.7.0",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -64,6 +65,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.4",
+    "uuid": "^11.1.0",
     "vaul": "^0.9.6",
     "xlsx": "^0.18.5",
     "zod": "^3.24.1"

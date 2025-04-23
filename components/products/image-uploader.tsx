@@ -1,11 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Upload } from "lucide-react"
-import { ProductImage } from "@/types/types"
+import { Upload, Loader2, AlertCircle } from "lucide-react"
+import type { ProductImage } from "@/types/types"
 import { toast } from "@/components/ui/use-toast"
+import { uploadImageToFirebase, createProductImage, IMAGE_SIZES } from "@/lib/image-processor"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface ImageUploaderProps {
   images: ProductImage[]
@@ -14,80 +16,100 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ images, onChange }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0] // Solo procesamos el primer archivo por ahora
-      
-      if (!file.type.startsWith("image/")) {
-        toast({
-          title: "Error",
-          description: `${file.name} no es una imagen válida`,
-          variant: "destructive",
-        })
-        return
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+
+    const file = e.target.files[0]
+    setError(null)
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Error",
+        description: `${file.name} no es una imagen válida`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      console.log("Iniciando procesamiento y subida...")
+      const uploadResult = await uploadImageToFirebase(file)
+      console.log(`Procesamiento completado. URL original: ${uploadResult.originalUrl}, Filename: ${uploadResult.filename}`)
+
+      const newImage = createProductImage(uploadResult, images.length + 1)
+
+      onChange([...images, newImage])
+
+      toast({
+        title: "Imagen subida",
+        description: "Imagen optimizada y subida correctamente.",
+      })
+
+    } catch (error) {
+      console.error("Error al procesar o subir la imagen:", error)
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
+      setError(`Error: ${errorMessage}`)
+      toast({
+        title: "Error",
+        description: `No se pudo procesar o subir la imagen. ${errorMessage}`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
       }
-
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          const newImage: ProductImage = {
-            id: Date.now(),
-            product_id: 0,
-            src: e.target.result as string,
-            position: images.length + 1,
-            alt: [],
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-          
-          onChange([...images, newImage])
-        }
-      }
-
-      reader.readAsDataURL(file)
     }
   }
 
   return (
     <div className="space-y-4">
       <div className="border-2 border-dashed rounded-lg p-8 text-center border-muted-foreground/25">
-        <div className="flex flex-col items-center justify-center gap-2">
-          <Upload className="h-10 w-10 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Subí fotos del producto</h3>
-          <p className="text-sm text-muted-foreground">
-            Tamaño mínimo recomendado: 1024px / Formatos recomendados: WEBP, PNG, JPEG o GIF
-          </p>
-          <Button 
-            type="button"
-            variant="outline" 
-            onClick={() => fileInputRef.current?.click()} 
-            className="mt-2"
-          >
-            Seleccionar archivo
-          </Button>
+        <div className="flex flex-col items-center justify-center gap-4">
+          {isUploading ? (
+            <>
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              <h3 className="text-lg font-medium">Optimizando y subiendo...</h3>
+            </>
+          ) : (
+            <>
+              <Upload className="h-10 w-10 text-muted-foreground" />
+              <h3 className="text-lg font-medium">Subir Imagen</h3>
+              <p className="text-sm text-muted-foreground">
+                Selecciona una imagen. Se optimizará automáticamente.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                Seleccionar archivo
+              </Button>
+            </>
+          )}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
             accept="image/*"
             className="hidden"
+            disabled={isUploading}
           />
         </div>
       </div>
 
-      {images.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {images.map((image, index) => (
-            <div key={image.id} className="relative aspect-square">
-              <img
-                src={image.src || "/placeholder.svg"}
-                alt={`Producto ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg"
-              />
-            </div>
-          ))}
-        </div>
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   )
