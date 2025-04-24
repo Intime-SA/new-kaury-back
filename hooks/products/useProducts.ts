@@ -28,6 +28,25 @@ interface DeleteApiResponse {
   message?: string;
 }
 
+// --- Interfaz para la página de productos (asegúrate que coincida con tu API) ---
+interface ProductsPage {
+  products: Product[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// --- Parámetros para la función de obtener productos ---
+interface GetProductsParams {
+  pageParam?: number;
+  limit?: number;
+  category?: string | null;
+  search?: string | null;
+}
+
 const createProductRequest = async (productData: ProductFormState): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products`, {
     method: 'POST',
@@ -114,6 +133,36 @@ const deleteProductRequest = async (productId: string): Promise<DeleteApiRespons
  return data || { status: 'success', message: 'Producto eliminado' };
 }
 
+const getProductsRequest = async ({
+  pageParam = 1,
+  limit = 10,
+  category,
+  search,
+}: GetProductsParams): Promise<ProductsPage> => {
+  const queryParams = new URLSearchParams({
+    page: pageParam.toString(),
+    limit: limit.toString(),
+  });
+  if (category) queryParams.set('category', category);
+  if (search) queryParams.set('search', search);
+
+  console.log(`Fetching products: page=${pageParam}, limit=${limit}, category=${category}, search=${search}`);
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products?${queryParams.toString()}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.message || `Error fetching products: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+   // Ajusta esto según la estructura REAL de tu API. 
+   // Si devuelve un objeto con { status: '...', data: ProductsPage }:
+   if (data.status !== 'success' || !data.data) {
+      throw new Error('Failed to get successful product data from API');
+   }
+  return data.data as ProductsPage; // Devuelve la data correcta
+};
+
 export const useProducts = () => {
   const queryClient = useQueryClient();
 
@@ -152,10 +201,13 @@ export const useProducts = () => {
 
   const getProductById = getProductByIdRequest;
 
+  const getProducts = getProductsRequest;
+
   return {
     createProduct,
     updateProduct,
     deleteProduct,
     getProductById,
+    getProducts,
   };
 }; 
