@@ -19,7 +19,7 @@ import {
 import { Plus, Trash2, Edit, AlertCircle, Info, Pencil, Check, Instagram, ChevronDown, X } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-import { PropertiesDrawer } from "@/components/products/properties-drawer"
+import { PropertiesDrawer } from "@/components/products/views/properties-drawer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProductImage, ProductVariant } from "@/types/types"
 import { cn } from "@/lib/utils"
@@ -34,6 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Switch } from "@/components/ui/switch"
 
 interface PropertyValue {
   id: string
@@ -50,19 +51,33 @@ interface VariantsManagerProps {
   variants: ProductVariant[]
   onChange: (variants: ProductVariant[]) => void
   stockManagement: boolean
+  initialUseGlobalPrices?: boolean
+  onUseGlobalPricesChange: (value: boolean) => void
+  initialGlobalUnitPrice?: string | null
+  onGlobalUnitPriceChange: (value: string) => void
+  initialGlobalPromotionalPrice?: string | null
+  onGlobalPromotionalPriceChange: (value: string) => void
+  initialGlobalCost?: string | null
+  onGlobalCostChange: (value: string) => void
 }
 
 const isVariantConfirmed = (variant: ProductVariant) => {
   return !variant.id.toString().startsWith('temp_');
 };
 
-export function VariantsManager({ variants, onChange, stockManagement }: VariantsManagerProps) {
+export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange }: VariantsManagerProps) {
   const images = useSelector((state: RootState) => state.products.images);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false)
   const [currentVariant, setCurrentVariant] = useState<ProductVariant | null>(null)
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [properties, setProperties] = useState<Property[]>([])
+
+  // Estados para precios globales
+  const [useGlobalPrices, setUseGlobalPrices] = useState(initialUseGlobalPrices ?? false);
+  const [globalUnitPrice, setGlobalUnitPrice] = useState(initialGlobalUnitPrice ?? "");
+  const [globalPromotionalPrice, setGlobalPromotionalPrice] = useState(initialGlobalPromotionalPrice ?? "");
+  const [globalCost, setGlobalCost] = useState(initialGlobalCost ?? "");
 
   const defaultVariant: ProductVariant = {
     id: `temp_${Date.now()}`,
@@ -118,16 +133,38 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
   }, [variants])
 
   const handleAddVariant = () => {
-    setCurrentVariant({ ...defaultVariant })
-    setEditIndex(null)
-    setIsDialogOpen(true)
-  }
+    const numericGlobalUnitPrice = parseFloat(globalUnitPrice);
+    const numericGlobalPromoPrice = parseFloat(globalPromotionalPrice);
+    const numericGlobalCost = parseFloat(globalCost);
+
+    setCurrentVariant({
+       ...defaultVariant,
+       unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : 0,
+       promotionalPrice: useGlobalPrices && !isNaN(numericGlobalPromoPrice) ? numericGlobalPromoPrice : null,
+       cost: useGlobalPrices && !isNaN(numericGlobalCost) ? numericGlobalCost : 0,
+       // Asegurar que el stockManagement se hereda correctamente
+       stockManagement: stockManagement,
+    });
+    setEditIndex(null);
+    setIsDialogOpen(true);
+  };
 
   const handleEditVariant = (variant: ProductVariant, index: number) => {
-    setCurrentVariant({ ...variant })
-    setEditIndex(index)
-    setIsDialogOpen(true)
-  }
+     const numericGlobalUnitPrice = parseFloat(globalUnitPrice);
+     const numericGlobalPromoPrice = parseFloat(globalPromotionalPrice);
+     const numericGlobalCost = parseFloat(globalCost);
+
+     // Al editar, si los precios globales están activos, los campos del modal mostrarán los globales (y estarán deshabilitados)
+     // Si no, mostrarán los de la variante específica.
+     setCurrentVariant({
+       ...variant,
+       unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : variant.unit_price,
+       promotionalPrice: useGlobalPrices && !isNaN(numericGlobalPromoPrice) ? numericGlobalPromoPrice : variant.promotionalPrice,
+       cost: useGlobalPrices && !isNaN(numericGlobalCost) ? numericGlobalCost : variant.cost,
+     });
+     setEditIndex(index);
+     setIsDialogOpen(true);
+  };
 
   const handleDeleteVariant = (index: number) => {
     const updatedVariants = [...variants]
@@ -216,6 +253,10 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
     ))
 
     // Crear variantes basadas en las combinaciones
+    const numericGlobalUnitPrice = parseFloat(globalUnitPrice);
+    const numericGlobalPromoPrice = parseFloat(globalPromotionalPrice);
+    const numericGlobalCost = parseFloat(globalCost);
+
     const newVariants: ProductVariant[] = combinations.map((combination) => {
       // Verificar si ya existe una variante con esta combinación
       const existingVariant = variants.find((variant) => {
@@ -233,8 +274,8 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
         attr: { ...combination },
         stock: null,
         stockManagement: stockManagement,
-        unit_price: 0,
-        promotionalPrice: null,
+        unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : 0,
+        promotionalPrice: useGlobalPrices && !isNaN(numericGlobalPromoPrice) ? numericGlobalPromoPrice : null,
         imageId: images.length > 0 ? images[0].id.toString() : null,
         shooterCount: 0,
         targetCount: 0,
@@ -242,7 +283,7 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
         sku: "",
         ageGroup: "",
         gender: "",
-        cost: 0,
+        cost: useGlobalPrices && !isNaN(numericGlobalCost) ? numericGlobalCost : 0,
       }
     })
 
@@ -274,11 +315,96 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
           <Button 
             type="button"
             onClick={handleAddVariant}
+            disabled={properties.length === 0}
           >
             <Plus className="mr-2 h-4 w-4" /> Agregar variante
           </Button>
         </div>
       </div>
+
+      {/* SECCIÓN PRECIOS GLOBALES */}
+      <Card className="mb-4">
+        <CardHeader className="py-3">
+          <CardTitle className="text-base flex items-center gap-3">
+             <Switch
+               id="use-global-prices"
+               checked={useGlobalPrices}
+               onCheckedChange={(checked) => {
+                 setUseGlobalPrices(checked);
+                 onUseGlobalPricesChange(checked);
+               }}
+               aria-label="Usar precios globales"
+             />
+             <Label htmlFor="use-global-prices" className="cursor-pointer">Usar precios globales para todas las variantes</Label>
+             <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] text-xs">
+                    <p>Si activas esta opción, los precios definidos aquí se aplicarán a todas las variantes nuevas y pre-completarán los campos al editar. Los campos de precio individuales se desactivarán.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-0">
+           <div>
+             <Label htmlFor="global-unit-price" className="text-sm mb-1 block">Precio de venta global</Label>
+             <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <Input
+                  id="global-unit-price"
+                  type="number" min="0" step="0.01"
+                  className="pl-7 bg-background border-muted disabled:cursor-not-allowed disabled:opacity-70"
+                  value={globalUnitPrice}
+                  onChange={(e) => {
+                    setGlobalUnitPrice(e.target.value);
+                    onGlobalUnitPriceChange(e.target.value);
+                  }}
+                  disabled={!useGlobalPrices}
+                  placeholder="Ej: 100.00"
+                />
+             </div>
+           </div>
+           <div>
+             <Label htmlFor="global-promo-price" className="text-sm mb-1 block">Precio promocional global</Label>
+             <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <Input
+                  id="global-promo-price"
+                  type="number" min="0" step="0.01"
+                  className="pl-7 bg-background border-muted disabled:cursor-not-allowed disabled:opacity-70"
+                  value={globalPromotionalPrice}
+                  onChange={(e) => {
+                    setGlobalPromotionalPrice(e.target.value);
+                    onGlobalPromotionalPriceChange(e.target.value);
+                  }}
+                  disabled={!useGlobalPrices}
+                  placeholder="Opcional"
+                />
+             </div>
+           </div>
+           <div>
+             <Label htmlFor="global-cost" className="text-sm mb-1 block">Costo global</Label>
+              <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                  <Input
+                    id="global-cost"
+                    type="number" min="0" step="0.01"
+                    className="pl-7 bg-background border-muted disabled:cursor-not-allowed disabled:opacity-70"
+                    value={globalCost}
+                    onChange={(e) => {
+                      setGlobalCost(e.target.value);
+                      onGlobalCostChange(e.target.value);
+                    }}
+                    disabled={!useGlobalPrices}
+                    placeholder="Uso interno"
+                  />
+              </div>
+           </div>
+        </CardContent>
+      </Card>
 
       {/* Propiedades seleccionadas */}
       {properties.length > 0 && (
@@ -604,6 +730,7 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
                     className="pl-7 bg-background border-muted"
                     value={currentVariant?.unit_price || ""}
                     onChange={(e) => updateVariantField("unit_price", Number.parseFloat(e.target.value) || 0)}
+                    disabled={useGlobalPrices}
                   />
                 </div>
               </div>
@@ -623,6 +750,7 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
                       const value = e.target.value ? Number.parseFloat(e.target.value) : null
                       updateVariantField("promotionalPrice", value)
                     }}
+                    disabled={useGlobalPrices}
                   />
                 </div>
               </div>
@@ -667,6 +795,7 @@ export function VariantsManager({ variants, onChange, stockManagement }: Variant
                   className="pl-7 bg-background border-muted"
                   value={currentVariant?.cost || ""}
                   onChange={(e) => updateVariantField("cost", Number.parseFloat(e.target.value) || 0)}
+                  disabled={useGlobalPrices}
                 />
               </div>
               <p className="text-sm text-muted-foreground mt-2">Es de uso interno, tus clientes no lo verán</p>

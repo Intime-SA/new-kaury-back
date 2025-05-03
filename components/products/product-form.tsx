@@ -36,7 +36,6 @@ interface Product {
   id: string;
   name: { es: string };
   description: { es: string };
-  published: boolean;
   freeShipping: boolean;
   variants: ProductVariant[];
   images: ProductImage[];
@@ -57,6 +56,10 @@ interface Product {
   ageRange?: string;
   gender?: string;
   showInStore?: boolean;
+  useGlobalPrices?: boolean;
+  globalUnitPrice?: number | null;
+  globalPromotionalPrice?: number | null;
+  globalCost?: number | null;
 }
 
 interface ProductCategory {
@@ -71,7 +74,6 @@ const productSchema = z.object({
   description: z.object({
     es: z.string().optional(),
   }),
-  published: z.boolean().default(true),
   freeShipping: z.boolean().default(false),
   productType: z.enum(["physical", "digital"]),
   stockManagement: z.enum(["infinite", "limited"]),
@@ -81,7 +83,6 @@ const productSchema = z.object({
   }),
   sku: z.string().optional(),
   barcode: z.string().optional(),
-  weight: z.string().optional(),
   dimensions: z
     .object({
       weight: z.string().optional(),
@@ -94,6 +95,10 @@ const productSchema = z.object({
   ageRange: z.string().optional(),
   gender: z.string().optional(),
   showInStore: z.boolean().default(true),
+  useGlobalPrices: z.boolean().default(false).optional(),
+  globalUnitPrice: z.string().optional().nullable(),
+  globalPromotionalPrice: z.string().optional().nullable(),
+  globalCost: z.string().optional().nullable(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -120,7 +125,7 @@ export function ProductForm({
     (state: RootState) => state.products.images
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createProduct } = useProducts();
+  const { createProduct, updateProduct } = useProducts();
 
   // Manejador para agregar categoría
   const handleAddCategory = (category: SelectedCategory) => {
@@ -142,7 +147,6 @@ export function ProductForm({
     defaultValues: {
       name: product?.name || { es: "" },
       description: product?.description || { es: "" },
-      published: product?.published ?? true,
       freeShipping: product?.freeShipping ?? false,
       productType: (product?.variants[0]?.stockManagement
         ? "physical"
@@ -164,6 +168,10 @@ export function ProductForm({
       ageRange: product?.ageRange || "",
       gender: product?.gender || "",
       showInStore: product?.showInStore ?? true,
+      useGlobalPrices: product?.useGlobalPrices ?? false,
+      globalUnitPrice: product?.globalUnitPrice?.toString() ?? "",
+      globalPromotionalPrice: product?.globalPromotionalPrice?.toString() ?? "",
+      globalCost: product?.globalCost?.toString() ?? "",
     },
   });
 
@@ -203,15 +211,19 @@ export function ProductForm({
         ...data,
         weight: undefined,
         dimensions: data.dimensions,
-        images: uploadedImages, // Usar la variable leída
+        images: uploadedImages,
         variants,
         categories: transformedCategories,
+        useGlobalPrices: data.useGlobalPrices,
+        globalUnitPrice: data.globalUnitPrice ? parseFloat(data.globalUnitPrice) || null : null,
+        globalPromotionalPrice: data.globalPromotionalPrice ? parseFloat(data.globalPromotionalPrice) || null : null,
+        globalCost: data.globalCost ? parseFloat(data.globalCost) || null : null,
       };
       // Log 3: Objeto final a enviar
       console.log("onSubmit - Final productData for API:", productData);
 
       if (context === "edit" && product) {
-        /* await updateProduct(product.id, productData); */
+        await updateProduct.mutateAsync({ productId: product.id, productData: productData as ProductFormState });
         toast({
           title: "Éxito",
           description: "Producto actualizado correctamente",
@@ -317,6 +329,14 @@ export function ProductForm({
                 variants={variants}
                 onVariantsChange={handleVariantsChange}
                 stockManagement={form.watch("stockManagement") === "limited"}
+                initialUseGlobalPrices={form.watch("useGlobalPrices")}
+                onUseGlobalPricesChange={(value) => form.setValue("useGlobalPrices", value)}
+                initialGlobalUnitPrice={form.watch("globalUnitPrice")}
+                onGlobalUnitPriceChange={(value) => form.setValue("globalUnitPrice", value)}
+                initialGlobalPromotionalPrice={form.watch("globalPromotionalPrice")}
+                onGlobalPromotionalPriceChange={(value) => form.setValue("globalPromotionalPrice", value)}
+                initialGlobalCost={form.watch("globalCost")}
+                onGlobalCostChange={(value) => form.setValue("globalCost", value)}
               />
 
               {/* Códigos */}

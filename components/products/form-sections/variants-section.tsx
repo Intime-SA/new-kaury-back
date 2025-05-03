@@ -9,9 +9,29 @@ interface VariantsSectionProps {
   variants: ProductVariant[]
   onVariantsChange: (variants: ProductVariant[]) => void
   stockManagement: boolean
+  initialUseGlobalPrices?: boolean
+  onUseGlobalPricesChange: (value: boolean) => void
+  initialGlobalUnitPrice?: string | null
+  onGlobalUnitPriceChange: (value: string) => void
+  initialGlobalPromotionalPrice?: string | null
+  onGlobalPromotionalPriceChange: (value: string) => void
+  initialGlobalCost?: string | null
+  onGlobalCostChange: (value: string) => void
 }
 
-export function VariantsSection({ variants, onVariantsChange, stockManagement }: VariantsSectionProps) {
+export function VariantsSection({ 
+  variants, 
+  onVariantsChange, 
+  stockManagement, 
+  initialUseGlobalPrices,
+  onUseGlobalPricesChange,
+  initialGlobalUnitPrice,
+  onGlobalUnitPriceChange,
+  initialGlobalPromotionalPrice,
+  onGlobalPromotionalPriceChange,
+  initialGlobalCost,
+  onGlobalCostChange
+}: VariantsSectionProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
@@ -26,6 +46,14 @@ export function VariantsSection({ variants, onVariantsChange, stockManagement }:
           variants={variants}
           onChange={onVariantsChange}
           stockManagement={stockManagement}
+          initialUseGlobalPrices={initialUseGlobalPrices}
+          onUseGlobalPricesChange={onUseGlobalPricesChange}
+          initialGlobalUnitPrice={initialGlobalUnitPrice}
+          onGlobalUnitPriceChange={onGlobalUnitPriceChange}
+          initialGlobalPromotionalPrice={initialGlobalPromotionalPrice}
+          onGlobalPromotionalPriceChange={onGlobalPromotionalPriceChange}
+          initialGlobalCost={initialGlobalCost}
+          onGlobalCostChange={onGlobalCostChange}
         />
       </CardContent>
     </Card>

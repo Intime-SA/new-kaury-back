@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Store } from "lucide-react"
-import { ProductPreview } from "@/components/products/product-preview"
+import { ProductPreview } from "@/components/products/views/product-preview"
 import type { ProductImage, ProductVariant } from "@/types/types"
 import type { SelectedCategory } from "@/store/slices/productsSlice"
 

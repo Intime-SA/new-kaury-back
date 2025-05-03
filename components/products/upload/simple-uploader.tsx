@@ -1,14 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Loader2 } from 'lucide-react'
 import { toast } from "@/components/ui/use-toast"
-import { initializeApp } from "firebase/app"
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { v4 as uuidv4 } from "uuid"
+import { uploadImageToR2 } from "@/lib/upload-cdn" // Importar la función de utilidad
 
 export function SimpleUploader() {
   const [isUploading, setIsUploading] = useState(false)
@@ -32,47 +29,32 @@ export function SimpleUploader() {
       addLog(`Archivo seleccionado: ${file.name} (${file.type}, ${file.size} bytes)`)
 
       // Verificar variables de entorno
-      if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-        addLog("Error: NEXT_PUBLIC_FIREBASE_API_KEY no está definida")
-        throw new Error("Falta configuración de Firebase")
+      if (!process.env.NEXT_PUBLIC_CLOUDFLARE_CDN_URL) {
+        addLog("Error: NEXT_PUBLIC_CLOUDFLARE_CDN_URL no está definida")
+        throw new Error("Falta configuración de Cloudflare")
       }
-
-      // Configuración de Firebase
-      const firebaseConfig = {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-      }
-
-      addLog("Inicializando Firebase...")
-      const app = initializeApp(firebaseConfig)
-      const storage = getStorage(app)
-      addLog("Firebase inicializado correctamente")
-
-      // Generar nombre único
-      const filename = `test-${uuidv4()}.${file.name.split(".").pop()}`
-      const storagePath = `test/${filename}`
-      addLog(`Subiendo a: ${storagePath}`)
-
-      // Crear referencia
-      const storageRef = ref(storage, storagePath)
-
-      // Subir archivo
-      addLog("Iniciando subida...")
-      const uploadResult = await uploadBytes(storageRef, file)
-      addLog(`Subida completada: ${uploadResult.metadata.fullPath}`)
-
+      
+      addLog("Preparando subida a Cloudflare R2...")
+      
+      // Usar la función de utilidad para subir a R2
+      addLog("Iniciando subida a través de la API route...")
+      const result = await uploadImageToR2(file)
+      
+      addLog(`Subida completada. ID: ${result.filename}`)
+      
       // Obtener URL
-      const url = await getDownloadURL(storageRef)
+      const url = result.originalUrl
       addLog(`URL obtenida: ${url}`)
       setUploadedUrl(url)
+      
+      // Mostrar información sobre los diferentes tamaños
+      addLog(`URL pequeña: ${result.sizes.small}`)
+      addLog(`URL mediana: ${result.sizes.medium}`)
+      addLog(`URL grande: ${result.sizes.large}`)
 
       toast({
         title: "Subida exitosa",
-        description: "El archivo se ha subido correctamente a Firebase Storage",
+        description: "El archivo se ha subido correctamente a Cloudflare R2",
       })
     } catch (error) {
       console.error("Error al subir:", error)
@@ -95,7 +77,7 @@ export function SimpleUploader() {
   return (
     <div className="space-y-4">
       <div className="border-2 border-dashed rounded-lg p-6 text-center border-muted-foreground/25">
-        <h3 className="text-lg font-semibold mb-4">Prueba Simple de Subida a Firebase</h3>
+        <h3 className="text-lg font-semibold mb-4">Prueba Simple de Subida a Cloudflare R2</h3>
 
         <div className="flex justify-center mb-4">
           <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading} variant="outline">

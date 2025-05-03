@@ -37,12 +37,6 @@ export function TagsSection({ control }: TagsSectionProps) {
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <div className="flex justify-between items-center">
-                <FormLabel>Etiquetas</FormLabel>
-                <Button type="button" variant="ghost" size="sm">
-                  <Edit className="h-4 w-4 mr-1" /> Editar
-                </Button>
-              </div>
               <FormControl>
                 <TagsInput value={field.value || []} onChange={field.onChange} />
               </FormControl>

@@ -9,7 +9,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    domains: ['cdn.invertimesa.workers.dev'],
+    unoptimized: true, // Puedes mantener esto si prefieres no usar la optimización de Next.js
   },
   transpilePackages: ['@react-pdf/renderer'],
   webpack: (config) => {

@@ -29,7 +29,6 @@ const transformProductToFormState = (product: Product): Partial<ProductFormState
   return {
     name: product.name,
     description: product.description,
-    published: product.published,
     freeShipping: product.freeShipping,
     productType: product.variants[0]?.stockManagement ? "physical" : "digital",
     stockManagement: product.variants[0]?.stockManagement ? "limited" : "infinite",

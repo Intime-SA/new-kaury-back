@@ -4,10 +4,10 @@ import type React from "react"
 import { useRef, useState } from "react"
 import { useDispatch } from "react-redux"
 import { Button } from "@/components/ui/button"
-import { Upload, Loader2, AlertCircle } from "lucide-react"
+import { Upload, Loader2, AlertCircle } from 'lucide-react'
 import type { ProductImage } from "@/types/types"
 import { toast } from "@/components/ui/use-toast"
-import { uploadImageToFirebase, createProductImage } from "@/lib/image-processor"
+import { uploadImageToR2, createProductImage } from "@/lib/upload-cdn" // Importar las nuevas funciones
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Image from "next/image"
 import { addImage } from "@/store/slices/productsSlice"
@@ -36,8 +36,9 @@ export function ImageUploader() {
     setIsUploading(true)
 
     try {
-      console.log("Iniciando procesamiento y subida...")
-      const uploadResult = await uploadImageToFirebase(file)
+      console.log("Iniciando procesamiento y subida a Cloudflare R2...")
+      // Usar la nueva función para subir a R2
+      const uploadResult = await uploadImageToR2(file)
       console.log(`Procesamiento completado. URL original: ${uploadResult.originalUrl}, Filename: ${uploadResult.filename}`)
 
       const newImage = createProductImage(uploadResult, 0)
@@ -73,14 +74,14 @@ export function ImageUploader() {
           {isUploading ? (
             <>
               <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <h3 className="text-lg font-medium">Optimizando y subiendo...</h3>
+              <h3 className="text-lg font-medium">Optimizando y subiendo a Cloudflare R2...</h3>
             </>
           ) : (
             <>
               <Upload className="h-10 w-10 text-muted-foreground" />
               <h3 className="text-lg font-medium">Subir Imagen</h3>
               <p className="text-sm text-muted-foreground">
-                Selecciona una imagen. Se optimizará automáticamente.
+                Selecciona una imagen. Se optimizará automáticamente y se subirá a Cloudflare R2.
               </p>
               <Button
                 type="button"
@@ -110,11 +111,6 @@ export function ImageUploader() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      {/* --- Eliminar Sección de Previsualización de Imágenes Adicionales --- */}
-      {/* Ya no es necesaria aquí, ImagesSection la maneja */}
-      {/* {images.length > 1 && ( ... )} */}
-
     </div>
   )
 }

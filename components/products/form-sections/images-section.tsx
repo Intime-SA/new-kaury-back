@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { ImageIcon, Trash2 } from "lucide-react";
-import { ImageUploader } from "@/components/products/image-uploader";
+import { ImageUploader } from "@/components/products/upload/image-uploader";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSelector, useDispatch } from "react-redux";

@@ -16,7 +16,6 @@ export interface ProductFormState {
   description: {
     es: string
   }
-  published: boolean
   freeShipping: boolean
   productType: 'physical' | 'digital'
   stockManagement: 'infinite' | 'limited'
@@ -48,7 +47,6 @@ export const initialState: ProductFormState = {
   description: {
     es: ''
   },
-  published: true,
   freeShipping: false,
   productType: 'physical',
   stockManagement: 'limited',
@@ -82,9 +80,6 @@ export const productsSlice = createSlice({
     },
     setProductDescription: (state, action: PayloadAction<{ es: string }>) => {
       state.description = action.payload
-    },
-    setPublished: (state, action: PayloadAction<boolean>) => {
-      state.published = action.payload
     },
     setFreeShipping: (state, action: PayloadAction<boolean>) => {
       state.freeShipping = action.payload
@@ -179,7 +174,6 @@ export const productsSlice = createSlice({
 export const {
   setProductName,
   setProductDescription,
-  setPublished,
   setFreeShipping,
   setProductType,
   setStockManagement,
