@@ -1,5 +1,6 @@
-import { useMutation, useQueryClient } from 'react-query'
-import { Product } from '@/types/types'
+import { useMutation, useQueryClient, useInfiniteQuery, UseInfiniteQueryResult, UseMutationResult } from 'react-query'
+import { useSelector } from 'react-redux'
+import type { Product, PaginatedApiResponse, GetProductsParams } from '@/types/types'
 import {
     createProductService,
     getProductByIdService,
@@ -9,13 +10,32 @@ import {
     type ApiResponse,
     type DeleteApiResponse,
 } from '@/services/products'
+import { selectProductFilters, ProductFiltersState } from '@/store/slices/productFiltersSlice';
 
-
+// Definir explícitamente la interfaz de lo que retorna el hook
+interface UseProductsReturn {
+  // Mutaciones
+  createProduct: UseMutationResult<any, Error, any>;
+  updateProduct: UseMutationResult<any, Error, { productId: string; productData: any }>;
+  deleteProduct: UseMutationResult<DeleteApiResponse, Error, string>;
+  // Fetch de un solo producto
+  getProductById: (productId: string) => Promise<Product | null>;
+  // Resultados y controles de Infinite Query
+  products: Product[];           
+  fetchNextPage: (options?: any) => Promise<UseInfiniteQueryResult<PaginatedApiResponse, Error>>;
+  hasNextPage?: boolean;       
+  isLoading: boolean;          
+  isFetching: boolean;         
+  isFetchingNextPage: boolean; 
+  status: 'idle' | 'error' | 'loading' | 'success';            
+  error: Error | null;
+}
 
 // --- Parámetros para la función de obtener productos --- //
-export const useProducts = () => {
+export const useProducts = (): UseProductsReturn => {
   // --- Query Client ---
   const queryClient = useQueryClient();
+  const filters = useSelector(selectProductFilters);
 
   // --- Crear producto ---
   const createProduct = useMutation<ApiResponse, Error, any>({
@@ -59,11 +79,57 @@ export const useProducts = () => {
   // --- Obtener productos ---
   const getProducts = getProductsService;
 
+  // --- Función de Fetch para useInfiniteQuery ---
+  const fetchProducts = async ({ pageParam = 1 }): Promise<PaginatedApiResponse> => {
+    // Definir params aquí dentro usando los filtros y pageParam
+    const params: GetProductsParams = {
+      page: pageParam,
+      ...filters,
+    };
+    console.log("Fetching products with params (hook - no limit):");
+    return getProductsService(params); // Llamar al servicio (sin limit explícito)
+  };
+
+  // --- Hook useInfiniteQuery ---
+  const {
+    data: infiniteProductsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isLoading,
+    status,
+    error,
+  } = useInfiniteQuery<PaginatedApiResponse, Error>(
+    ['products', filters],
+    fetchProducts,
+    {
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage.pagination?.hasNextPage ? lastPage.pagination.currentPage + 1 : undefined;
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Aplanar los datos
+  const products = infiniteProductsData?.pages.flatMap(page => page.data) ?? [];
+
+  // Retornar explícitamente el objeto que coincide con UseProductsReturn
   return {
+    // Mutaciones
     createProduct,
     updateProduct,
     deleteProduct,
+    // Fetch de un solo producto
     getProductById,
-    getProducts,
+    // Resultados y controles de Infinite Query
+    products,           
+    fetchNextPage,      
+    hasNextPage,        
+    isLoading,          
+    isFetching,         
+    isFetchingNextPage, 
+    status,             
+    error,             
   };
 }; 

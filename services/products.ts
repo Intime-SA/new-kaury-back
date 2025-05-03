@@ -1,5 +1,6 @@
 import type { Product, ProductImage, ProductVariant, ProductCategory } from '@/types/types';
 import type { ProductFormState } from '@/store/slices/productsSlice';
+import type { ProductFiltersState } from '@/store/slices/productFiltersSlice';
 
 // Interfaces de respuesta de API
 export interface ApiResponse { // Para Create/Update
@@ -20,23 +21,31 @@ export interface DeleteApiResponse { // Para Delete
     message?: string;
 }
 
-export interface ProductsPage { // Para Get List (Infinite Query) - Exportar para usar en hook/componente
-    products: Product[];
-    pagination: { total: number; page: number; limit: number; totalPages: number; };
+export interface PaginatedApiResponse { // Lo renombramos aquí temporalmente
+    data: Product[]; // Cambiamos 'products' a 'data' para que coincida con el hook
+    pagination: {
+        total?: number; // Hacer opcional por si la API no siempre lo devuelve
+        currentPage: number; // Cambiar 'page' a 'currentPage'
+        limit: number;
+        totalPages: number;
+        hasNextPage: boolean; // Añadir esto para getNextPageParam
+        hasPrevPage?: boolean; // Opcional
+     };
 }
 
-export interface GetProductsParams { // Parámetros para Get List - Exportar para usar en hook/componente
-    pageParam?: number;
+export interface GetProductsParams extends Partial<ProductFiltersState> { // Hereda los filtros opcionalmente
+    page?: number; // Cambiar pageParam a page para consistencia
     limit?: number;
-    category?: string | null;
+    category?: string | null; // Mantener filtros existentes
     search?: string | null;
+    productName?: string | null; // <-- Añadir productName a la desestructuración
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // --- Servicio para Crear Producto ---
 export const createProductService = async (productData: ProductFormState): Promise<ApiResponse> => {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+    const response = await fetch(`${API_BASE_URL}/products/mongo-test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),
@@ -91,33 +100,62 @@ export const deleteProductService = async (productId: string): Promise<DeleteApi
     return data || { status: 'success', message: 'Producto eliminado' };
 };
 
-// --- Servicio para Obtener Lista de Productos (Paginado) ---
-export const getProductsService = async ({
-    pageParam = 1,
-    limit = 10,
-    category,
-    search,
-}: GetProductsParams): Promise<ProductsPage> => {
-    const queryParams = new URLSearchParams({
-        page: pageParam.toString(),
-        limit: limit.toString(),
-    });
-    if (category) queryParams.set('category', category);
-    if (search) queryParams.set('search', search);
+// --- Servicio para Obtener Lista de Productos (Paginado y Filtrado) ---
+export const getProductsService = async (params: GetProductsParams): Promise<PaginatedApiResponse> => {
+    const {
+        page = 1,
+        category,
+        minPrice,
+        maxPrice,
+        inStock,
+        createdAtFrom,
+        createdAtTo,
+        updatedAtFrom,
+        updatedAtTo,
+        productName
+    } = params;
 
-    console.log(`Fetching products (service): page=${pageParam}`);
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+    });
+
+    // Añadir filtros solo si tienen valor
+    if (category) queryParams.set('category', category);
+    if (productName) queryParams.set('search', productName);
+    if (minPrice !== null && minPrice !== undefined) queryParams.set('minPrice', minPrice.toString());
+    if (maxPrice !== null && maxPrice !== undefined) queryParams.set('maxPrice', maxPrice.toString());
+    if (inStock !== null && inStock !== undefined) queryParams.set('inStock', inStock.toString());
+    if (createdAtFrom) queryParams.set('createdAtFrom', createdAtFrom);
+    if (createdAtTo) queryParams.set('createdAtTo', createdAtTo);
+    if (updatedAtFrom) queryParams.set('updatedAtFrom', updatedAtFrom);
+    if (updatedAtTo) queryParams.set('updatedAtTo', updatedAtTo);
+
+    console.log(`Fetching products (service) with params (no limit from FE): ${queryParams.toString()}`);
     const response = await fetch(`${API_BASE_URL}/products?${queryParams.toString()}`);
+
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData?.message || `Error fetching products: ${response.statusText}`);
     }
     const data = await response.json();
-    // Ajusta según estructura API:
-    // Si devuelve { status: '...', data: ProductsPage }:
-    if (data.status !== 'success' || !data.data) {
-       throw new Error('Failed to get successful product data from API');
+
+    if (data.status !== 'success' || !data.data || !data.data.products || !data.data.pagination) {
+       throw new Error('API response structure is not as expected (status/data/products/pagination)'); 
     }
-    return data.data as ProductsPage;
-    // Si devuelve directamente ProductsPage:
-    // return data as ProductsPage;
+    const responseData = data.data as { products: Product[], pagination: any }; 
+    const paginationFromApi = responseData.pagination;
+    const currentPage = paginationFromApi.page;
+    const totalPages = paginationFromApi.totalPages;
+    const hasNextPage = currentPage < totalPages;
+
+    return {
+        data: responseData.products,
+        pagination: {
+            currentPage: currentPage,
+            totalPages: totalPages,
+            limit: paginationFromApi.limit,
+            totalCount: paginationFromApi.total,
+            hasNextPage: hasNextPage, 
+        }
+    } as PaginatedApiResponse;
 }; 

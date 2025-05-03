@@ -127,7 +127,18 @@ export function ProductTable({
                   <TableCell>
                     {product.images && product.images[0] ? (
                       <div className="relative w-16 h-16 rounded-md overflow-hidden">
-                        <Image src={product.images[0].src} alt={product.name?.es || 'Imagen producto'} fill className="object-cover" />
+                        <Image 
+                          src={product.images[0].src} 
+                          alt={product.name?.es || 'Imagen producto'} 
+                          fill 
+                          className="object-cover" 
+                          onError={(event) => {
+                            // Evita posibles loops infinitos si el placeholder tampoco carga
+                            event.currentTarget.onerror = null;
+                            // Establece la ruta del placeholder
+                            event.currentTarget.src = '/placeholderkaury2.png';
+                          }}
+                        />
                       </div>
                     ) : (
                       <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground">?</div>
@@ -183,6 +194,12 @@ export function ProductTable({
                           alt={variant.value || 'Imagen variante'}
                           fill
                           className="object-cover"
+                          onError={(event) => {
+                            // Evita posibles loops infinitos si el placeholder tampoco carga
+                            event.currentTarget.onerror = null;
+                            // Establece la ruta del placeholder
+                            event.currentTarget.src = '/placeholderkaury2.png';
+                          }}
                         />
                       </div>
                     </TableCell>

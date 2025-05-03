@@ -4,69 +4,39 @@ import React, { Suspense, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from 'next/link'
-import { Product } from '@/types/types'
-import { useSearchParams } from 'next/navigation'
-import { useInfiniteQuery } from 'react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useInView } from 'react-intersection-observer'
 import { useProducts } from '@/hooks/products/useProducts'
 import { toast } from "@/components/ui/use-toast"
 import { ProductTable } from '@/components/products/list/product-table'
-
-interface ProductsPage {
-  products: Product[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import { Product } from '@/types/types'
+import { ProductFilters } from '@/components/products/list/product-filters'
+import { Plus } from 'lucide-react'
 
 function ProductListContent() {
-  const searchParams = useSearchParams()
-
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0.5 });
 
-  const { deleteProduct, getProducts } = useProducts();
-
-  const limit = parseInt(searchParams.get('limit') || '10', 10);
-  const category = searchParams.get('category')
-  const search = searchParams.get('search')
-
   const {
-    data,
-    error,
+    products,
     fetchNextPage,
     hasNextPage,
-    isFetching,
     isLoading,
+    isFetching,
     isFetchingNextPage,
     status,
-  } = useInfiniteQuery<ProductsPage, Error>(
-    ['products', limit, category, search],
-    ({ pageParam = 1 }) => getProducts({ pageParam, limit, category, search }),
-    {
-      getNextPageParam: (lastPage, allPages) => {
-        const currentPage = lastPage.pagination.page;
-        const totalPages = lastPage.pagination.totalPages;
-        console.log(`Current: ${currentPage}, Total: ${totalPages}`);
-        return currentPage < totalPages ? currentPage + 1 : undefined;
-      },
-    }
-  )
+    error,
+    deleteProduct
+  } = useProducts();
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       console.log("Intersection observer inView: Cargando siguiente página...");
-      fetchNextPage();
+      fetchNextPage?.();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const products = data?.pages.flatMap(page => page.products) ?? [];
-
   const handleDelete = (productId: string) => {
-    const productToDelete = products.find(p => p.id === productId);
+    const productToDelete = products?.find((p: Product) => p.id === productId);
     console.log("Initiating delete for product ID:", productId);
     deleteProduct.mutate(productId, {
       onSuccess: () => {
@@ -79,7 +49,7 @@ function ProductListContent() {
   };
 
   if (status === 'error') {
-    return <div className="container mx-auto py-6 max-w-7xl text-destructive">Error al cargar los productos: {(error as Error).message}</div>
+    return <div className="container mx-auto py-6 max-w-7xl text-destructive">Error al cargar los productos: {(error as Error)?.message || 'Error desconocido'}</div>
   }
 
   return (
@@ -87,19 +57,23 @@ function ProductListContent() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Productos</h1>
         <Link href="/products/create">
-          <Button>Crear Producto</Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Crear Producto
+          </Button>
         </Link>
       </div>
 
+      <ProductFilters />
+
       <ScrollArea className="rounded-md border">
         <ProductTable
-          products={products}
-          isLoading={isLoading}
+          products={products ?? []}
+          isLoading={isLoading ?? true}
           isDeleting={deleteProduct.isLoading}
-          isFetchingNextPage={isFetchingNextPage}
+          isFetchingNextPage={isFetchingNextPage ?? false}
           loadMoreRef={loadMoreRef}
           onDeleteProduct={handleDelete}
-          hasNextPage={hasNextPage}
+          hasNextPage={hasNextPage ?? false}
         />
       </ScrollArea>
 
@@ -122,6 +96,7 @@ function ProductListPageSkeleton() {
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-10 w-32" />
       </div>
+      <Skeleton className="h-[180px] w-full rounded-md border mb-6" />
       <Skeleton className="h-[400px] w-full rounded-md border" />
     </div>
   );

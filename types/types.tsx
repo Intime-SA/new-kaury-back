@@ -74,3 +74,37 @@ export interface Product {
   gender?: string
   showInStore?: boolean
 }
+
+// --- Tipos para Filtros y Paginación de Productos --- 
+
+// Interfaz para los parámetros que acepta tu función getProductsService
+// (combina paginación y filtros)
+export interface GetProductsParams {
+  page?: number;
+  limit?: number;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  inStock?: boolean | null;
+  createdAtFrom?: string | null;
+  createdAtTo?: string | null;
+  updatedAtFrom?: string | null;
+  updatedAtTo?: string | null;
+  category?: string | null; // Mantener otros filtros si existen
+  search?: string | null;
+  // Añade aquí cualquier otro parámetro que acepte tu API (sortBy, etc.)
+}
+
+// Interfaz para la respuesta paginada de la API de productos
+// AJUSTA ESTA ESTRUCTURA PARA QUE COINCIDA CON TU API REAL
+export interface PaginatedApiResponse<T = Product> { 
+  data: T[]; // Array de datos (productos)
+  pagination: {
+    currentPage: number; // Número de la página actual
+    totalPages: number;  // Total de páginas disponibles
+    totalCount?: number; // Total de items (opcional)
+    limit: number;       // Items por página
+    hasNextPage: boolean; // Booleano crucial para useInfiniteQuery
+    hasPrevPage?: boolean; // Booleano (opcional)
+    // ... cualquier otro metadato de paginación que devuelva tu API
+  };
+}
