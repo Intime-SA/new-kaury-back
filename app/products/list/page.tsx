@@ -21,7 +21,6 @@ function ProductListContent() {
     fetchNextPage,
     hasNextPage,
     isLoading,
-    isFetching,
     isFetchingNextPage,
     status,
     error,

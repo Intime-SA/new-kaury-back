@@ -11,8 +11,8 @@ const navigation = [
   {
     title: 'PRINCIPAL',
     items: [
-      { name: 'Dashboard', href: '/', icon: Home, enabled: true },
-      { name: 'Órdenes', href: '#', icon: ShoppingBag, enabled: false },
+/*       { name: 'Dashboard', href: '/', icon: Home, enabled: true }, */
+      { name: 'Órdenes', href: '/', icon: ShoppingBag, enabled: true },
       { 
         name: 'Productos', 
         href: '/products', 
@@ -83,57 +83,75 @@ export function DashboardSidebar({ isCollapsed = false }: DashboardSidebarProps)
                 return (
                   <div key={item.name}>
                     {item.enabled ? (
-                      <>
-                        <div
-                          className={cn(
-                            "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors cursor-pointer",
-                            isActive 
-                              ? 'bg-[#1F1F1F] text-gray-100' 
-                              : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
-                          )}
-                          onClick={() => item.subItems && toggleExpand(item.name)}
-                        >
-                          <Icon className="w-5 h-5 min-w-[20px]" />
-                          <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
-                            {item.name}
-                          </span>
-                          {item.subItems && !isCollapsed && (
-                            <svg
-                              className={`w-4 h-4 transition-transform ${isExpanded ? 'transform rotate-90' : ''}`}
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          )}
-                        </div>
-                        
-                        {item.subItems && isExpanded && !isCollapsed && (
-                          <div className="ml-6 mt-1 space-y-1">
-                            {item.subItems.map((subItem) => {
-                              const SubIcon = subItem.icon
-                              const isSubActive = pathname === subItem.href
-                              
-                              return (
-                                <Link
-                                  key={subItem.name}
-                                  href={subItem.href}
-                                  className={cn(
-                                    "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors",
-                                    isSubActive
-                                      ? 'bg-[#1F1F1F] text-gray-100'
-                                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
-                                  )}
-                                >
-                                  <SubIcon className="w-4 h-4" />
-                                  <span>{subItem.name}</span>
-                                </Link>
-                              )
-                            })}
+                      !item.subItems ? (
+                        <Link href={item.href} passHref>
+                          <div
+                            className={cn(
+                              "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors cursor-pointer",
+                              isActive 
+                                ? 'bg-[#1F1F1F] text-gray-100' 
+                                : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                            )}
+                          >
+                            <Icon className="w-5 h-5 min-w-[20px]" />
+                            <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                              {item.name}
+                            </span>
                           </div>
-                        )}
-                      </>
+                        </Link>
+                      ) : (
+                        <>
+                          <div
+                            className={cn(
+                              "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors cursor-pointer",
+                              isActive
+                                ? 'bg-[#1F1F1F] text-gray-100' 
+                                : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                            )}
+                            onClick={() => toggleExpand(item.name)}
+                          >
+                            <Icon className="w-5 h-5 min-w-[20px]" />
+                            <span className={`flex-1 transition-opacity duration-300 ${isCollapsed ? 'opacity-0 hidden group-hover:block group-hover:opacity-100' : ''}`}>
+                              {item.name}
+                            </span>
+                            {!isCollapsed && (
+                              <svg
+                                className={`w-4 h-4 transition-transform ${isExpanded ? 'transform rotate-90' : ''}`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            )}
+                          </div>
+                          
+                          {isExpanded && !isCollapsed && (
+                            <div className="ml-6 mt-1 space-y-1">
+                              {item.subItems.map((subItem) => {
+                                const SubIcon = subItem.icon
+                                const isSubActive = pathname === subItem.href
+                                
+                                return (
+                                  <Link
+                                    key={subItem.name}
+                                    href={subItem.href}
+                                    className={cn(
+                                      "flex items-center gap-3 px-2 py-2 text-sm rounded-lg transition-colors",
+                                      isSubActive
+                                        ? 'bg-[#1F1F1F] text-gray-100'
+                                        : 'text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]'
+                                    )}
+                                  >
+                                    <SubIcon className="w-4 h-4" />
+                                    <span>{subItem.name}</span>
+                                  </Link>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )
                     ) : (
                       <div className="flex items-center gap-3 px-2 py-2 text-sm rounded-lg text-gray-500 cursor-not-allowed">
                         <Icon className="w-5 h-5 min-w-[20px]" />
