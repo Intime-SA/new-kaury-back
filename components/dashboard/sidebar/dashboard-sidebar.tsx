@@ -24,7 +24,7 @@ const navigation = [
           { name: 'Inventario', href: '/products/create', icon: Archive },
         ]
       },
-      { name: 'Clientes', href: '#', icon: Users, enabled: false },
+      { name: 'Clientes', href: '/users', icon: Users, enabled: true },
     ],
   },
   {

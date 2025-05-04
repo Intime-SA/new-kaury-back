@@ -108,3 +108,50 @@ export interface PaginatedApiResponse<T = Product> {
     // ... cualquier otro metadato de paginación que devuelva tu API
   };
 }
+
+// --- Tipos para Clientes --- 
+
+// Interfaz básica para un Cliente (AJUSTA según tu API)
+export interface Client {
+  id: string;
+  _id?: string; // Añadir por si se necesita el _id de mongo
+  name: string;
+  apellido?: string; // La API usa 'apellido'
+  email: string;
+  telefono?: string; // La API usa 'telefono'
+  dni?: string; // Añadir DNI
+  roll?: 'customer' | 'admin' | string; // Añadir Rol
+  fechaInicio?: { // La API usa fechaInicio con esta estructura
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  // createdAt?: string; // Comentar o quitar si la API usa fechaInicio
+  // updatedAt?: string;
+  datosEnvio?: { // Añadir datosEnvio
+    calle?: string;
+    numero?: string;
+    pisoDpto?: string;
+    codigoPostal?: boolean | string;
+    barrio?: string;
+    ciudad?: string;
+    estado?: string;
+    provincia?: string; // Añadir provincia si existe
+    email?: string; // Puede ser diferente al principal
+    name?: string;
+    apellido?: string;
+    telefono?: string;
+  };
+  // Añade aquí otros campos relevantes: userAgent, etc.
+  userAgent?: string;
+}
+
+// Parámetros para obtener la lista de clientes (inicialmente solo paginación)
+export interface GetClientsParams {
+  page?: number;
+  // Añadir aquí futuros filtros: search, status, etc.
+  // search?: string | null;
+}
+
+
+// Podemos reutilizar PaginatedApiResponse genérica definida previamente
+// export type PaginatedClientsApiResponse = PaginatedApiResponse<Client>;
