@@ -22,7 +22,7 @@ import { toast } from "@/components/ui/use-toast";
 import { HeaderSection } from "@/components/products/form-sections/header-section";
 import { BasicInfoSection } from "@/components/products/form-sections/basic-info-section";
 import { ImagesSection } from "@/components/products/form-sections/images-section";
-import { VariantsSection } from "@/components/products/form-sections/variants-section";
+import { VariantsSection } from "@/components/products/variants-section";
 import { CodesSection } from "@/components/products/form-sections/codes-section";
 import { DimensionsSection } from "@/components/products/form-sections/dimensions-section";
 import { SocialSection } from "@/components/products/form-sections/social-section";

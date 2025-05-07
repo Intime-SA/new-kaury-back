@@ -1,22 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
-import { ChevronRight, Plus, X, Wand2 } from "lucide-react"
+import { ChevronRight, Plus, X, Wand2, Palette } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
+import SelectableColorGrid, { Color } from '@/components/products/views/selected-color'
+import { useColors } from '@/hooks/utility/useColors'
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface PropertyValue {
   id: string
   value: string
+  hex?: string
+  name?: string
 }
 
 interface Property {
   id: string
   name: string
+  isColorProperty: boolean
   values: PropertyValue[]
 }
 
@@ -27,6 +33,8 @@ interface PropertiesDrawerProps {
   onPropertiesChange: (properties: Property[]) => void
   onGenerateVariants: () => void
 }
+
+const COLOR_PROPERTY_NAMES = ["color", "colors", "colour", "colours", "cor", "cores"]
 
 export function PropertiesDrawer({
   open,
@@ -39,17 +47,26 @@ export function PropertiesDrawer({
   const [newPropertyValueMap, setNewPropertyValueMap] = useState<{ [key: string]: string }>({})
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null)
 
+  const { colors: apiColors, isLoading: isLoadingColors, error: colorsError } = useColors()
+
   const addProperty = () => {
-    if (!newPropertyName.trim()) return
+    const trimmedName = newPropertyName.trim()
+    if (!trimmedName) return
+
+    const isColorProp = COLOR_PROPERTY_NAMES.includes(trimmedName.toLowerCase())
 
     const newProperty: Property = {
       id: `prop_${Date.now()}`,
-      name: newPropertyName.trim(),
+      name: trimmedName,
+      isColorProperty: isColorProp,
       values: [],
     }
 
     onPropertiesChange([...properties, newProperty])
     setNewPropertyName("")
+    if (isColorProp) {
+      setEditingPropertyId(newProperty.id)
+    }
   }
 
   const removeProperty = (propertyId: string) => {
@@ -59,50 +76,86 @@ export function PropertiesDrawer({
     }
   }
 
-  const addPropertyValue = (propertyId: string) => {
+  const addManualPropertyValue = (propertyId: string) => {
     const trimmedValue = newPropertyValueMap[propertyId]?.trim() || ""
     if (!trimmedValue) return
 
     const updatedProperties = properties.map((prop) => {
-      if (prop.id === propertyId) {
-        if (prop.values.some((v) => v.value === trimmedValue)) {
+      if (prop.id === propertyId && !prop.isColorProperty) {
+        if (prop.values.some((v) => v.value.toLowerCase() === trimmedValue.toLowerCase())) {
           return prop
         }
-
         return {
           ...prop,
           values: [
             ...prop.values,
-            {
-              id: `val_${Date.now()}`,
-              value: trimmedValue,
-            },
+            { id: `val_${Date.now()}`, value: trimmedValue },
           ],
         }
       }
       return prop
     })
-
     onPropertiesChange(updatedProperties)
     setNewPropertyValueMap(prev => ({ ...prev, [propertyId]: "" }))
   }
 
+  const handleColorValueSelect = (propertyId: string, selectedApiColor: Color | null) => {
+    const updatedProperties = properties.map((prop) => {
+      if (prop.id === propertyId && prop.isColorProperty) {
+        if (!selectedApiColor) {
+          return prop;
+        }
+
+        if (prop.values.some(v => v.id === selectedApiColor._id)) {
+            return prop;
+        }
+
+        const newValue: PropertyValue = {
+          id: selectedApiColor._id,
+          value: selectedApiColor.spanish,
+          hex: selectedApiColor.hex,
+          name: selectedApiColor.name
+        };
+        return { ...prop, values: [...prop.values, newValue] };
+      }
+      return prop;
+    });
+    onPropertiesChange(updatedProperties);
+  }
+
   const removePropertyValue = (propertyId: string, valueId: string) => {
+    removeColorValue(propertyId, valueId, false)
+  }
+
+  const removeColorValue = (propertyId: string, valueIdentifier: string, isDeselecting: boolean) => {
     const updatedProperties = properties.map((prop) => {
       if (prop.id === propertyId) {
         return {
           ...prop,
-          values: prop.values.filter((val) => val.id !== valueId),
+          values: prop.values.filter((val) => val.id !== valueIdentifier),
         }
       }
       return prop
     })
-
     onPropertiesChange(updatedProperties)
   }
 
   const handleValueInputChange = (propertyId: string, value: string) => {
     setNewPropertyValueMap(prev => ({ ...prev, [propertyId]: value }))
+  }
+
+  const getSelectedColorForProperty = (propertyId: string): Color | null => {
+    const prop = properties.find(p => p.id === propertyId && p.isColorProperty);
+    if (prop && prop.values.length > 0) {
+      const lastColorValue = prop.values[prop.values.length - 1];
+      return {
+        _id: lastColorValue.id,
+        spanish: lastColorValue.value,
+        hex: lastColorValue.hex || '#000000',
+        name: lastColorValue.name || ''
+      };
+    }
+    return null;
   }
 
   return (
@@ -118,7 +171,7 @@ export function PropertiesDrawer({
           <div className="flex items-center gap-2">
             <Input
               id="new-property-name"
-              placeholder="Nombre (ej: Color)"
+              placeholder="Nombre (ej: Color, Talle)"
               value={newPropertyName}
               onChange={(e) => setNewPropertyName(e.target.value)}
               className="flex-1"
@@ -143,7 +196,10 @@ export function PropertiesDrawer({
               properties.map((property) => (
                 <div key={property.id} className="border rounded-lg overflow-hidden">
                   <div className="flex items-center justify-between p-3 bg-muted/30 border-b">
-                    <span className="font-medium text-sm capitalize">{property.name}</span>
+                    <div className="flex items-center gap-2">
+                      {property.isColorProperty && <Palette className="h-4 w-4 text-muted-foreground" />}
+                      <span className="font-medium text-sm capitalize">{property.name}</span>
+                    </div>
                     <div className="flex items-center gap-1">
                       <Button
                         type="button"
@@ -174,31 +230,61 @@ export function PropertiesDrawer({
 
                   {editingPropertyId === property.id && (
                     <div className="p-3 space-y-3 bg-background">
-                      <div className="flex items-center gap-2">
-                        <Input
-                          placeholder={`Valor para ${property.name} (ej: Rojo)`}
-                          value={newPropertyValueMap[property.id] || ""}
-                          onChange={(e) => handleValueInputChange(property.id, e.target.value)}
-                          className="flex-1 h-9"
-                          aria-label={`Nuevo valor para ${property.name}`}
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => addPropertyValue(property.id)}
-                          disabled={!(newPropertyValueMap[property.id] || "").trim()}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Agregar Valor
-                        </Button>
-                      </div>
+                      {property.isColorProperty ? (
+                        isLoadingColors ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 py-2">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                              <div key={i} className="flex items-center gap-2 p-2 border rounded-md">
+                                <Skeleton className="w-8 h-8 rounded-md" />
+                                <Skeleton className="h-4 w-12" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : colorsError ? (
+                          <p className="text-destructive text-sm">Error al cargar colores: {colorsError.message}</p>
+                        ) : apiColors && apiColors.length > 0 ? (
+                          <SelectableColorGrid
+                            colors={apiColors}
+                            selectedColor={getSelectedColorForProperty(property.id)}
+                            onColorSelect={(color) => handleColorValueSelect(property.id, color)}
+                          />
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-2">No hay colores disponibles en la API.</p>
+                        )
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder={`Valor para ${property.name} (ej: Rojo)`}
+                            value={newPropertyValueMap[property.id] || ""}
+                            onChange={(e) => handleValueInputChange(property.id, e.target.value)}
+                            className="flex-1 h-9"
+                            aria-label={`Nuevo valor para ${property.name}`}
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => addManualPropertyValue(property.id)}
+                            disabled={!(newPropertyValueMap[property.id] || "").trim()}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Agregar Valor
+                          </Button>
+                        </div>
+                      )}
 
-                      {property.values.length > 0 ? (
+                      {property.values.length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-2">
                           {property.values
                             .filter((value) => value.value.trim() !== "")
                             .map((value) => (
-                              <Badge key={value.id} variant="secondary" className="flex items-center gap-1 px-2 py-1 rounded-full text-xs">
+                              <Badge
+                                key={value.id}
+                                variant="secondary"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm"
+                              >
+                                {property.isColorProperty && value.hex && (
+                                  <span className="w-3 h-3 rounded-full border inline-block" style={{ backgroundColor: value.hex }}></span>
+                                )}
                                 {value.value}
                                 <Button
                                   type="button"
@@ -206,14 +292,14 @@ export function PropertiesDrawer({
                                   size="icon"
                                   className="h-4 w-4 p-0 ml-0.5 hover:bg-transparent group"
                                   onClick={() => removePropertyValue(property.id, value.id)}
-                                  aria-label={`Eliminar valor ${value.value}`}
                                 >
                                   <X className="h-3 w-3 text-muted-foreground group-hover:text-destructive" />
                                 </Button>
                               </Badge>
                             ))}
                         </div>
-                      ) : (
+                      )}
+                      {!property.isColorProperty && property.values.length === 0 && (
                         <p className="text-xs text-muted-foreground text-center py-2">Aún no hay valores para "{property.name}".</p>
                       )}
                     </div>

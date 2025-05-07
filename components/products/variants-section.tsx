@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Boxes } from "lucide-react"
-import { VariantsManager } from "@/components/products/variants-manager"
+import { VariantsManager } from "@/components/products/form-sections/variants-manager"
 import type { ProductImage, ProductVariant } from "@/types/types"
 
 interface VariantsSectionProps {
