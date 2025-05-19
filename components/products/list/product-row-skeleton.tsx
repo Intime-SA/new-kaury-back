@@ -1,38 +1,37 @@
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProductRowSkeleton() {
   return (
     <TableRow>
-      {/* Celda para botón de expandir (vacía o skeleton pequeño) */}
+      {/* Botón de expandir */}
       <TableCell className="w-4">
-        <Skeleton className="h-4 w-4" />
+        <div className="w-4 h-4 rounded bg-muted animate-pulse mx-auto" />
       </TableCell>
-      {/* Celda de Imagen */}
+      {/* Imagen */}
       <TableCell className="w-[100px]">
-        <Skeleton className="h-16 w-16 rounded-md" />
+        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted animate-pulse mx-auto" />
       </TableCell>
-      {/* Celda de Nombre */}
+      {/* Nombre */}
       <TableCell>
-        <Skeleton className="h-4 w-[250px]" />
+        <div className="h-4 w-32 bg-muted rounded animate-pulse" />
       </TableCell>
-      {/* Celda de Precio */}
+      {/* Precio */}
       <TableCell>
-        <Skeleton className="h-4 w-[100px]" />
+        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
       </TableCell>
-      {/* Celda de Categoría */}
+      {/* Categoría */}
       <TableCell>
-        <Skeleton className="h-6 w-[150px] rounded-md" />
+        <div className="h-4 w-24 bg-muted rounded animate-pulse" />
       </TableCell>
-      {/* Celda de Visible */}
+      {/* Visible */}
       <TableCell className="w-[100px]">
-        <Skeleton className="h-5 w-5 rounded-full" />
+        <div className="w-8 h-4 bg-muted rounded animate-pulse mx-auto" />
       </TableCell>
-      {/* Celda de Acciones */}
+      {/* Acciones */}
       <TableCell className="w-[100px]">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
+        <div className="flex gap-1 justify-center">
+          <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+          <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
         </div>
       </TableCell>
     </TableRow>
