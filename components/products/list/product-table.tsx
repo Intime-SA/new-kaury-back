@@ -297,7 +297,7 @@ export function ProductTable({
           })}
           {/* Esqueletos para carga de siguientes páginas */}
           {isFetchingNextPage &&
-            Array.from({ length: 3 }).map((_, index) => (
+            Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={`fetch-skel-${index}`} className="transition-colors hover:bg-muted/50">
                 <TableCell className="w-[40px]">
                   <div className="p-1 rounded">
