@@ -45,7 +45,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // --- Servicio para Crear Producto ---
 export const createProductService = async (productData: ProductFormState): Promise<ApiResponse> => {
-    const response = await fetch(`${API_BASE_URL}/products/mongo-test`, {
+    const response = await fetch(`${API_BASE_URL}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),
@@ -125,10 +125,28 @@ export const getProductsService = async (params: GetProductsParams): Promise<Pag
     if (minPrice !== null && minPrice !== undefined) queryParams.set('minPrice', minPrice.toString());
     if (maxPrice !== null && maxPrice !== undefined) queryParams.set('maxPrice', maxPrice.toString());
     if (inStock !== null && inStock !== undefined) queryParams.set('inStock', inStock.toString());
-    if (createdAtFrom) queryParams.set('createdAtFrom', createdAtFrom);
-    if (createdAtTo) queryParams.set('createdAtTo', createdAtTo);
-    if (updatedAtFrom) queryParams.set('updatedAtFrom', updatedAtFrom);
-    if (updatedAtTo) queryParams.set('updatedAtTo', updatedAtTo);
+    
+    // Ajustar las fechas para incluir la hora
+    if (createdAtFrom) {
+        const fromDate = new Date(createdAtFrom);
+        const formattedDate = fromDate.toISOString().split('T')[0];
+        queryParams.set('createdAtFrom', formattedDate);
+    }
+    if (createdAtTo) {
+        const toDate = new Date(createdAtTo);
+        const formattedDate = toDate.toISOString().split('T')[0];
+        queryParams.set('createdAtTo', formattedDate);
+    }
+    if (updatedAtFrom) {
+        const fromDate = new Date(updatedAtFrom);
+        const formattedDate = fromDate.toISOString().split('T')[0];
+        queryParams.set('updatedAtFrom', formattedDate);
+    }
+    if (updatedAtTo) {
+        const toDate = new Date(updatedAtTo);
+        const formattedDate = toDate.toISOString().split('T')[0];
+        queryParams.set('updatedAtTo', formattedDate);
+    }
 
     console.log(`Fetching products (service) with params (no limit from FE): ${queryParams.toString()}`);
     const response = await fetch(`${API_BASE_URL}/products?${queryParams.toString()}`);
@@ -142,7 +160,7 @@ export const getProductsService = async (params: GetProductsParams): Promise<Pag
     if (data.status !== 'success' || !data.data || !data.data.products || !data.data.pagination) {
        throw new Error('API response structure is not as expected (status/data/products/pagination)'); 
     }
-    const responseData = data.data as { products: Product[], pagination: any }; 
+    const responseData = data.data as { products: Product[], pagination: any };
     const paginationFromApi = responseData.pagination;
     const currentPage = paginationFromApi.page;
     const totalPages = paginationFromApi.totalPages;
