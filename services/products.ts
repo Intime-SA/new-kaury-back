@@ -83,7 +83,7 @@ export const updateProductService = async ({ productId, productData }: { product
         body: JSON.stringify(productData),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || `Error updating product ${productId}`);
+    if (!response.ok) throw data; // Lanzar la respuesta cruda de la API
     return data;
 };
 

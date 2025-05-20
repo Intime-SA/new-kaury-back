@@ -278,6 +278,7 @@ export function ProductForm({
           // Mostrar errores de campos en el formulario de forma dinámica
           if (result.errors?.fieldErrors) {
             setApiFieldErrorsDynamically(form, result.errors.fieldErrors, form.getValues());
+            showFieldErrorsToast(result.errors.fieldErrors);
           }
           // Solo mostrar toast si hay errores generales
           if (result.errors?.formErrors && result.errors.formErrors.length > 0) {
