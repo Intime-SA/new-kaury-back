@@ -126,6 +126,7 @@ export function ProductForm({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createProduct, updateProduct } = useProducts();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Manejador para agregar categoría
   const handleAddCategory = (category: SelectedCategory) => {
@@ -299,7 +300,13 @@ export function ProductForm({
   const previewDiscountPrice =
     variants.length > 0 ? variants[0].promotionalPrice : null;
 
-  const handleFormSubmit = form.handleSubmit(onSubmit);
+  const handleFormSubmit = form.handleSubmit((data) => {
+    // Si el modal de variantes está abierto, no permitir el submit
+    if (isDialogOpen) {
+      return;
+    }
+    onSubmit(data);
+  });
 
   return (
     <div className="container mx-auto max-w-7xl">
@@ -314,7 +321,15 @@ export function ProductForm({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-background text-foreground">
         <div className="lg:col-span-2">
           <Form {...form}>
-            <form onSubmit={handleFormSubmit} className="space-y-8">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!isDialogOpen) {
+                  handleFormSubmit(e);
+                }
+              }} 
+              className="space-y-8"
+            >
               {/* Información básica */}
               <BasicInfoSection
                 control={form.control}
@@ -337,6 +352,7 @@ export function ProductForm({
                 onGlobalPromotionalPriceChange={(value) => form.setValue("globalPromotionalPrice", value)}
                 initialGlobalCost={form.watch("globalCost")}
                 onGlobalCostChange={(value) => form.setValue("globalCost", value)}
+                onDialogOpenChange={setIsDialogOpen}
               />
 
               {/* Códigos */}

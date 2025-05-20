@@ -81,7 +81,7 @@ export function BasicInfoSection({ control, generateDescription }: BasicInfoSect
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    defaultValue="physical"
                     className="flex flex-col space-y-1"
                   >
                     <div className="flex items-center space-x-2">

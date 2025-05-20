@@ -35,6 +35,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
+import { toast } from "@/components/ui/use-toast"
 
 interface PropertyValue {
   id: string
@@ -59,13 +60,14 @@ interface VariantsManagerProps {
   onGlobalPromotionalPriceChange: (value: string) => void
   initialGlobalCost?: string | null
   onGlobalCostChange: (value: string) => void
+  onDialogOpenChange?: (isOpen: boolean) => void
 }
 
 const isVariantConfirmed = (variant: ProductVariant) => {
   return !variant.id.toString().startsWith('temp_');
 };
 
-export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange }: VariantsManagerProps) {
+export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange, onDialogOpenChange }: VariantsManagerProps) {
   const images = useSelector((state: RootState) => state.products.images);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false)
@@ -142,11 +144,11 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
        unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : 0,
        promotionalPrice: useGlobalPrices && !isNaN(numericGlobalPromoPrice) ? numericGlobalPromoPrice : null,
        cost: useGlobalPrices && !isNaN(numericGlobalCost) ? numericGlobalCost : 0,
-       // Asegurar que el stockManagement se hereda correctamente
        stockManagement: stockManagement,
     });
     setEditIndex(null);
     setIsDialogOpen(true);
+    onDialogOpenChange?.(true);
   };
 
   const handleEditVariant = (variant: ProductVariant, index: number) => {
@@ -154,8 +156,6 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
      const numericGlobalPromoPrice = parseFloat(globalPromotionalPrice);
      const numericGlobalCost = parseFloat(globalCost);
 
-     // Al editar, si los precios globales están activos, los campos del modal mostrarán los globales (y estarán deshabilitados)
-     // Si no, mostrarán los de la variante específica.
      setCurrentVariant({
        ...variant,
        unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : variant.unit_price,
@@ -164,6 +164,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
      });
      setEditIndex(index);
      setIsDialogOpen(true);
+     onDialogOpenChange?.(true);
   };
 
   const handleDeleteVariant = (index: number) => {
@@ -173,47 +174,46 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
   }
 
   const handleSaveVariant = () => {
-    if (!currentVariant) return
+    if (!currentVariant) return;
 
-    const updatedVariants = [...variants]
-    const variantToSave = { ...currentVariant }
+    const updatedVariants = [...variants];
+    const variantToSave = { ...currentVariant };
 
     // Si la variante no está confirmada (tiene ID temporal) y todos los campos requeridos están completos
     if (!isVariantConfirmed(variantToSave) && 
-        variantToSave.sku && 
         variantToSave.unit_price > 0 && 
         Object.keys(variantToSave.attr).length > 0) {
       // Asignar un ID permanente
-      variantToSave.id = Date.now().toString()
+      variantToSave.id = Date.now().toString();
     }
 
     if (editIndex !== null) {
-      updatedVariants[editIndex] = variantToSave
+      updatedVariants[editIndex] = variantToSave;
     } else {
-      updatedVariants.push(variantToSave)
+      updatedVariants.push(variantToSave);
     }
 
-    onChange(updatedVariants)
-    setIsDialogOpen(false)
+    onChange(updatedVariants);
+    setIsDialogOpen(false);
   }
 
   const updateVariantField = (field: string, value: any) => {
-    if (!currentVariant) return
+    if (!currentVariant) return;
 
     if (field.startsWith("attr.")) {
-      const attrKey = field.split(".")[1]
+      const attrKey = field.split(".")[1];
       setCurrentVariant({
         ...currentVariant,
         attr: {
           ...currentVariant.attr,
           [attrKey]: value,
         },
-      })
+      });
     } else {
       setCurrentVariant({
         ...currentVariant,
         [field]: value,
-      })
+      });
     }
   }
 
@@ -480,7 +480,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             <TableHeader>
               <TableRow>
                 <TableHead>Imagen</TableHead>
-                <TableHead>IDc</TableHead>
+                <TableHead>ID</TableHead>
                 <TableHead>Atributos</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Estado</TableHead>
@@ -498,7 +498,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       <div className="relative h-20 w-20">
                         <Image
                           src={images.find((img) => img.id.toString() === variant.imageId)?.src || "/placeholder.svg"}
-                          alt={variant.sku}
+                          alt={variant.id}
                           fill
                           className="object-cover"
                         />
@@ -509,7 +509,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{variant.sku}</TableCell>
+                  <TableCell>{variant.id}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(variant.attr).map(([key, value], index) => (
@@ -581,8 +581,23 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
       )}
 
       {/* Dialog para editar variante */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+      <Dialog 
+        open={isDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentVariant(null);
+            setEditIndex(null);
+          }
+          setIsDialogOpen(open);
+          onDialogOpenChange?.(open);
+        }}
+      >
+        <DialogContent 
+          className="sm:max-w-[600px]" 
+          onInteractOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-xl">Editar variante</DialogTitle>
             <DialogDescription className="text-muted-foreground">
@@ -590,233 +605,246 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Label htmlFor="sku" className="text-base font-medium">IDC</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-[300px] text-xs">
-                        <p>Este es el IDC (Identificador Único del sistema Contable). Es el ID seleccionado a esta variante en particular.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSaveVariant();
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Label htmlFor="sku" className="text-base font-medium">IDC</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px] text-xs">
+                          <p>Este es el IDC (Identificador Único del sistema Contable). Es el ID seleccionado a esta variante en particular.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input
+                    id="sku"
+                    value={currentVariant?.id || ""}
+                    onChange={(e) => updateVariantField("sku", e.target.value)}
+                    placeholder="Identificador único"
+                    required
+                    className="bg-background border-muted"
+                  />
                 </div>
-                <Input
-                  id="sku"
-                  value={currentVariant?.sku || ""}
-                  onChange={(e) => updateVariantField("sku", e.target.value)}
-                  placeholder="Identificador único"
-                  required
-                  className="bg-background border-muted"
-                />
-              </div>
 
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Label htmlFor="image" className="text-base font-medium">Imagen</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-[200px] text-xs">
-                        <p>Esta funcionalidad es para asociar una imagen a una variante.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div 
-                      className={cn(
-                        "relative h-[140px] w-full cursor-pointer rounded-lg border",
-                        "hover:border-primary/50 transition-colors",
-                        !currentVariant || !isVariantConfirmed(currentVariant) ? "opacity-50" : "",
-                        currentVariant?.imageId ? "" : "border-dashed bg-muted/10"
-                      )}
-                      role="button"
-                      tabIndex={0}
-                      aria-disabled={!currentVariant || !isVariantConfirmed(currentVariant)}
-                    >
-                      {currentVariant?.imageId ? (
-                        <Image
-                          src={images.find(img => img.id.toString() === currentVariant.imageId)?.src || "/placeholder.svg"}
-                          alt="Imagen seleccionada"
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-                          <Plus className="h-6 w-6 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">Seleccionar imagen</span>
-                        </div>
-                      )}
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-3" align="start">
-                    <div className="grid grid-cols-3 gap-3">
-                      {images.map((image) => (
-                        <div
-                          key={image.id}
-                          className={cn(
-                            "relative h-20 w-20 cursor-pointer rounded-lg border-2 overflow-hidden",
-                            currentVariant?.imageId === image.id.toString() ? "border-primary" : "border-transparent hover:border-primary/50",
-                          )}
-                          onClick={() => updateVariantField("imageId", image.id.toString())}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <Image
-                            src={image.src}
-                            alt={`Imagen ${image.position || image.id}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* Propiedades de la variante */}
-            {properties.length > 0 && (
-              <div>
-                <Label className="text-base font-medium mb-3 block">Color</Label>
-                <div className="grid grid-cols-1 gap-4">
-                  {properties.map((property) => (
-                    <div key={property.id}>
-                      <Select
-                        value={currentVariant?.attr[property.name] || ""}
-                        onValueChange={(value) => updateVariantField(`attr.${property.name}`, value)}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Label htmlFor="image" className="text-base font-medium">Imagen</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[200px] text-xs">
+                          <p>Esta funcionalidad es para asociar una imagen a una variante.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div 
+                        className={cn(
+                          "relative h-[140px] w-full cursor-pointer rounded-lg border",
+                          "hover:border-primary/50 transition-colors",
+                          !currentVariant || !isVariantConfirmed(currentVariant) ? "opacity-50" : "",
+                          currentVariant?.imageId ? "" : "border-dashed bg-muted/10"
+                        )}
+                        role="button"
+                        tabIndex={0}
+                        aria-disabled={!currentVariant || !isVariantConfirmed(currentVariant)}
                       >
-                        <SelectTrigger id={`attr.${property.name}`} className="bg-background border-muted">
-                          <SelectValue placeholder={`Seleccionar ${property.name.toLowerCase()}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {property.values.map(
-                            (value) =>
-                              value.value.trim() !== "" && (
-                                <SelectItem key={value.id} value={value.value}>
-                                  {value.value}
-                                </SelectItem>
-                              ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
+                        {currentVariant?.imageId ? (
+                          <Image
+                            src={images.find(img => img.id.toString() === currentVariant.imageId)?.src || "/placeholder.svg"}
+                            alt="Imagen seleccionada"
+                            fill
+                            className="object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+                            <Plus className="h-6 w-6 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Seleccionar imagen</span>
+                          </div>
+                        )}
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-3" align="start">
+                      <div className="grid grid-cols-3 gap-3">
+                        {images.map((image) => (
+                          <div
+                            key={image.id}
+                            className={cn(
+                              "relative h-20 w-20 cursor-pointer rounded-lg border-2 overflow-hidden",
+                              currentVariant?.imageId === image.id.toString() ? "border-primary" : "border-transparent hover:border-primary/50",
+                            )}
+                            onClick={() => updateVariantField("imageId", image.id.toString())}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <Image
+                              src={image.src}
+                              alt={`Imagen ${image.position || image.id}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
-            )}
 
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="unit_price" className="text-base font-medium block mb-3">Precio de venta</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
-                  <Input
-                    id="unit_price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="pl-7 bg-background border-muted"
-                    value={currentVariant?.unit_price || ""}
-                    onChange={(e) => updateVariantField("unit_price", Number.parseFloat(e.target.value) || 0)}
-                    disabled={useGlobalPrices}
-                  />
+              {/* Propiedades de la variante */}
+              {properties.length > 0 && (
+                <div>
+                  <Label className="text-base font-medium mb-3 block">Color</Label>
+                  <div className="grid grid-cols-1 gap-4">
+                    {properties.map((property) => (
+                      <div key={property.id}>
+                        <Select
+                          value={currentVariant?.attr[property.name] || ""}
+                          onValueChange={(value) => updateVariantField(`attr.${property.name}`, value)}
+                        >
+                          <SelectTrigger id={`attr.${property.name}`} className="bg-background border-muted">
+                            <SelectValue placeholder={`Seleccionar ${property.name.toLowerCase()}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {property.values.map(
+                              (value) =>
+                                value.value.trim() !== "" && (
+                                  <SelectItem key={value.id} value={value.value}>
+                                    {value.value}
+                                  </SelectItem>
+                                ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="unit_price" className="text-base font-medium block mb-3">Precio de venta</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                    <Input
+                      id="unit_price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="pl-7 bg-background border-muted"
+                      value={currentVariant?.unit_price || ""}
+                      onChange={(e) => updateVariantField("unit_price", Number.parseFloat(e.target.value) || 0)}
+                      disabled={useGlobalPrices}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="promotionalPrice" className="text-base font-medium block mb-3">Precio promocional</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                    <Input
+                      id="promotionalPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="pl-7 bg-background border-muted"
+                      value={currentVariant?.promotionalPrice || ""}
+                      onChange={(e) => {
+                        const value = e.target.value ? Number.parseFloat(e.target.value) : null
+                        updateVariantField("promotionalPrice", value)
+                      }}
+                      disabled={useGlobalPrices}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="promotionalPrice" className="text-base font-medium block mb-3">Precio promocional</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+              {/* --- Input de Stock (Condicional) --- */}
+              {stockManagement && (
+                <div>
+                  <Label htmlFor="stock" className="text-base font-medium block mb-3">Stock</Label>
                   <Input
-                    id="promotionalPrice"
+                    id="stock"
                     type="number"
                     min="0"
-                    step="0.01"
-                    className="pl-7 bg-background border-muted"
-                    value={currentVariant?.promotionalPrice || ""}
+                    step="1" // Stock usualmente son enteros
+                    className="bg-background border-muted"
+                    placeholder="Cantidad disponible"
+                    value={currentVariant?.stock ?? ""} // Usar ?? para mostrar string vacío si es null
                     onChange={(e) => {
-                      const value = e.target.value ? Number.parseFloat(e.target.value) : null
-                      updateVariantField("promotionalPrice", value)
+                      // Convertir a número o null si está vacío
+                      const value = e.target.value === '' ? null : Number.parseInt(e.target.value, 10);
+                      // Asegurarse de que no sea NaN, si lo es, mantener null o 0? Optemos por null.
+                      const stockValue = isNaN(value as number) ? null : value;
+                      updateVariantField("stock", stockValue)
                     }}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Cantidad de unidades disponibles para esta variante específica.
+                  </p>
+                </div>
+              )}
+              {/* --- Fin Input de Stock --- */}
+
+              <div>
+                <Label htmlFor="cost" className="text-base font-medium block mb-3">Costo</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                  <Input
+                    id="cost"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="pl-7 bg-background border-muted"
+                    value={currentVariant?.cost || ""}
+                    onChange={(e) => updateVariantField("cost", Number.parseFloat(e.target.value) || 0)}
                     disabled={useGlobalPrices}
                   />
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">Es de uso interno, tus clientes no lo verán</p>
               </div>
             </div>
 
-            {/* --- Input de Stock (Condicional) --- */}
-            {stockManagement && (
-              <div>
-                <Label htmlFor="stock" className="text-base font-medium block mb-3">Stock</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  min="0"
-                  step="1" // Stock usualmente son enteros
-                  className="bg-background border-muted"
-                  placeholder="Cantidad disponible"
-                  value={currentVariant?.stock ?? ""} // Usar ?? para mostrar string vacío si es null
-                  onChange={(e) => {
-                    // Convertir a número o null si está vacío
-                    const value = e.target.value === '' ? null : Number.parseInt(e.target.value, 10);
-                    // Asegurarse de que no sea NaN, si lo es, mantener null o 0? Optemos por null.
-                    const stockValue = isNaN(value as number) ? null : value;
-                    updateVariantField("stock", stockValue)
-                  }}
-                />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Cantidad de unidades disponibles para esta variante específica.
-                </p>
-              </div>
-            )}
-            {/* --- Fin Input de Stock --- */}
-
-            <div>
-              <Label htmlFor="cost" className="text-base font-medium block mb-3">Costo</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
-                <Input
-                  id="cost"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="pl-7 bg-background border-muted"
-                  value={currentVariant?.cost || ""}
-                  onChange={(e) => updateVariantField("cost", Number.parseFloat(e.target.value) || 0)}
-                  disabled={useGlobalPrices}
-                />
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">Es de uso interno, tus clientes no lo verán</p>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button 
-              type="button"
-              variant="outline" 
-              onClick={() => setIsDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button"
-              onClick={handleSaveVariant}
-            >
-              Guardar
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDialogOpen(false);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Guardar
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
