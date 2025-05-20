@@ -121,12 +121,7 @@ export interface Client {
   telefono?: string; // La API usa 'telefono'
   dni?: string; // Añadir DNI
   roll?: 'customer' | 'admin' | string; // Añadir Rol
-  fechaInicio?: { // La API usa fechaInicio con esta estructura
-    _seconds: number;
-    _nanoseconds: number;
-  };
-  // createdAt?: string; // Comentar o quitar si la API usa fechaInicio
-  // updatedAt?: string;
+  fechaInicio?: string; // La API usa fechaInicio como string ISO
   datosEnvio?: { // Añadir datosEnvio
     calle?: string;
     numero?: string;

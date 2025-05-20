@@ -337,11 +337,7 @@ export function UsersTable() {
 
                     <TableCell>
                       {client.fechaInicio
-                        ? formatDate(
-                            new Date(
-                              client.fechaInicio._seconds * 1000
-                            ).toISOString()
-                          )
+                        ? formatDate(client.fechaInicio)
                         : "N/A"}
                     </TableCell>
                     <TableCell>
