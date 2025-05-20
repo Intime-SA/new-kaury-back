@@ -51,7 +51,7 @@ export const createProductService = async (productData: ProductFormState): Promi
         body: JSON.stringify(productData),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Error al crear el producto');
+    if (!response.ok) throw data; // Lanzar la respuesta cruda de la API
     return data;
 };
 

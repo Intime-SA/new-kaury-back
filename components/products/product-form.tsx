@@ -109,6 +109,59 @@ interface ProductFormProps {
   onSaveComplete?: () => void;
 }
 
+interface ApiErrorResponse {
+  status: "error";
+  message: string;
+  errors: {
+    formErrors: string[];
+    fieldErrors: {
+      [key: string]: string[];
+    };
+  };
+}
+
+interface ApiSuccessResponse {
+  status: "success";
+  message: string;
+}
+
+type ApiResponse = ApiErrorResponse | ApiSuccessResponse;
+
+// Función para mapear errores de la API a los campos anidados del formulario
+function setApiFieldErrorsDynamically(form: any, fieldErrors: Record<string, string[]>, formValues: any) {
+  Object.entries(fieldErrors).forEach(([field, errors]) => {
+    const value = formValues[field];
+    if (typeof value === 'object' && value !== null) {
+      // Si es un objeto, asignar el error a cada subcampo
+      Object.keys(value).forEach((subKey) => {
+        form.setError(`${field}.${subKey}`, {
+          type: "manual",
+          message: errors[0],
+        });
+      });
+    } else {
+      // Si no, asignar el error directamente
+      form.setError(field, {
+        type: "manual",
+        message: errors[0],
+      });
+    }
+  });
+}
+
+// Función para mostrar un toast por cada error de campo
+function showFieldErrorsToast(fieldErrors: Record<string, string[]>) {
+  Object.entries(fieldErrors).forEach(([key, errors]) => {
+    errors.forEach((msg) => {
+      toast({
+        title: `Error en ${key}`,
+        description: msg,
+        variant: "destructive",
+      });
+    });
+  });
+}
+
 export function ProductForm({
   context,
   product,
@@ -201,12 +254,9 @@ export function ProductForm({
   };
 
   const onSubmit = async (data: ProductFormValues) => {
-    // Log 1: Estado de Redux al inicio de onSubmit
-
     try {
       setIsSubmitting(true);
-      const transformedCategories =
-        transformCategoriesForApi(selectedCategories);
+      const transformedCategories = transformCategoriesForApi(selectedCategories);
 
       const productData = {
         ...data,
@@ -220,19 +270,49 @@ export function ProductForm({
         globalPromotionalPrice: data.globalPromotionalPrice ? parseFloat(data.globalPromotionalPrice) || null : null,
         globalCost: data.globalCost ? parseFloat(data.globalCost) || null : null,
       };
-      // Log 3: Objeto final a enviar
-      console.log("onSubmit - Final productData for API:", productData);
 
       if (context === "edit" && product) {
-        await updateProduct.mutateAsync({ productId: product.id, productData: productData as ProductFormState });
+        const result = await updateProduct.mutateAsync({ productId: product.id, productData: productData as ProductFormState }) as ApiResponse;
+        
+        if (result.status === "error") {
+          // Mostrar errores de campos en el formulario de forma dinámica
+          if (result.errors?.fieldErrors) {
+            setApiFieldErrorsDynamically(form, result.errors.fieldErrors, form.getValues());
+          }
+          // Solo mostrar toast si hay errores generales
+          if (result.errors?.formErrors && result.errors.formErrors.length > 0) {
+            toast({
+              title: "Error",
+              description: result.errors.formErrors[0],
+              variant: "destructive",
+            });
+          }
+          return;
+        }
+
         toast({
           title: "Éxito",
           description: "Producto actualizado correctamente",
         });
       } else {
-        const result = await createProduct.mutateAsync(
-          productData as ProductFormState
-        );
+        const result = await createProduct.mutateAsync(productData as ProductFormState) as ApiResponse;
+        console.log(result, "result");
+        if (result.status === "error") {
+          console.log(result, "result");
+          // Mostrar errores de campos en el formulario de forma dinámica
+          if (result.errors?.fieldErrors) {
+            setApiFieldErrorsDynamically(form, result.errors.fieldErrors, form.getValues());
+          }
+          // Solo mostrar toast si hay errores generales
+          if (result.errors?.formErrors && result.errors.formErrors.length > 0) {
+            toast({
+              title: "Error",
+              description: result.errors.formErrors[0],
+              variant: "destructive",
+            });
+          }
+          return;
+        }
 
         if (result.status === "success") {
           toast({
@@ -243,22 +323,17 @@ export function ProductForm({
           form.reset();
           setVariants([]);
           dispatch(setCategories([]));
-        } else {
-          throw new Error(result.message || "Error al crear el producto");
         }
       }
 
       onSaveComplete?.();
-    } catch (error) {
-      console.error("Error:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Hubo un problema al guardar el producto",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.log(error, "error");
+      // Mapear errores de campos
+      if (error.errors?.fieldErrors) {
+        showFieldErrorsToast(error.errors.fieldErrors);
+      }
+      return;
     } finally {
       setIsSubmitting(false);
     }

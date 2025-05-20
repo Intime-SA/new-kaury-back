@@ -5,7 +5,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface ColorsApiResponse {
     data: Color[];
-    // Añade aquí otros campos si tu API los devuelve (ej. status, pagination si existiera)
 }
 
 export const getColorsService = async (): Promise<Color[]> => {

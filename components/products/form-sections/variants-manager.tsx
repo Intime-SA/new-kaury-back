@@ -60,14 +60,13 @@ interface VariantsManagerProps {
   onGlobalPromotionalPriceChange: (value: string) => void
   initialGlobalCost?: string | null
   onGlobalCostChange: (value: string) => void
-  onDialogOpenChange?: (isOpen: boolean) => void
 }
 
 const isVariantConfirmed = (variant: ProductVariant) => {
   return !variant.id.toString().startsWith('temp_');
 };
 
-export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange, onDialogOpenChange }: VariantsManagerProps) {
+export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange }: VariantsManagerProps) {
   const images = useSelector((state: RootState) => state.products.images);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false)
@@ -144,11 +143,11 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
        unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : 0,
        promotionalPrice: useGlobalPrices && !isNaN(numericGlobalPromoPrice) ? numericGlobalPromoPrice : null,
        cost: useGlobalPrices && !isNaN(numericGlobalCost) ? numericGlobalCost : 0,
+       // Asegurar que el stockManagement se hereda correctamente
        stockManagement: stockManagement,
     });
     setEditIndex(null);
     setIsDialogOpen(true);
-    onDialogOpenChange?.(true);
   };
 
   const handleEditVariant = (variant: ProductVariant, index: number) => {
@@ -156,6 +155,8 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
      const numericGlobalPromoPrice = parseFloat(globalPromotionalPrice);
      const numericGlobalCost = parseFloat(globalCost);
 
+     // Al editar, si los precios globales están activos, los campos del modal mostrarán los globales (y estarán deshabilitados)
+     // Si no, mostrarán los de la variante específica.
      setCurrentVariant({
        ...variant,
        unit_price: useGlobalPrices && !isNaN(numericGlobalUnitPrice) ? numericGlobalUnitPrice : variant.unit_price,
@@ -164,7 +165,6 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
      });
      setEditIndex(index);
      setIsDialogOpen(true);
-     onDialogOpenChange?.(true);
   };
 
   const handleDeleteVariant = (index: number) => {
@@ -176,11 +176,22 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
   const handleSaveVariant = () => {
     if (!currentVariant) return;
 
+    // Validar campos requeridos antes de guardar
+    if (!currentVariant.sku || currentVariant.sku.trim() === '') {
+      toast({
+        title: "Error",
+        description: "El IDC es requerido",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const updatedVariants = [...variants];
     const variantToSave = { ...currentVariant };
 
     // Si la variante no está confirmada (tiene ID temporal) y todos los campos requeridos están completos
     if (!isVariantConfirmed(variantToSave) && 
+        variantToSave.sku && 
         variantToSave.unit_price > 0 && 
         Object.keys(variantToSave.attr).length > 0) {
       // Asignar un ID permanente
@@ -480,7 +491,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             <TableHeader>
               <TableRow>
                 <TableHead>Imagen</TableHead>
-                <TableHead>ID</TableHead>
+                <TableHead>IDc</TableHead>
                 <TableHead>Atributos</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Estado</TableHead>
@@ -498,7 +509,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       <div className="relative h-20 w-20">
                         <Image
                           src={images.find((img) => img.id.toString() === variant.imageId)?.src || "/placeholder.svg"}
-                          alt={variant.id}
+                          alt={variant.sku}
                           fill
                           className="object-cover"
                         />
@@ -509,7 +520,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{variant.id}</TableCell>
+                  <TableCell>{variant.sku}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(variant.attr).map(([key, value], index) => (
@@ -589,7 +600,6 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             setEditIndex(null);
           }
           setIsDialogOpen(open);
-          onDialogOpenChange?.(open);
         }}
       >
         <DialogContent 
@@ -631,7 +641,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                   </div>
                   <Input
                     id="sku"
-                    value={currentVariant?.id || ""}
+                    value={currentVariant?.sku || ""}
                     onChange={(e) => updateVariantField("sku", e.target.value)}
                     placeholder="Identificador único"
                     required
