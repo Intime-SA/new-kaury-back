@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { toast } from "../ui/use-toast" 
 import { Badge } from "@/components/ui/badge"
@@ -103,7 +103,7 @@ export function CategoriesManager({ searchTerm }: CategoriesManagerProps) {
     try {
       if (parentId) {
         // Si tiene parentId, es una subcategoría
-        updateCategory({
+        await updateCategory({
           id: category.id,
           parentId: parentId,
           visible: !category.visible,
@@ -113,7 +113,7 @@ export function CategoriesManager({ searchTerm }: CategoriesManagerProps) {
         })
       } else {
         // Si no tiene parentId, es una categoría principal
-        updateCategory({
+        await updateCategory({
           id: category.id,
           visible: !category.visible,
           name: category.name,

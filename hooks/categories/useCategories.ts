@@ -115,12 +115,16 @@ async function deleteSubcategory(parentId: string, subcategoryId: string): Promi
 async function updateSubcategory(parentId: string, subcategoryId: string, categoryData: CategoryInput): Promise<Category> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/${parentId}/subcategories/${subcategoryId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
     body: JSON.stringify(categoryData),
   })
   
   if (!response.ok) {
-    throw new Error("Error al actualizar la subcategoría")
+    const errorData = await response.json().catch(() => ({ message: "Error al actualizar la subcategoría" }))
+    throw new Error(errorData.message || "Error al actualizar la subcategoría")
   }
   
   const { data } = await response.json() as ApiResponse<Category>

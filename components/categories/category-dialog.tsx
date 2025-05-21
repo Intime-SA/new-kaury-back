@@ -66,6 +66,8 @@ export function CategoryDialog({
     },
   })
 
+  const [localImage, setLocalImage] = useState<string | null>(category?.image ?? null);
+
   useEffect(() => {
     if (category) {
       form.reset({
@@ -82,10 +84,15 @@ export function CategoryDialog({
         image: null,
       })
     }
+    setLocalImage(category?.image ?? null);
   }, [category, form])
 
   const onSubmit = (data: CategoryFormValues) => {
-    onSave(data)
+    onSave({
+      ...data,
+      image: localImage,
+    })
+    setLocalImage(null);
     onOpenChange(false)
   }
 
@@ -110,8 +117,8 @@ export function CategoryDialog({
                   <FormLabel>Imagen</FormLabel>
                   <FormControl>
                     <ImageUploadCard
-                      imageUrl={field.value}
-                      onImageChange={field.onChange}
+                      imageUrl={localImage}
+                      onImageChange={setLocalImage}
                       className="w-full"
                     />
                   </FormControl>
