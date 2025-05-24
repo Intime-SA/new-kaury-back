@@ -288,6 +288,14 @@ export function ProductForm({
               variant: "destructive",
             });
           }
+          // Si es un error 409 (producto duplicado)
+          if (result.message && !result.errors) {
+            toast({
+              title: "Error",
+              description: result.message,
+              variant: "destructive",
+            });
+          }
           return;
         }
 
@@ -298,6 +306,7 @@ export function ProductForm({
       } else {
         const result = await createProduct.mutateAsync(productData as ProductFormState) as ApiResponse;
         console.log(result, "result");
+        
         if (result.status === "error") {
           console.log(result, "result");
           // Mostrar errores de campos en el formulario de forma dinámica
@@ -309,6 +318,14 @@ export function ProductForm({
             toast({
               title: "Error",
               description: result.errors.formErrors[0],
+              variant: "destructive",
+            });
+          }
+          // Si es un error 409 (producto duplicado)
+          if (result.message && !result.errors) {
+            toast({
+              title: "Error",
+              description: result.message,
               variant: "destructive",
             });
           }
