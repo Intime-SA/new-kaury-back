@@ -29,6 +29,9 @@ export function OptionsSection({ control }: OptionsSectionProps) {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>Este producto tiene envío gratis</FormLabel>
+                <FormDescription>
+                  Al activar esta opción, el envío será gratuito para este producto
+                </FormDescription>
               </div>
             </FormItem>
           )}
@@ -44,6 +47,27 @@ export function OptionsSection({ control }: OptionsSectionProps) {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>Mostrar en la tienda</FormLabel>
+                <FormDescription>
+                  Si está desactivado, el producto no será visible para los clientes
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="featured"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Producto destacado</FormLabel>
+                <FormDescription>
+                  Los productos destacados aparecerán en la página principal
+                </FormDescription>
               </div>
             </FormItem>
           )}

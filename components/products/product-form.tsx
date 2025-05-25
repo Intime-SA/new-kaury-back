@@ -37,6 +37,7 @@ interface Product {
   name: { es: string };
   description: { es: string };
   freeShipping: boolean;
+  featured: boolean;
   variants: ProductVariant[];
   images: ProductImage[];
   categories: ProductCategory[];
@@ -75,6 +76,7 @@ const productSchema = z.object({
     es: z.string().optional(),
   }),
   freeShipping: z.boolean().default(false),
+  featured: z.boolean().default(false),
   productType: z.enum(["physical", "digital"]),
   stockManagement: z.enum(["infinite", "limited"]),
   tags: z.array(z.string()).optional(),
@@ -202,6 +204,7 @@ export function ProductForm({
       name: product?.name || { es: "" },
       description: product?.description || { es: "" },
       freeShipping: product?.freeShipping ?? false,
+      featured: product?.featured ?? false,
       productType: (product?.variants[0]?.stockManagement
         ? "physical"
         : "digital") as "physical" | "digital",
