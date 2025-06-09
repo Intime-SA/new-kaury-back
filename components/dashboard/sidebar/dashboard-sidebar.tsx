@@ -36,7 +36,17 @@ const navigation = [
   {
     title: 'SISTEMA',
     items: [
-      { name: 'Configuración', href: '#', icon: Settings, enabled: false },
+      { 
+        name: 'Configuración', 
+        href: '/settings', 
+        icon: Settings, 
+        enabled: true,
+        subItems: [
+          { name: 'General', href: '/settings/common', icon: Settings },
+          { name: 'Envíos', href: '/settings/shipping', icon: Package },
+          { name: 'Pagos', href: '/settings/payments', icon: Tag },
+        ]
+      },
       { name: 'Ayuda', href: '#', icon: HelpCircle, enabled: false },
     ],
   },
