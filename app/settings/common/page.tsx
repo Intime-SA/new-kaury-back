@@ -183,14 +183,7 @@ export default function CommonSettingsPage() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteClick(setting._id)}
-                        className="h-8 w-8 p-0 hover:bg-red-900/20 hover:text-red-400"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      
                     </div>
                   </div>
 {/*                   <CardTitle className="text-base text-gray-400">{setting.description}</CardTitle> */}
@@ -276,6 +269,7 @@ export default function CommonSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre</Label>
                 <Input
+                  disabled
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}

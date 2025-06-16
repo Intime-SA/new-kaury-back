@@ -109,18 +109,18 @@ export function BasicInfoSection({ control, generateDescription }: BasicInfoSect
               <FormItem className="space-y-3">
                 <FormControl>
                   <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(value) => field.onChange(value === "true")}
+                    defaultValue={field.value ? "true" : "false"}
                     className="flex flex-col space-y-1"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="infinite" id="infinite" />
-                      <Label htmlFor="infinite">Sin límite</Label>
+                      <RadioGroupItem value="false" id="false" />
+                      <Label htmlFor="false">Sin límite</Label>
                       <Infinity className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="limited" id="limited" />
-                      <Label htmlFor="limited">Limitado</Label>
+                      <RadioGroupItem value="true" id="true" />
+                      <Label htmlFor="true">Limitado</Label>
                       <CircleDot className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </RadioGroup>

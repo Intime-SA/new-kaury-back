@@ -18,7 +18,7 @@ export interface ProductFormState {
   }
   freeShipping: boolean
   productType: 'physical' | 'digital'
-  stockManagement: 'infinite' | 'limited'
+  stockManagement: boolean
   images: ProductImage[]
   variants: ProductVariant[]
   categories: SelectedCategory[]
@@ -49,7 +49,7 @@ export const initialState: ProductFormState = {
   },
   freeShipping: false,
   productType: 'physical',
-  stockManagement: 'limited',
+  stockManagement: true,
   images: [],
   variants: [],
   categories: [],
@@ -87,7 +87,7 @@ export const productsSlice = createSlice({
     setProductType: (state, action: PayloadAction<"physical" | "digital">) => {
       state.productType = action.payload
     },
-    setStockManagement: (state, action: PayloadAction<"infinite" | "limited">) => {
+    setStockManagement: (state, action: PayloadAction<boolean>) => {
       state.stockManagement = action.payload
     },
     setImages: (state, action: PayloadAction<ProductImage[]>) => {

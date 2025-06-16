@@ -60,6 +60,9 @@ export interface Product {
   createdAt: string
   updatedAt: string
   freeShipping: boolean
+  featured: boolean
+  stockManagement: boolean
+  productType: 'physical' | 'digital'
   tags: string[]
   sku?: string
   barcode?: string

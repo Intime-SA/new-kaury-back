@@ -38,6 +38,7 @@ interface Product {
   description: { es: string };
   freeShipping: boolean;
   featured: boolean;
+  stockManagement: boolean;
   variants: ProductVariant[];
   images: ProductImage[];
   categories: ProductCategory[];
@@ -78,7 +79,7 @@ const productSchema = z.object({
   freeShipping: z.boolean().default(false),
   featured: z.boolean().default(false),
   productType: z.enum(["physical", "digital"]),
-  stockManagement: z.enum(["infinite", "limited"]),
+  stockManagement: z.boolean(),
   tags: z.array(z.string()).optional(),
   urls: z.object({
     videoURL: z.string().optional().nullable(),
@@ -208,9 +209,7 @@ export function ProductForm({
       productType: (product?.variants[0]?.stockManagement
         ? "physical"
         : "digital") as "physical" | "digital",
-      stockManagement: (product?.variants[0]?.stockManagement
-        ? "limited"
-        : "infinite") as "infinite" | "limited",
+      stockManagement: product?.stockManagement ?? true,
       tags: product?.tags || [],
       urls: product?.urls || { videoURL: null },
       sku: product?.sku || "",
@@ -439,7 +438,7 @@ export function ProductForm({
               <VariantsSection
                 variants={variants}
                 onVariantsChange={handleVariantsChange}
-                stockManagement={form.watch("stockManagement") === "limited"}
+                stockManagement={form.watch("stockManagement")}
                 initialUseGlobalPrices={form.watch("useGlobalPrices")}
                 onUseGlobalPricesChange={(value) => form.setValue("useGlobalPrices", value)}
                 initialGlobalUnitPrice={form.watch("globalUnitPrice")}
