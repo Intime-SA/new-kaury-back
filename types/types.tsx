@@ -33,7 +33,7 @@ export interface ProductVariant {
   shooterCount: number
   targetCount: number
   productId: string
-  sku: string
+  sku?: string
   ageGroup: string
   gender: string
   cost: number

@@ -46,6 +46,7 @@ interface Property {
   id: string
   name: string
   values: PropertyValue[]
+  isColorProperty: boolean
 }
 
 interface VariantsManagerProps {
@@ -113,6 +114,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
               id: `prop_${Date.now()}_${key}`,
               name: key,
               values: [],
+              isColorProperty: false,
             }
             existingProperties.push(property)
           }
@@ -177,13 +179,13 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
     if (!currentVariant) return;
 
     // Validar campos requeridos antes de guardar
-    if (!currentVariant.sku || currentVariant.sku.trim() === '') {
+    if (!currentVariant.id || currentVariant.id.trim() === '') {
       toast({
         title: "Error",
         description: "El IDC es requerido",
         variant: "destructive"
       });
-      return;
+      return; 
     }
 
     const updatedVariants = [...variants];
@@ -191,7 +193,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
 
     // Si la variante no está confirmada (tiene ID temporal) y todos los campos requeridos están completos
     if (!isVariantConfirmed(variantToSave) && 
-        variantToSave.sku && 
+        variantToSave.id && 
         variantToSave.unit_price > 0 && 
         Object.keys(variantToSave.attr).length > 0) {
       // Asignar un ID permanente
@@ -491,7 +493,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             <TableHeader>
               <TableRow>
                 <TableHead>Imagen</TableHead>
-                <TableHead>IDc</TableHead>
+                <TableHead>IDC</TableHead>
                 <TableHead>Atributos</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Estado</TableHead>
@@ -509,7 +511,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       <div className="relative h-20 w-20">
                         <Image
                           src={images.find((img) => img.id.toString() === variant.imageId)?.src || "/placeholder.svg"}
-                          alt={variant.sku}
+                          alt={variant.id}
                           fill
                           className="object-cover"
                         />
@@ -520,7 +522,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{variant.sku}</TableCell>
+                  <TableCell>{variant.id}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(variant.attr).map(([key, value], index) => (
@@ -627,7 +629,7 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Label htmlFor="sku" className="text-base font-medium">IDC</Label>
+                    <Label htmlFor="id" className="text-base font-medium">IDC</Label>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -640,9 +642,9 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
                     </TooltipProvider>
                   </div>
                   <Input
-                    id="sku"
-                    value={currentVariant?.sku || ""}
-                    onChange={(e) => updateVariantField("sku", e.target.value)}
+                    id="id"
+                    value={currentVariant?.id || ""}
+                    onChange={(e) => updateVariantField("id", e.target.value)}
                     placeholder="Identificador único"
                     required
                     className="bg-background border-muted"
