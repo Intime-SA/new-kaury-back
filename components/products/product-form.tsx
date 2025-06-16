@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,6 +17,7 @@ import {
 import { useProducts } from "@/hooks/products/useProducts";
 import type { ProductImage, ProductVariant } from "@/types/types";
 import { toast } from "@/components/ui/use-toast";
+import * as XLSX from "xlsx";
 
 // Import all the form section components
 import { HeaderSection } from "@/components/products/form-sections/header-section";
@@ -30,6 +31,7 @@ import { CategoriesSection } from "@/components/products/form-sections/categorie
 import { TagsSection } from "@/components/products/form-sections/tags-section";
 import { OptionsSection } from "@/components/products/form-sections/options-section";
 import { PreviewSection } from "@/components/products/form-sections/preview-section";
+import { ImportProductsSection } from "@/components/products/ImportProductsSection";
 
 // Define types for Product, ProductImage, ProductCategory, and ProductVariant
 interface Product {
@@ -403,6 +405,8 @@ export function ProductForm({
     onSubmit(data);
   });
 
+
+
   return (
     <div className="container mx-auto max-w-7xl">
       {/* Header */}
@@ -475,6 +479,8 @@ export function ProductForm({
 
               {/* Más opciones */}
               <OptionsSection control={form.control} />
+
+              
             </form>
           </Form>
         </div>
