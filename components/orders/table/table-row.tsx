@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import { cn, formatISODate } from "@/lib/utils"
 import { OrderStatus } from "../status/order-status"
 import { OrderStatusType } from "../status/order-status"
 import type { Order } from "@/types/orders"
@@ -67,7 +67,7 @@ export function OrderTableRow({
         #{order.numberOrder}
       </TableCell>
       <TableCell className="w-[180px]">
-        {formatFirebaseTimestamp(order.date)}
+        {formatISODate(order.date)}
       </TableCell>
       <TableCell className="w-[180px] font-bold">
         ${order.total.toLocaleString("es-ES", {
@@ -80,7 +80,7 @@ export function OrderTableRow({
           variant="outline"
           className="bg-muted-foreground text-muted-foreground-foreground"
         >
-          {order.orderItems.length} items
+          {order.orderItems?.length} items
         </Badge>
       </TableCell>
       <TableCell className="flex-1">

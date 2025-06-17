@@ -15,3 +15,24 @@ export const formatFirebaseTimestamp = (timestamp: { _seconds: number; _nanoseco
     minute: "2-digit",
   })
 }
+
+export const formatISODate = (isoString: string | null | undefined): string => {
+  if (!isoString) return '-';
+  
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    return date.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha ISO:', error);
+    return 'Error de formato';
+  }
+}
