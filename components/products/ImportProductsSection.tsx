@@ -11,6 +11,8 @@ interface ImportProductsSectionProps {
   onClear: () => void
   selectedFile: File | null
   rowsReadyCount: number
+  analyzeLoading?: boolean
+  analyzeData?: any
 }
 
 export function ImportProductsSection({
@@ -19,6 +21,8 @@ export function ImportProductsSection({
   onClear,
   selectedFile,
   rowsReadyCount,
+  analyzeLoading,
+  analyzeData,
 }: ImportProductsSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -51,10 +55,22 @@ export function ImportProductsSection({
             size="sm"
             onClick={onConfirm}
             className="bg-green-600 hover:bg-green-700 text-xs px-2"
-            disabled={rowsReadyCount === 0}
+            disabled={rowsReadyCount === 0 || analyzeLoading}
           >
-            <Check className="h-3 w-3 mr-1" />
-            Confirmar
+            {analyzeLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin h-3 w-3 mr-1" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Analizando...
+              </span>
+            ) : (
+              <>
+                <Check className="h-3 w-3 mr-1" />
+                Confirmar
+              </>
+            )}
           </Button>
           <Button
             variant="ghost"

@@ -15,6 +15,8 @@ import { Plus } from "lucide-react";
 import * as XLSX from "xlsx";
 import { ImportProductsSection } from "@/components/products/ImportProductsSection";
 import { useImportProducts } from "@/hooks/useImportProducts";
+import { useAnalyzeImportProducts } from "@/hooks/useAnalyzeImportProducts";
+import { ImportAnalyzeModal } from "@/components/products/ImportAnalyzeModal";
 
 function ProductListContent() {
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0.5 });
@@ -31,6 +33,7 @@ function ProductListContent() {
   } = useProducts();
 
   const importProductsMutation = useImportProducts();
+  const analyzeImportMutation = useAnalyzeImportProducts();
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -66,6 +69,7 @@ function ProductListContent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [rowsReadyCount, setRowsReadyCount] = useState<number>(0);
   const [productosFiltrados, setProductosFiltrados] = useState<any[]>([]);
+  const [showAnalyzeModal, setShowAnalyzeModal] = useState(false);
 
   const handleFileSelected = async (file: File) => {
     setSelectedFile(file);
@@ -83,15 +87,49 @@ function ProductListContent() {
         preciolista: row[5],
         id_Lista: row[6],
         stock: row[11],
-      }));
+      }))
 
     setProductosFiltrados(productos);
     setRowsReadyCount(productos.length);
   };
 
-  const handleConfirm = () => {
+  const handleAnalyze = () => {
     if (productosFiltrados.length === 0) return;
-    importProductsMutation.mutate(productosFiltrados, {
+    analyzeImportMutation.mutate(productosFiltrados, {
+      onSuccess: () => setShowAnalyzeModal(true),
+      onError: (error: any) => {
+        toast({
+          title: "Error al analizar",
+          description: error?.message || "Ocurrió un error inesperado",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  const handleConfirm = () => {
+    if (!analyzeImportMutation.data?.analysis?.itemsToUpdate?.length) return;
+
+    // Obtener los ids de las variantes a actualizar
+    const idsToUpdate = new Set(
+      analyzeImportMutation.data.analysis.itemsToUpdate.map(item => Number(item.id_articulo))
+    );
+
+    // Filtrar productosFiltrados solo con los que tienen cambios
+    const productosAImportar = productosFiltrados.filter(prod =>
+      idsToUpdate.has(Number(prod.id_articulo))
+    );
+
+    if (productosAImportar.length === 0) {
+      toast({
+        title: "Nada para actualizar",
+        description: "No hay variantes con cambios para importar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    importProductsMutation.mutate(productosAImportar, {
       onSuccess: (data) => {
         toast({
           title: "Importación exitosa",
@@ -100,6 +138,7 @@ function ProductListContent() {
         setSelectedFile(null);
         setRowsReadyCount(0);
         setProductosFiltrados([]);
+        setShowAnalyzeModal(false);
       },
       onError: (error: any) => {
         toast({
@@ -110,6 +149,7 @@ function ProductListContent() {
       },
     });
   };
+
 
   const handleClear = () => {
     setSelectedFile(null);
@@ -141,10 +181,12 @@ function ProductListContent() {
       <div className="mb-6">
         <ImportProductsSection
           onFileSelected={handleFileSelected}
-          onConfirm={handleConfirm}
+          onConfirm={handleAnalyze}
           onClear={handleClear}
           selectedFile={selectedFile}
           rowsReadyCount={rowsReadyCount}
+          analyzeLoading={analyzeImportMutation.isLoading}
+          analyzeData={analyzeImportMutation.data}
         />
       </div>
 
@@ -161,6 +203,26 @@ function ProductListContent() {
           hasNextPage={hasNextPage ?? false}
         />
       </ScrollArea>
+
+      <ImportAnalyzeModal
+        open={showAnalyzeModal}
+        onClose={() => setShowAnalyzeModal(false)}
+        onConfirm={handleConfirm}
+        analysis={analyzeImportMutation.data?.analysis ?? {
+          totalItems: 0,
+          itemsToUpdate: [],
+          itemsNotFound: [],
+          itemsUnchanged: [],
+          summary: {
+            totalPriceChanges: 0,
+            totalStockChanges: 0,
+            totalNotFound: 0,
+            totalUnchanged: 0,
+            totalToUpdate: 0,
+          }
+        }}
+        importLoading={importProductsMutation.isLoading}
+      />
     </div>
   );
 }
