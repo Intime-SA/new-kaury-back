@@ -102,6 +102,7 @@ export interface TipoDePago {
 }
 
 export interface Order {
+  _id: string
   id: string
   numberOrder: string
   canalVenta: string

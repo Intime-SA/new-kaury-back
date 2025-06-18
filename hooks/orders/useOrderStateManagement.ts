@@ -109,7 +109,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
         break;
       case 'pago':
         updateOrderStatus.mutate(
-          { orderId: order.id, newStatus: 'pagoRecibido' },
+          { orderId: order._id, newStatus: 'pagoRecibido' },
           {
             onSuccess: (updatedOrder) => {
               showSuccessToast("La orden ha sido marcada como pago recibido", 'pagoRecibido');
@@ -121,7 +121,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
         break;
       case 'cancelar':
         updateOrderStatus.mutate(
-          { orderId: order.id, newStatus: 'cancelada' },
+          { orderId: order._id, newStatus: 'cancelada' },
           {
             onSuccess: (updatedOrder) => {
               showSuccessToast("La orden ha sido cancelada", 'cancelada');
@@ -133,7 +133,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
         break;
       case 'empaquetar':
         updateOrderStatus.mutate(
-          { orderId: order.id, newStatus: 'empaquetada' },
+          { orderId: order._id, newStatus: 'empaquetada' },
           {
             onSuccess: (updatedOrder) => {
               showSuccessToast("La orden ha sido marcada como empaquetada", 'empaquetada');
@@ -145,7 +145,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
         break;
       case 'archivar':
         updateOrderStatus.mutate(
-          { orderId: order.id, newStatus: 'archivada' },
+          { orderId: order._id, newStatus: 'archivada' },
           {
             onSuccess: (updatedOrder) => {
               showSuccessToast("La orden ha sido archivada", 'archivada');
@@ -201,7 +201,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
   const handleBulkOrderAction = (action: string) => {
     if (!selectedOrders || selectedOrders.length === 0) return;
 
-    const orderIds = selectedOrders.map(order => order.id);
+    const orderIds = selectedOrders.map(order => order._id);
     const currentStatus = selectedOrders[0].status;
 
     const allSameStatus = selectedOrders.every(order => order.status === currentStatus);
@@ -247,7 +247,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
         return {
           ...oldData,
           orders: oldData.orders.map((order: Order) => 
-            orderIds.includes(order.id) 
+            orderIds.includes(order._id) 
               ? { ...order, status: newStatus }
               : order
           )
@@ -276,7 +276,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
                   return {
                     ...oldData,
                     orders: oldData.orders.map((order: Order) => 
-                      orderIds.includes(order.id) 
+                      orderIds.includes(order._id) 
                         ? { ...order, status: currentStatus }
                         : order
                     )
@@ -305,7 +305,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
                   return {
                     ...oldData,
                     orders: oldData.orders.map((order: Order) => 
-                      orderIds.includes(order.id) 
+                      orderIds.includes(order._id) 
                         ? { ...order, status: currentStatus }
                         : order
                     )
@@ -333,7 +333,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
                   return {
                     ...oldData,
                     orders: oldData.orders.map((order: Order) => 
-                      orderIds.includes(order.id) 
+                      orderIds.includes(order._id) 
                         ? { ...order, status: currentStatus }
                         : order
                     )
@@ -361,7 +361,7 @@ export const useOrderStateManagement = ({ onSelectOrder, selectedOrders = [] }: 
                   return {
                     ...oldData,
                     orders: oldData.orders.map((order: Order) => 
-                      orderIds.includes(order.id) 
+                      orderIds.includes(order._id) 
                         ? { ...order, status: currentStatus }
                         : order
                     )
