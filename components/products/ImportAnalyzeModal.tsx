@@ -160,7 +160,7 @@ export const ImportAnalyzeModal: React.FC<ImportAnalyzeModalProps> = ({ open, on
 
             <TabsContent value="toUpdate" className="space-y-4">
               {analysis.itemsToUpdate.length > 0 ? (
-                <div className="border rounded-lg">
+                <div className="border rounded-lg max-h-[400px] overflow-auto [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-track]:bg-transparent">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -221,7 +221,7 @@ export const ImportAnalyzeModal: React.FC<ImportAnalyzeModalProps> = ({ open, on
 
             <TabsContent value="notFound" className="space-y-4">
               {analysis.itemsNotFound.length > 0 ? (
-                <div className="border rounded-lg">
+                <div className="border rounded-lg max-h-[400px] overflow-auto [&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-track]:bg-transparent">
                   <Table>
                     <TableHeader>
                       <TableRow>
