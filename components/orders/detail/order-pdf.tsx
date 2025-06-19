@@ -203,7 +203,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
           >
             <View style={styles.infoBlock}>
               <Text style={styles.infoText}>
-                Dirección: Rivadavia 5931, de 10 a 17hs, Mar del Plata.
+                Dirección: Rivadavia 5931, de 09:00 a 17:00hs, Mar del Plata.
               </Text>
               <Text style={styles.infoText}>Teléfono: +54 223 348-5438</Text>
               <Text style={styles.infoText}>
