@@ -10,31 +10,31 @@ export function TableSkeleton({ rows = 10 }: TableSkeletonProps) {
     <>
       {[...Array(rows)].map((_, i) => (
         <TableRow key={`skeleton-${i}`} className="h-[73px]">
-          <TableCell className="w-[40px] p-4">
+          <TableCell className="w-[5%] p-4">
             <Skeleton className="h-4 w-4" />
           </TableCell>
-          <TableCell className="w-[120px] font-medium">
-            <Skeleton className="h-4 w-[80px]" />
+          <TableCell className="w-[14%] font-medium">
+            <Skeleton className="h-4 w-full" />
           </TableCell>
-          <TableCell className="w-[180px]">
-            <Skeleton className="h-4 w-[120px]" />
+          <TableCell className="w-[14%]">
+            <Skeleton className="h-4 w-full" />
           </TableCell>
-          <TableCell className="w-[180px] font-bold">
-            <Skeleton className="h-4 w-[100px]" />
+          <TableCell className="w-[14%] font-bold">
+            <Skeleton className="h-4 w-full" />
           </TableCell>
-          <TableCell className="w-[120px]">
-            <Skeleton className="h-[22px] w-[70px] rounded-full" />
+          <TableCell className="w-[10%]">
+            <Skeleton className="h-auto w-full rounded-full" />
           </TableCell>
-          <TableCell className="flex-1 min-w-[200px]">
+          <TableCell className="flex-1">
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-8 rounded-full shrink-0" />
-              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-4 w-full" />
             </div>
           </TableCell>
-          <TableCell className="w-[100px]">
-            <Skeleton className="h-[22px] w-[100px] rounded-full" />
+          <TableCell className="w-[10%]">
+            <Skeleton className="h-[22px] w-full rounded-full" />
           </TableCell>
-          <TableCell className="w-[80px] text-right">
+          <TableCell className="w-[5%] text-right">
             <div className="flex justify-end">
               <Skeleton className="h-8 w-8" />
             </div>

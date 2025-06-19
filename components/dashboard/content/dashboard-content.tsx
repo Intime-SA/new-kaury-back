@@ -22,8 +22,8 @@ export function DashboardContent() {
   return (
     <div className="flex-1">
       <div className="p-6">
-        <div className="flex gap-6">
-          <div className="flex-1">
+        <div className="flex">
+          <div className={`flex-1 ${selectedOrder ? 'pr-[35%]' : ''}`}>
             <Orders
               orders={orders}
               loading={isLoading}
@@ -36,13 +36,10 @@ export function DashboardContent() {
               onSelectOrder={setSelectedOrder}
               selectedOrderId={selectedOrder?.id}
             />
-          </div>
+          </div>  
           {selectedOrder && (
-            <div className="w-[30%]">
-              <OrderDetails
-                order={selectedOrder}
-                onClose={() => setSelectedOrder(null)}
-              />
+            <div className="fixed top-20 right-10 w-[calc(30%-1.5rem)] h-[calc(100vh-3rem)] overflow-y-auto bg-background border rounded-lg shadow-lg z-[9999]">
+              <OrderDetails order={selectedOrder} onClose={() => setSelectedOrder(null)} />
             </div>
           )}
         </div>

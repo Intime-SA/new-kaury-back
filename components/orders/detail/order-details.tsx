@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OrderStatus, OrderStatusType } from "@/components/orders/status/order-status"
-import { formatFirebaseTimestamp } from "@/lib/utils"
+import { formatFirebaseTimestamp, formatISODate } from "@/lib/utils"
 import { CustomerInfoCard } from "./customer-info-card"
 import { OrderProductsCard } from "./order-products-card"
 import type { OrderItem } from "@/types/orders"
@@ -95,7 +95,7 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
   }, [order]);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-xl font-bold">#{order.numberOrder}</CardTitle>
         <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-muted-foreground">Fecha</p>
-            <p className="font-medium">{formatFirebaseTimestamp(order.date)}</p>
+            <p className="font-medium">{formatISODate(order.date)}</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Total</p>

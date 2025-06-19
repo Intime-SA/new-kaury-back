@@ -13,7 +13,7 @@ import { formatFirebaseTimestamp } from "@/lib/utils"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { OrderActions } from "./table-actions"
 import { useDispatch } from "react-redux"
-import { clearSelectedOrders } from "@/store/slices/ordersSlice"
+import { clearSelectedOrders, toggleOrderSelection } from "@/store/slices/ordersSlice"
 
 interface TableRowProps {
   order: Order
@@ -38,7 +38,7 @@ export function OrderTableRow({
 
   const handleOrderClick = () => {
     dispatch(clearSelectedOrders());
-    onSelectOrder?.(order);
+    onSelectOrder?.({...order, id: order._id});
   };
 
   const handleCheckboxChange = (e: React.MouseEvent) => {
@@ -53,7 +53,7 @@ export function OrderTableRow({
     <TableRow
       className={cn(
         "cursor-pointer hover:bg-muted/50",
-        selectedOrderId === order.id && "bg-muted"
+        selectedOrderId === order._id && "bg-muted"
       )}
       onClick={handleOrderClick}
     >
