@@ -203,24 +203,26 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
           >
             <View style={styles.infoBlock}>
               <Text style={styles.infoText}>
-                Dirección: Jose marmol 970 timbre 104 de 10 a 17hs, Mar del Plata
+                Dirección: Rivadavia 5931, de 10 a 17hs, Mar del Plata.
               </Text>
               <Text style={styles.infoText}>Teléfono: +54 223 348-5438</Text>
               <Text style={styles.infoText}>
-                Email: comercial@mayoristakaurymdp.com
+                Email: kaury.store@gmail.com
               </Text>
               <Text style={styles.infoText}>www.mayoristakaurymdp.com</Text>
             </View>
 
-            <Image
-              src="/descarga.png"
-              style={styles.image}
-            />
+            <View style={{ position: 'relative', marginBottom: 20 }}>
+              <Image
+                src="/ready.png"
+                style={styles.image}
+              />
+            </View>
           </View>
           <View style={styles.header}>
             <Text
               style={{
-                marginLeft: 450,
+                marginLeft: 250,
                 fontSize: 10,
                 marginTop: 5,
                 textAlign: "right",
@@ -393,7 +395,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
               flexDirection: "row",
               justifyContent: "space-between",
               width: 550,
-              margin: 20,
+              margin: 10,
               borderBottom: "1px solid black",
             }}
           >
