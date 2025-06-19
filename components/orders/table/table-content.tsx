@@ -62,13 +62,13 @@ export function TableContent({
             <>
               {orders.map((order) => (
                 <OrderTableRow
-                  key={order.id}
+                  key={order._id}
                   order={order}
                   selectedOrderId={selectedOrderId}
                   onSelectOrder={onSelectOrder}
                   getOrderActions={getOrderActions}
                   handleOrderAction={handleOrderAction}
-                  isSelected={selectedOrders.some(selected => selected.id === order.id)}
+                  isSelected={selectedOrders.some(selected => selected._id === order._id)}
                   onToggleSelection={() => dispatch(toggleOrderSelection(order))}
                 />
               ))}

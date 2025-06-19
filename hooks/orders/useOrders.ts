@@ -123,7 +123,7 @@ export const useOrders = () => {
               pages: oldData.pages.map((page: any) => ({
                 ...page,
                 data: page.data.map((order: any) => 
-                  order.id === updatedOrder.id ? updatedOrder : order
+                  order._id === updatedOrder._id ? updatedOrder : order
                 )
               }))
             }
@@ -164,7 +164,7 @@ export const useOrders = () => {
             pages: oldData.pages.map((page: any) => ({
               ...page,
               data: page.data.map((order: any) => 
-                orderIds.includes(order.id) 
+                orderIds.includes(order._id) 
                   ? { ...order, status: newStatus }
                   : order
               )
