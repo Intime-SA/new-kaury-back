@@ -3,7 +3,7 @@ import { importProducts, ImportProduct, ImportProductsResponse } from '@/service
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// Función para iniciar importación en batches
+// Función para iniciar importación en batches (crear job)
 const startBatchImport = async (products: ImportProduct[]) => {
   const response = await fetch(`${API_URL}/products/import-batch`, {
     method: 'POST',
@@ -15,19 +15,37 @@ const startBatchImport = async (products: ImportProduct[]) => {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Error al iniciar la importación');
+    throw new Error(error.message || 'Error al crear el job de importación');
   }
 
   return response.json();
 };
 
-// Función para consultar el estado del job
-const getBatchStatus = async (jobId: string) => {
+// Función para procesar el job (iniciar el procesamiento)
+const processBatchJob = async (jobId: string) => {
+  const response = await fetch(`${API_URL}/products/import-batch/process`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ jobId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Error al procesar el job');
+  }
+
+  return response.json();
+};
+
+// Función para consultar el progreso del job
+const getBatchProgress = async (jobId: string) => {
   const response = await fetch(`${API_URL}/products/import-batch/status?jobId=${jobId}`);
   
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Error al consultar el estado');
+    throw new Error(error.message || 'Error al consultar el progreso');
   }
 
   return response.json();
@@ -39,11 +57,18 @@ export function useImportProducts() {
   });
 }
 
-// Hook para consultar el estado del batch
-export function useBatchStatus(jobId: string | null) {
+// Hook para procesar el job
+export function useProcessBatchJob() {
+  return useMutation<any, Error, string>({
+    mutationFn: processBatchJob,
+  });
+}
+
+// Hook para consultar el progreso del batch
+export function useBatchProgress(jobId: string | null) {
   return useQuery(
-    ['batchStatus', jobId],
-    () => getBatchStatus(jobId!),
+    ['batchProgress', jobId],
+    () => getBatchProgress(jobId!),
     {
       enabled: !!jobId,
       refetchInterval: (data) => {

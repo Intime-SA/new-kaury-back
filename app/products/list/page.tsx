@@ -14,7 +14,7 @@ import { ProductFilters } from "@/components/products/list/product-filters";
 import { Plus } from "lucide-react";
 import * as XLSX from "xlsx";
 import { ImportProductsSection } from "@/components/products/ImportProductsSection";
-import { useImportProducts, useBatchStatus } from "@/hooks/useImportProducts";
+import { useImportProducts, useBatchProgress, useProcessBatchJob } from "@/hooks/useImportProducts";
 import { useAnalyzeImportProducts } from "@/hooks/useAnalyzeImportProducts";
 import { ImportAnalyzeModal } from "@/components/products/ImportAnalyzeModal";
 import { BatchProgressModal } from "@/components/products/BatchProgressModal";
@@ -34,14 +34,15 @@ function ProductListContent() {
   } = useProducts();
 
   const importProductsMutation = useImportProducts();
+  const processBatchJobMutation = useProcessBatchJob();
   const analyzeImportMutation = useAnalyzeImportProducts();
 
   // Estados para el sistema de batches
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [showBatchProgress, setShowBatchProgress] = useState(false);
 
-  // Hook para consultar el estado del batch
-  const batchStatusQuery = useBatchStatus(currentJobId);
+  // Hook para consultar el progreso del batch
+  const batchProgressQuery = useBatchProgress(currentJobId);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -52,22 +53,22 @@ function ProductListContent() {
 
   // Efecto para manejar el estado del batch
   useEffect(() => {
-    if (batchStatusQuery.data?.job?.status === 'completed') {
-      const job = batchStatusQuery.data.job;
+    if (batchProgressQuery.data?.job?.status === 'completed') {
+      const job = batchProgressQuery.data.job;
       toast({
         title: "Importación completada",
         description: `Procesados: ${job.results.processed}, Actualizados: ${job.results.updated}, Errores: ${job.results.errors.length}`,
       });
       setShowBatchProgress(false);
       setCurrentJobId(null);
-    } else if (batchStatusQuery.data?.job?.status === 'failed') {
+    } else if (batchProgressQuery.data?.job?.status === 'failed') {
       toast({
         title: "Error en la importación",
         description: "La importación falló. Revisa los errores en el modal.",
         variant: "destructive",
       });
     }
-  }, [batchStatusQuery.data]);
+  }, [batchProgressQuery.data]);
 
   const handleDelete = (productId: string) => {
     const productToDelete = products?.find((p: Product) => p.id === productId);
@@ -156,7 +157,7 @@ function ProductListContent() {
       return;
     }
 
-    // Iniciar importación en batches
+    // Crear job de importación
     importProductsMutation.mutate(productosAImportar, {
       onSuccess: (data) => {
         setCurrentJobId(data.jobId);
@@ -164,13 +165,30 @@ function ProductListContent() {
         setShowAnalyzeModal(false);
         
         toast({
-          title: "Importación iniciada",
-          description: `Procesando ${data.summary.totalItems} items en ${data.summary.batches} batches`,
+          title: "Job creado",
+          description: `Job ${data.jobId} creado con ${data.summary.totalItems} items`,
+        });
+
+        // Iniciar el procesamiento del job
+        processBatchJobMutation.mutate(data.jobId, {
+          onSuccess: () => {
+            toast({
+              title: "Procesamiento iniciado",
+              description: "El job ha comenzado a procesarse",
+            });
+          },
+          onError: (error: any) => {
+            toast({
+              title: "Error al procesar",
+              description: error?.message || "Error al iniciar el procesamiento",
+              variant: "destructive",
+            });
+          },
         });
       },
       onError: (error: any) => {
         toast({
-          title: "Error al importar",
+          title: "Error al crear job",
           description: error?.message || "Ocurrió un error inesperado",
           variant: "destructive",
         });
@@ -248,7 +266,7 @@ function ProductListContent() {
             totalToUpdate: 0,
           }
         }}
-        importLoading={importProductsMutation.isLoading}
+        importLoading={importProductsMutation.isLoading || processBatchJobMutation.isLoading}
       />
 
       <BatchProgressModal
@@ -258,8 +276,8 @@ function ProductListContent() {
           setCurrentJobId(null);
         }}
         jobId={currentJobId}
-        jobData={batchStatusQuery.data}
-        isLoading={batchStatusQuery.isLoading}
+        jobData={batchProgressQuery.data}
+        isLoading={batchProgressQuery.isLoading}
       />
     </div>
   );
