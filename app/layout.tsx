@@ -15,7 +15,7 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
-  title: "Kaury Dashboard | Sistema de Gestión Empresarial",
+  title: "Crossup Inicio",
   description: "Dashboard empresarial para gestión de e-commerce",
   generator: 'v0.dev'
 }

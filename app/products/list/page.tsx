@@ -14,9 +14,10 @@ import { ProductFilters } from "@/components/products/list/product-filters";
 import { Plus } from "lucide-react";
 import * as XLSX from "xlsx";
 import { ImportProductsSection } from "@/components/products/ImportProductsSection";
-import { useImportProducts } from "@/hooks/useImportProducts";
+import { useImportProducts, useBatchStatus } from "@/hooks/useImportProducts";
 import { useAnalyzeImportProducts } from "@/hooks/useAnalyzeImportProducts";
 import { ImportAnalyzeModal } from "@/components/products/ImportAnalyzeModal";
+import { BatchProgressModal } from "@/components/products/BatchProgressModal";
 
 function ProductListContent() {
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0.5 });
@@ -35,12 +36,38 @@ function ProductListContent() {
   const importProductsMutation = useImportProducts();
   const analyzeImportMutation = useAnalyzeImportProducts();
 
+  // Estados para el sistema de batches
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [showBatchProgress, setShowBatchProgress] = useState(false);
+
+  // Hook para consultar el estado del batch
+  const batchStatusQuery = useBatchStatus(currentJobId);
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       console.log("Intersection observer inView: Cargando siguiente página...");
       fetchNextPage?.();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Efecto para manejar el estado del batch
+  useEffect(() => {
+    if (batchStatusQuery.data?.job?.status === 'completed') {
+      const job = batchStatusQuery.data.job;
+      toast({
+        title: "Importación completada",
+        description: `Procesados: ${job.results.processed}, Actualizados: ${job.results.updated}, Errores: ${job.results.errors.length}`,
+      });
+      setShowBatchProgress(false);
+      setCurrentJobId(null);
+    } else if (batchStatusQuery.data?.job?.status === 'failed') {
+      toast({
+        title: "Error en la importación",
+        description: "La importación falló. Revisa los errores en el modal.",
+        variant: "destructive",
+      });
+    }
+  }, [batchStatusQuery.data]);
 
   const handleDelete = (productId: string) => {
     const productToDelete = products?.find((p: Product) => p.id === productId);
@@ -129,16 +156,17 @@ function ProductListContent() {
       return;
     }
 
+    // Iniciar importación en batches
     importProductsMutation.mutate(productosAImportar, {
       onSuccess: (data) => {
-        toast({
-          title: "Importación exitosa",
-          description: `Procesados: ${data.summary.totalProcessed}, Actualizados: ${data.summary.totalUpdated}, Errores: ${data.summary.totalErrors}`,
-        });
-        setSelectedFile(null);
-        setRowsReadyCount(0);
-        setProductosFiltrados([]);
+        setCurrentJobId(data.jobId);
+        setShowBatchProgress(true);
         setShowAnalyzeModal(false);
+        
+        toast({
+          title: "Importación iniciada",
+          description: `Procesando ${data.summary.totalItems} items en ${data.summary.batches} batches`,
+        });
       },
       onError: (error: any) => {
         toast({
@@ -149,7 +177,6 @@ function ProductListContent() {
       },
     });
   };
-
 
   const handleClear = () => {
     setSelectedFile(null);
@@ -222,6 +249,17 @@ function ProductListContent() {
           }
         }}
         importLoading={importProductsMutation.isLoading}
+      />
+
+      <BatchProgressModal
+        open={showBatchProgress}
+        onClose={() => {
+          setShowBatchProgress(false);
+          setCurrentJobId(null);
+        }}
+        jobId={currentJobId}
+        jobData={batchStatusQuery.data}
+        isLoading={batchStatusQuery.isLoading}
       />
     </div>
   );
