@@ -145,10 +145,9 @@ export function BatchProgressModal({
           {job && job.batches > 1 && (
             <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
               <div className="font-medium mb-1">Información de Batches:</div>
-              <div>• Tamaño de batch: 50 items</div>
+              <div>• Tamaño de batch: 200 items</div>
               <div>• Batch actual: {job.currentBatch}</div>
               <div>• Total de batches: {job.batches}</div>
-              <div>• Items por batch: ~{Math.ceil(job.totalItems / job.batches)}</div>
             </div>
           )}
 

@@ -87,7 +87,7 @@ export function useBatchImportProducts() {
   const startBatchImport = useCallback(
     async (
       items: ImportProduct[],
-      batchSize = 50,
+      batchSize = 200,
       onProgress?: (progress: BatchImportProgress) => void,
       onComplete?: (finalProgress: BatchImportProgress, allDetails: Array<any>) => void,
       onError?: (error: Error) => void,
