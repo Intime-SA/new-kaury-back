@@ -21,19 +21,19 @@ const startBatchImport = async (products: ImportProduct[]) => {
   return response.json();
 };
 
-// Función para procesar el job (iniciar el procesamiento)
-const processBatchJob = async (jobId: string) => {
-  const response = await fetch(`${API_URL}/products/import-batch/process`, {
+// Función para procesar un chunk específico
+const processBatchChunk = async ({ jobId, batchNumber }: { jobId: string; batchNumber: number }) => {
+  const response = await fetch(`${API_URL}/products/import-batch/process-chunk`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ jobId }),
+    body: JSON.stringify({ jobId, batchNumber }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Error al procesar el job');
+    throw new Error(error.message || 'Error al procesar el batch');
   }
 
   return response.json();
@@ -57,10 +57,10 @@ export function useImportProducts() {
   });
 }
 
-// Hook para procesar el job
-export function useProcessBatchJob() {
-  return useMutation<any, Error, string>({
-    mutationFn: processBatchJob,
+// Hook para procesar un chunk específico
+export function useProcessBatchChunk() {
+  return useMutation<any, Error, { jobId: string; batchNumber: number }>({
+    mutationFn: processBatchChunk,
   });
 }
 
@@ -76,8 +76,8 @@ export function useBatchProgress(jobId: string | null) {
         if (data?.job?.status === 'completed' || data?.job?.status === 'failed') {
           return false;
         }
-        // Hacer polling cada 2 segundos mientras está procesando
-        return 2000;
+        // Hacer polling cada 5 segundos mientras está procesando
+        return 5000;
       },
       refetchIntervalInBackground: false,
     }

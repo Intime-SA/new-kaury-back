@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, AlertCircle, Loader2, Clock } from "lucide-react"
+import { CheckCircle, AlertCircle, Loader2, Clock, Package } from "lucide-react"
 
 interface BatchProgressModalProps {
   open: boolean
@@ -95,11 +95,29 @@ export function BatchProgressModal({
           {/* Barra de progreso */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Progreso</span>
+              <span>Progreso General</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="w-full" />
           </div>
+
+          {/* Información de batches */}
+          {job && job.batches > 1 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Package className="h-4 w-4" />
+                Progreso de Batches
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Batch actual:</span>
+                <span className="font-medium">{job.currentBatch} de {job.batches}</span>
+              </div>
+              <Progress 
+                value={(job.currentBatch / job.batches) * 100} 
+                className="w-full h-2" 
+              />
+            </div>
+          )}
 
           {/* Estadísticas */}
           {job && (
@@ -123,13 +141,14 @@ export function BatchProgressModal({
             </div>
           )}
 
-          {/* Información de batches */}
+          {/* Información adicional de batches */}
           {job && job.batches > 1 && (
-            <div className="text-sm">
-              <span className="text-muted-foreground">Batch:</span>
-              <div className="font-medium">
-                {job.currentBatch} de {job.batches}
-              </div>
+            <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
+              <div className="font-medium mb-1">Información de Batches:</div>
+              <div>• Tamaño de batch: 50 items</div>
+              <div>• Batch actual: {job.currentBatch}</div>
+              <div>• Total de batches: {job.batches}</div>
+              <div>• Items por batch: ~{Math.ceil(job.totalItems / job.batches)}</div>
             </div>
           )}
 
