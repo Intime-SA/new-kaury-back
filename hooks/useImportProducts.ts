@@ -1,85 +1,167 @@
-import { useMutation, useQuery } from "react-query";
-import { importProducts, ImportProduct, ImportProductsResponse } from '@/services/productsImportService';
+"use client"
+
+import { useState, useCallback } from "react"
+import { useMutation } from "react-query"
+
+export interface ImportProduct {
+  id_articulo: number
+  preciolista: number
+  id_Lista: number
+  stock: number
+}
+
+export interface BatchImportResponse {
+  success: boolean
+  batch: {
+    batchSize: number
+    currentOffset: number
+    nextOffset: number
+    processedInBatch: number
+    updatedInBatch: number
+    errorsInBatch: number
+  }
+  progress: {
+    totalItems: number
+    processedItems: number
+    remainingItems: number
+    progressPercentage: number
+    isComplete: boolean
+  }
+  summary: {
+    totalProcessed: number
+    totalUpdated: number
+    totalErrors: number
+  }
+  details: Array<{
+    id_articulo: number
+    status: "success" | "error"
+    message: string
+  }>
+}
+
+export interface BatchImportProgress {
+  totalItems: number
+  processedItems: number
+  remainingItems: number
+  progressPercentage: number
+  isComplete: boolean
+  totalUpdated: number
+  totalErrors: number
+  currentBatch: number
+  totalBatches: number
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// Función para iniciar importación en batches (crear job)
-const startBatchImport = async (products: ImportProduct[]) => {
-  const response = await fetch(`${API_URL}/products/import-batch`, {
-    method: 'POST',
+const importBatch = async (items: ImportProduct[], offset: number, batchSize = 50): Promise<BatchImportResponse> => {
+    const response = await fetch(`${API_URL}/products/import-batch`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(products),
-  });
+    body: JSON.stringify({
+      items,
+      batchSize,
+      offset,
+    }),
+  })
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Error al crear el job de importación');
+    const errorData = await response.json()
+    throw new Error(errorData.error || "Error en la importación por lotes")
   }
 
-  return response.json();
-};
-
-// Función para procesar un chunk específico
-const processBatchChunk = async ({ jobId, batchNumber }: { jobId: string; batchNumber: number }) => {
-  const response = await fetch(`${API_URL}/products/import-batch/process-chunk`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ jobId, batchNumber }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Error al procesar el batch');
-  }
-
-  return response.json();
-};
-
-// Función para consultar el progreso del job
-const getBatchProgress = async (jobId: string) => {
-  const response = await fetch(`${API_URL}/products/import-batch/status?jobId=${jobId}`);
-  
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Error al consultar el progreso');
-  }
-
-  return response.json();
-};
-
-export function useImportProducts() {
-  return useMutation<any, Error, ImportProduct[]>({
-    mutationFn: startBatchImport,
-  });
+  return response.json()
 }
 
-// Hook para procesar un chunk específico
-export function useProcessBatchChunk() {
-  return useMutation<any, Error, { jobId: string; batchNumber: number }>({
-    mutationFn: processBatchChunk,
-  });
-}
+export function useBatchImportProducts() {
+  const [progress, setProgress] = useState<BatchImportProgress | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const [allDetails, setAllDetails] = useState<Array<any>>([])
 
-// Hook para consultar el progreso del batch
-export function useBatchProgress(jobId: string | null) {
-  return useQuery(
-    ['batchProgress', jobId],
-    () => getBatchProgress(jobId!),
-    {
-      enabled: !!jobId,
-      refetchInterval: (data) => {
-        // Si el job está completado o falló, dejar de hacer polling
-        if (data?.job?.status === 'completed' || data?.job?.status === 'failed') {
-          return false;
+  const batchMutation = useMutation({
+    mutationFn: ({ items, offset, batchSize }: { items: ImportProduct[]; offset: number; batchSize: number }) =>
+      importBatch(items, offset, batchSize),
+  })
+
+  const startBatchImport = useCallback(
+    async (
+      items: ImportProduct[],
+      batchSize = 50,
+      onProgress?: (progress: BatchImportProgress) => void,
+      onComplete?: (finalProgress: BatchImportProgress, allDetails: Array<any>) => void,
+      onError?: (error: Error) => void,
+    ) => {
+      setIsImporting(true)
+      setAllDetails([])
+
+      const totalBatches = Math.ceil(items.length / batchSize)
+      let currentOffset = 0
+      let totalUpdated = 0
+      let totalErrors = 0
+      let currentBatch = 1
+      const accumulatedDetails: Array<any> = []
+
+      try {
+        while (currentOffset < items.length) {
+          const response = await batchMutation.mutateAsync({
+            items,
+            offset: currentOffset,
+            batchSize,
+          })
+
+          // Acumular detalles
+          accumulatedDetails.push(...response.details)
+          setAllDetails((prev) => [...prev, ...response.details])
+
+          // Acumular totales
+          totalUpdated += response.summary.totalUpdated
+          totalErrors += response.summary.totalErrors
+
+          const progressData: BatchImportProgress = {
+            totalItems: response.progress.totalItems,
+            processedItems: response.progress.processedItems,
+            remainingItems: response.progress.remainingItems,
+            progressPercentage: response.progress.progressPercentage,
+            isComplete: response.progress.isComplete,
+            totalUpdated,
+            totalErrors,
+            currentBatch,
+            totalBatches,
+          }
+
+          setProgress(progressData)
+          onProgress?.(progressData)
+
+          if (response.progress.isComplete) {
+            onComplete?.(progressData, accumulatedDetails)
+            break
+          }
+
+          currentOffset = response.batch.nextOffset
+          currentBatch++
         }
-        // Hacer polling cada 5 segundos mientras está procesando
-        return 5000;
-      },
-      refetchIntervalInBackground: false,
-    }
-  );
-} 
+      } catch (error) {
+        console.error("Error en importación por lotes:", error)
+        onError?.(error as Error)
+      } finally {
+        setIsImporting(false)
+      }
+    },
+    [batchMutation],
+  )
+
+  const resetProgress = useCallback(() => {
+    setProgress(null)
+    setAllDetails([])
+  }, [])
+
+  return {
+    startBatchImport,
+    progress,
+    isImporting,
+    allDetails,
+    resetProgress,
+    error: batchMutation.error,
+  }
+}
