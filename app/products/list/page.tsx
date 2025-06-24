@@ -151,7 +151,7 @@ function ProductListContent() {
     // Usar el método startBatchImport del hook
     startBatchImport(
       productosAImportar,
-      60, // batchSize
+      70, // batchSize
       (progressData) => {
         // Callback de progreso - opcional para mostrar progreso en tiempo real
         console.log("Progreso de importación:", progressData);
