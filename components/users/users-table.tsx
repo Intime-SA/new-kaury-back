@@ -88,12 +88,18 @@ export function UsersTable() {
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      
+      if (isNaN(date.getTime())) {
+        return "Fecha inválida";
+      }
+      
+      const day = date.getUTCDate().toString().padStart(2, '0');
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+      const year = date.getUTCFullYear();
+      
+      return `${day}/${month}/${year}`;
     } catch (e) {
+      console.error("Error formateando fecha:", dateString, e);
       return "Fecha inválida";
     }
   };
@@ -137,8 +143,8 @@ export function UsersTable() {
     }
 
     if (clientFilters.registrationDateFrom || clientFilters.registrationDateTo) {
-      const formattedFrom = clientFilters.registrationDateFrom ? formatDate(clientFilters.registrationDateFrom + 'T00:00:00') : '';
-      const formattedTo = clientFilters.registrationDateTo ? formatDate(clientFilters.registrationDateTo + 'T00:00:00') : '';
+      const formattedFrom = clientFilters.registrationDateFrom ? formatDate(clientFilters.registrationDateFrom) : '';
+      const formattedTo = clientFilters.registrationDateTo ? formatDate(clientFilters.registrationDateTo) : '';
       chips.push(
         <Badge key="registrationDate" variant="secondary" className="flex items-center gap-1">
           <Calendar className="h-3 w-3" />
@@ -335,11 +341,7 @@ export function UsersTable() {
                     </TableCell>
                     <TableCell>{client.email}</TableCell>
 
-                    <TableCell>
-                      {client.fechaInicio
-                        ? formatDate(client.fechaInicio)
-                        : "N/A"}
-                    </TableCell>
+                    
                     <TableCell>
                       <div className="flex items-center justify-start gap-1">
                         {client.telefono &&
@@ -381,6 +383,11 @@ export function UsersTable() {
                           </a>
                         </Link>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {client.fechaInicio
+                        ? formatDate(client.fechaInicio)
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                   {expandedUser === client.id && (
