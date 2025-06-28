@@ -72,17 +72,10 @@ export function CategoriesSelector({
       return
     }
 
-    // Si hay otra categoría seleccionada, la removemos primero
-    if (selectedCategories.length > 0) {
-      selectedCategories.forEach(cat => {
-        onRemoveCategory(cat.id)
-      })
-    }
-
     // Si estamos seleccionando una subcategoría, también marcamos la categoría padre como seleccionada
     if (parentId) {
       const parentCategory = categories.find(cat => cat.id === parentId)
-      if (parentCategory) {
+      if (parentCategory && !isSelected(parentCategory.id)) {
         onAddCategory({
           id: parentCategory.id,
           name: {
@@ -115,7 +108,6 @@ export function CategoriesSelector({
             {categories.map((category) => {
               const isExpanded = expandedCategories.has(category.id)
               const hasSubcategories = category.subcategories.length > 0
-              const isDisabled = selectedCategories.length > 0 && !isSelected(category.id) && !hasSelectedSubcategory(category)
               const hasSubSelected = hasSelectedSubcategory(category)
 
               return (
@@ -149,7 +141,6 @@ export function CategoriesSelector({
                         }}
                         checked={isSelected(category.id) || hasSubSelected}
                         onCheckedChange={() => handleToggleCategory(category)}
-                        disabled={isDisabled}
                       />
                     </TableCell>
                     <TableCell className="font-medium">
@@ -159,8 +150,6 @@ export function CategoriesSelector({
 
                   {/* Filas de subcategorías */}
                   {isExpanded && category.subcategories.map((subcategory) => {
-                    const isSubDisabled = selectedCategories.length > 0 && !isSelected(subcategory.id)
-
                     return (
                       <TableRow
                         key={subcategory.id}
@@ -174,7 +163,6 @@ export function CategoriesSelector({
                           <Checkbox
                             checked={isSelected(subcategory.id)}
                             onCheckedChange={() => handleToggleCategory(subcategory, category.id)}
-                            disabled={isSubDisabled}
                           />
                         </TableCell>
                         <TableCell className="pl-10">    
@@ -210,7 +198,7 @@ export function CategoriesSelector({
               })}
           </div>
         ) : (
-          <p>Selecciona una categoría para tu producto</p>
+          <p>Selecciona una o más categorías para tu producto</p>
         )}
       </div>
     </div>
