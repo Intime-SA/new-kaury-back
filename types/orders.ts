@@ -76,6 +76,8 @@ export interface OrderItem {
   subtotal?: number
   color?: string
   talle?: string
+  TALLE?: string
+  COLOR?: string
   image?: string | string[]
   productId?: string
   descuento?: number

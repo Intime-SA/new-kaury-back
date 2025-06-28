@@ -137,6 +137,7 @@ interface OrderPDFProps {
       image?: string | string[]
       productId?: string
       descuento?: number
+      variantId?: string
     }[]
     infoEntrega?: {
       name?: string
@@ -180,6 +181,8 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
   } = infoEntrega;
 
   const totalPrice = orderItems.reduce((acc, item) => acc + (item.subtotal || 0), 0);
+
+  console.log(orderItems, 'orderItems');
 
   return (
     <Document>
@@ -316,7 +319,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
             </View>
             {(orderItems || []).map((producto = {}, index) => {
               const uniqueKey = `item-${index}`;
-              const { name = 'Sin nombre', talle = '-', color = '-', quantity = 0, unit_price = 0, descuento = 0, subtotal = 0 } = producto;
+              const { name = 'Sin nombre', talle = '-', color = '-', quantity = 0, unit_price = 0, descuento = 0, subtotal = 0, variantId = '' } = producto;
               
               return (
                 <View key={uniqueKey} style={styles.tableRow}>
@@ -328,7 +331,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
                         fontSize: 7.5,
                       }}
                     >
-                      {`Articulo: ${name} / Talle: ${talle} / Color: ${color}`}
+                      {`Articulo: ${name} / Talle: ${talle} / Color: ${color} / VariantId: ${variantId}`}
                     </Text>
                   </View>
                   <View style={{ ...styles.tableCell, width: 25 }}>

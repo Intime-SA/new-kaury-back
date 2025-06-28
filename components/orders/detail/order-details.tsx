@@ -132,7 +132,7 @@ const WhatsAppButton = ({ order }: { order: OrderDetailsProps['order'] }) => {
 };
 
 export function OrderDetails({ order, onClose }: OrderDetailsProps) {
-
+  console.log(order, 'order');
 
   return (
     <Card className="h-full overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">

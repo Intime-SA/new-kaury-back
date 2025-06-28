@@ -51,7 +51,7 @@ export function TableContent({
             <TableHead className="w-[180px]">Total</TableHead>
             <TableHead className="w-[120px]">Productos</TableHead>
             <TableHead className="flex-1">Cliente</TableHead>
-            <TableHead className="w-[100px]">Estado</TableHead>
+            <TableHead className="w-[150px]">Estado</TableHead>
             <TableHead className="w-[80px] text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>

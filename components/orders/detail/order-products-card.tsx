@@ -66,11 +66,11 @@ export function OrderProductsCard({ items, onClose }: OrderProductsCardProps) {
                 </div>
                 <div className="flex items-center gap-2 justify-center border-r border-[#1F1F1F]">
                   <Ruler className="h-4 w-4" />
-                  <span>{item.talle || '-'}</span>
+                  <span>{item.talle || item.TALLE}</span>
                 </div>
                 <div className="flex items-center gap-2 justify-center">
                   <Palette className="h-4 w-4" />
-                  <span>{item.color || '-'}</span>
+                  <span>{item.color || item.COLOR}</span>
                 </div>
               </div>
             </div>
