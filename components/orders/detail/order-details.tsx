@@ -6,7 +6,7 @@ import { formatFirebaseTimestamp, formatISODate } from "@/lib/utils"
 import { CustomerInfoCard } from "./customer-info-card"
 import { OrderProductsCard } from "./order-products-card"
 import type { OrderItem } from "@/types/orders"
-import { X, Download } from "lucide-react"
+import { X, Download, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PDFDownloadLink } from "@react-pdf/renderer"
 import { OrderPDF } from "./order-pdf"
@@ -88,11 +88,51 @@ const PDFButton = ({ order }: { order: OrderDetailsProps['order'] }) => {
   );
 };
 
+const WhatsAppButton = ({ order }: { order: OrderDetailsProps['order'] }) => {
+  const handleWhatsAppClick = () => {
+    const phone = order.infoEntrega?.telefono;
+    if (!phone) {
+      alert("No hay número de teléfono disponible");
+      return;
+    }
+
+    // Limpiar el número de teléfono (remover espacios, guiones, etc.)
+    const cleanPhone = phone.replace(/\s+/g, '').replace(/[-()]/g, '');
+    
+    // Asegurar que tenga el código de país (Argentina: +54)
+    const phoneWithCountry = cleanPhone.startsWith('+54') ? cleanPhone : 
+                           cleanPhone.startsWith('54') ? `+${cleanPhone}` :
+                           cleanPhone.startsWith('9') ? `+54${cleanPhone}` :
+                           `+54${cleanPhone}`;
+
+    // Crear mensaje predeterminado
+    const message = `Hola ${order.infoEntrega.name} ${order.infoEntrega.apellido}, te contactamos desde Kaury sobre tu orden #${order.numberOrder}.`;
+    
+    // Crear enlace de WhatsApp
+    const whatsappUrl = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
+    
+    // Abrir WhatsApp en nueva pestaña
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const hasPhone = Boolean(order.infoEntrega?.telefono);
+
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={handleWhatsAppClick}
+      disabled={!hasPhone}
+      title={hasPhone ? "Contactar por WhatsApp" : "No hay teléfono disponible"}
+      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+    >
+      <MessageCircle className="h-4 w-4" />
+    </Button>
+  );
+};
+
 export function OrderDetails({ order, onClose }: OrderDetailsProps) {
-  // Log para debug
-  useEffect(() => {
-    console.log('OrderDetails recibió:', order);
-  }, [order]);
+
 
   return (
     <Card className="h-full overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">
@@ -100,6 +140,7 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
         <CardTitle className="text-xl font-bold">#{order.numberOrder}</CardTitle>
         <div className="flex items-center gap-2">
           <PDFButton order={order} />
+          <WhatsAppButton order={order} />
           <OrderStatus status={order.status} />
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
