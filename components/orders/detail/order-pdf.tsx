@@ -255,7 +255,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
               </Text>
               {tipoEnvio === 1 && (
                 <Text style={styles.infoText}>
-                  {envioSeleccionado === "envioSucursal"
+                  {envioSeleccionado === "Envio a Central"
                     ? "Entrega a sucursal a coordinar"
                     : "Envio a domicilio"}
                 </Text>
@@ -331,7 +331,7 @@ export const OrderPDF: React.FC<OrderPDFProps> = ({ order = {} }) => {
                         fontSize: 7.5,
                       }}
                     >
-                      {`Articulo: ${name} / Talle: ${talle} / Color: ${color} / VariantId: ${variantId}`}
+                      {`Articulo: ${name}${talle ? ` / Talle: ${talle}` : ""}${color ? ` / Color: ${color}` : ""}`}
                     </Text>
                   </View>
                   <View style={{ ...styles.tableCell, width: 25 }}>
