@@ -164,7 +164,7 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
         </div>
 
         {/* Información del Cliente */}
-        <CustomerInfoCard info={order.infoEntrega} />
+        <CustomerInfoCard info={order.infoEntrega}/>
 
         {/* Productos */}
         <div className="space-y-4">
