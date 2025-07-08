@@ -34,7 +34,7 @@ interface PropertiesDrawerProps {
   onGenerateVariants: () => void
 }
 
-const COLOR_PROPERTY_NAMES = ["color", "colors", "colour", "colours", "cor", "cores"]
+const COLOR_PROPERTY_REGEX = /color/i;
 
 export function PropertiesDrawer({
   open,
@@ -49,11 +49,14 @@ export function PropertiesDrawer({
 
   const { colors: apiColors, isLoading: isLoadingColors, error: colorsError } = useColors()
 
+  console.log("properties", properties)
   const addProperty = () => {
     const trimmedName = newPropertyName.trim()
     if (!trimmedName) return
 
-    const isColorProp = COLOR_PROPERTY_NAMES.includes(trimmedName.toLowerCase())
+    const isColorProp = COLOR_PROPERTY_REGEX.test(trimmedName)
+
+    console.log("isColorProp", isColorProp)
 
     const newProperty: Property = {
       id: `prop_${Date.now()}`,

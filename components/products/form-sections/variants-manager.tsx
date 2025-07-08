@@ -67,6 +67,9 @@ const isVariantConfirmed = (variant: ProductVariant) => {
   return !variant.id.toString().startsWith('temp_');
 };
 
+// Definir la expresión regular para identificar propiedades de color
+const COLOR_PROPERTY_REGEX = /color/i;
+
 export function VariantsManager({ variants, onChange, stockManagement, initialUseGlobalPrices, onUseGlobalPricesChange, initialGlobalUnitPrice, onGlobalUnitPriceChange, initialGlobalPromotionalPrice, onGlobalPromotionalPriceChange, initialGlobalCost, onGlobalCostChange }: VariantsManagerProps) {
   const images = useSelector((state: RootState) => state.products.images);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -102,21 +105,21 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
   // Inicializar propiedades desde variantes existentes
   useEffect(() => {
     if (variants.length > 0) {
-      const existingProperties: Property[] = []
+      const existingProperties: Property[] = [];
 
       // Extraer propiedades únicas de las variantes
       variants.forEach((variant) => {
         Object.entries(variant.attr).forEach(([key, value]) => {
-          let property = existingProperties.find((p) => p.name === key)
+          let property = existingProperties.find((p) => p.name === key);
 
           if (!property) {
             property = {
               id: `prop_${Date.now()}_${key}`,
               name: key,
               values: [],
-              isColorProperty: false,
-            }
-            existingProperties.push(property)
+              isColorProperty: COLOR_PROPERTY_REGEX.test(key),
+            };
+            existingProperties.push(property);
           }
 
           // Agregar valor si no existe
@@ -124,16 +127,16 @@ export function VariantsManager({ variants, onChange, stockManagement, initialUs
             property.values.push({
               id: `val_${Date.now()}_${value}`,
               value: value,
-            })
+            });
           }
-        })
-      })
+        });
+      });
 
       if (existingProperties.length > 0 && properties.length === 0) {
-        setProperties(existingProperties)
+        setProperties(existingProperties);
       }
     }
-  }, [variants])
+  }, [variants]);
 
   const handleAddVariant = () => {
     const numericGlobalUnitPrice = parseFloat(globalUnitPrice);
