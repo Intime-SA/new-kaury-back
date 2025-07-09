@@ -18,6 +18,7 @@ import { useProducts } from "@/hooks/products/useProducts";
 import type { ProductImage, ProductVariant } from "@/types/types";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
+import { useRouter } from "next/navigation";
 
 // Import all the form section components
 import { HeaderSection } from "@/components/products/form-sections/header-section";
@@ -133,10 +134,14 @@ interface ApiSuccessResponse {
 type ApiResponse = ApiErrorResponse | ApiSuccessResponse;
 
 // Función para mapear errores de la API a los campos anidados del formulario
-function setApiFieldErrorsDynamically(form: any, fieldErrors: Record<string, string[]>, formValues: any) {
+function setApiFieldErrorsDynamically(
+  form: any,
+  fieldErrors: Record<string, string[]>,
+  formValues: any
+) {
   Object.entries(fieldErrors).forEach(([field, errors]) => {
     const value = formValues[field];
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       // Si es un objeto, asignar el error a cada subcampo
       Object.keys(value).forEach((subKey) => {
         form.setError(`${field}.${subKey}`, {
@@ -185,7 +190,7 @@ export function ProductForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createProduct, updateProduct } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const router = useRouter();
   // Manejador para agregar categoría
   const handleAddCategory = (category: SelectedCategory) => {
     dispatch(addCategory(category));
@@ -257,35 +262,72 @@ export function ProductForm({
     });
   };
 
+  const transformVariantsGlobalPrices = (
+    variants: ProductVariant[],
+    data: ProductFormValues
+  ) => {
+    return variants.map((variant) => ({
+      ...variant,
+      unit_price: data.globalUnitPrice
+        ? parseFloat(data.globalUnitPrice)
+        : variant.unit_price,
+      promotionalPrice: data.globalPromotionalPrice
+        ? parseFloat(data.globalPromotionalPrice)
+        : variant.promotionalPrice,
+      cost: data.globalCost ? parseFloat(data.globalCost) : variant.cost,
+    }));
+  };
+
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setIsSubmitting(true);
-      const transformedCategories = transformCategoriesForApi(selectedCategories);
+      const transformedCategories =
+        transformCategoriesForApi(selectedCategories);
+
+      console.log(variants, "variants");
 
       const productData = {
         ...data,
         weight: undefined,
         dimensions: data.dimensions,
         images: uploadedImages,
-        variants,
+        variants: data.useGlobalPrices
+          ? transformVariantsGlobalPrices(variants, data)
+          : variants,
         categories: transformedCategories,
         useGlobalPrices: data.useGlobalPrices,
-        globalUnitPrice: data.globalUnitPrice ? parseFloat(data.globalUnitPrice) || null : null,
-        globalPromotionalPrice: data.globalPromotionalPrice ? parseFloat(data.globalPromotionalPrice) || null : null,
-        globalCost: data.globalCost ? parseFloat(data.globalCost) || null : null,
+        globalUnitPrice: data.globalUnitPrice
+          ? parseFloat(data.globalUnitPrice) || null
+          : null,
+        globalPromotionalPrice: data.globalPromotionalPrice
+          ? parseFloat(data.globalPromotionalPrice) || null
+          : null,
+        globalCost: data.globalCost
+          ? parseFloat(data.globalCost) || null
+          : null,
       };
 
       if (context === "edit" && product) {
-        const result = await updateProduct.mutateAsync({ productId: product.id, productData: productData as ProductFormState }) as ApiResponse;
-        
+        const result = (await updateProduct.mutateAsync({
+          productId: product.id,
+          productData: productData as ProductFormState,
+        })) as ApiResponse;
+
         if (result.status === "error") {
           // Mostrar errores de campos en el formulario de forma dinámica
           if (result.errors?.fieldErrors) {
-            setApiFieldErrorsDynamically(form, result.errors.fieldErrors, form.getValues());
+            setApiFieldErrorsDynamically(
+              form,
+              result.errors.fieldErrors,
+              form.getValues()
+            );
             showFieldErrorsToast(result.errors.fieldErrors);
           }
           // Solo mostrar toast si hay errores generales
-          if (result.errors?.formErrors && result.errors.formErrors.length > 0) {
+          if (
+            result.errors?.formErrors &&
+            result.errors.formErrors.length > 0
+          ) {
             toast({
               title: "Error",
               description: result.errors.formErrors[0],
@@ -308,17 +350,26 @@ export function ProductForm({
           description: "Producto actualizado correctamente",
         });
       } else {
-        const result = await createProduct.mutateAsync(productData as ProductFormState) as ApiResponse;
+        const result = (await createProduct.mutateAsync(
+          productData as ProductFormState
+        )) as ApiResponse;
         console.log(result, "result");
-        
+
         if (result.status === "error") {
           console.log(result, "result");
           // Mostrar errores de campos en el formulario de forma dinámica
           if (result.errors?.fieldErrors) {
-            setApiFieldErrorsDynamically(form, result.errors.fieldErrors, form.getValues());
+            setApiFieldErrorsDynamically(
+              form,
+              result.errors.fieldErrors,
+              form.getValues()
+            );
           }
           // Solo mostrar toast si hay errores generales
-          if (result.errors?.formErrors && result.errors.formErrors.length > 0) {
+          if (
+            result.errors?.formErrors &&
+            result.errors.formErrors.length > 0
+          ) {
             toast({
               title: "Error",
               description: result.errors.formErrors[0],
@@ -355,10 +406,11 @@ export function ProductForm({
       if (error.errors?.fieldErrors) {
         showFieldErrorsToast(error.errors.fieldErrors);
       }
-      return;
-    } finally {
       setIsSubmitting(false);
-    }
+      return;
+    } /* finally {
+      setIsSubmitting(false);
+    } */
   };
 
   // Modificar los campos de dimensiones para usar el formulario directamente
@@ -403,9 +455,10 @@ export function ProductForm({
       return;
     }
     onSubmit(data);
+    setTimeout(() => {
+      router.push("/products/list");
+    }, 1500);
   });
-
-
 
   return (
     <div className="container mx-auto max-w-7xl">
@@ -420,13 +473,13 @@ export function ProductForm({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-background text-foreground">
         <div className="lg:col-span-2">
           <Form {...form}>
-            <form 
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!isDialogOpen) {
                   handleFormSubmit(e);
                 }
-              }} 
+              }}
               className="space-y-8"
             >
               {/* Información básica */}
@@ -444,13 +497,23 @@ export function ProductForm({
                 onVariantsChange={handleVariantsChange}
                 stockManagement={form.watch("stockManagement")}
                 initialUseGlobalPrices={form.watch("useGlobalPrices")}
-                onUseGlobalPricesChange={(value) => form.setValue("useGlobalPrices", value)}
+                onUseGlobalPricesChange={(value) =>
+                  form.setValue("useGlobalPrices", value)
+                }
                 initialGlobalUnitPrice={form.watch("globalUnitPrice")}
-                onGlobalUnitPriceChange={(value) => form.setValue("globalUnitPrice", value)}
-                initialGlobalPromotionalPrice={form.watch("globalPromotionalPrice")}
-                onGlobalPromotionalPriceChange={(value) => form.setValue("globalPromotionalPrice", value)}
+                onGlobalUnitPriceChange={(value) =>
+                  form.setValue("globalUnitPrice", value)
+                }
+                initialGlobalPromotionalPrice={form.watch(
+                  "globalPromotionalPrice"
+                )}
+                onGlobalPromotionalPriceChange={(value) =>
+                  form.setValue("globalPromotionalPrice", value)
+                }
                 initialGlobalCost={form.watch("globalCost")}
-                onGlobalCostChange={(value) => form.setValue("globalCost", value)}
+                onGlobalCostChange={(value) =>
+                  form.setValue("globalCost", value)
+                }
                 onDialogOpenChange={setIsDialogOpen}
               />
 
@@ -479,8 +542,6 @@ export function ProductForm({
 
               {/* Más opciones */}
               <OptionsSection control={form.control} />
-
-              
             </form>
           </Form>
         </div>

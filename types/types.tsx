@@ -76,6 +76,10 @@ export interface Product {
   ageRange?: string
   gender?: string
   showInStore?: boolean
+  useGlobalPrices?: boolean
+  globalUnitPrice?: number
+  globalPromotionalPrice?: number
+  globalCost?: number
 }
 
 // --- Tipos para Filtros y Paginación de Productos --- 

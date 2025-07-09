@@ -1,14 +1,39 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import Link from "next/link"
-import type { Product, ProductVariant, ProductCategory } from "@/types/types"
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Pencil,
+  Trash2,
+  X,
+  Globe,
+  Tag,
+  Infinity,
+  Settings,
+  Box,
+  Store,
+  ImageIcon,
+  Blocks,
+  CircleDollarSign,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import type { Product, ProductVariant, ProductCategory } from "@/types/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,17 +44,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductTableProps {
-  products: Product[]
-  isLoading: boolean
-  isDeleting: boolean
-  isFetchingNextPage: boolean
-  loadMoreRef: React.Ref<HTMLDivElement>
-  onDeleteProduct: (productId: string) => void // Función para manejar la eliminación
-  hasNextPage?: boolean // Para mostrar mensaje de fin
+  products: Product[];
+  isLoading: boolean;
+  isDeleting: boolean;
+  isFetchingNextPage: boolean;
+  loadMoreRef: React.Ref<HTMLDivElement>;
+  onDeleteProduct: (productId: string) => void; // Función para manejar la eliminación
+  hasNextPage?: boolean; // Para mostrar mensaje de fin
 }
 
 export function ProductTable({
@@ -41,30 +66,32 @@ export function ProductTable({
   onDeleteProduct,
   hasNextPage,
 }: ProductTableProps) {
-  const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
+  const [expandedProducts, setExpandedProducts] = useState<Set<string>>(
+    new Set()
+  );
 
   const toggleExpand = (productId: string) => {
-    const newExpanded = new Set(expandedProducts)
+    const newExpanded = new Set(expandedProducts);
     if (newExpanded.has(productId)) {
-      newExpanded.delete(productId)
+      newExpanded.delete(productId);
     } else {
-      newExpanded.add(productId)
+      newExpanded.add(productId);
     }
-    setExpandedProducts(newExpanded)
-  }
+    setExpandedProducts(newExpanded);
+  };
 
   const formatPrice = (price: number | null | undefined): string => {
-    if (price === null || price === undefined) return "N/A"
+    if (price === null || price === undefined) return "N/A";
     return new Intl.NumberFormat("es-AR", {
       style: "currency",
       currency: "ARS",
-    }).format(price)
-  }
+    }).format(price);
+  };
 
   const handleConfirmDelete = (productId: string) => {
-    console.log("Confirmado eliminar desde tabla:", productId)
-    onDeleteProduct(productId) // Llamar a la función pasada por props
-  }
+    console.log("Confirmado eliminar desde tabla:", productId);
+    onDeleteProduct(productId); // Llamar a la función pasada por props
+  };
 
   // Si está cargando inicialmente, mostrar esqueletos
   if (isLoading) {
@@ -83,7 +110,10 @@ export function ProductTable({
         </TableHeader>
         <TableBody>
           {Array.from({ length: 10 }).map((_, index) => (
-            <TableRow key={`skel-${index}`} className="transition-colors hover:bg-muted/50">
+            <TableRow
+              key={`skel-${index}`}
+              className="transition-colors hover:bg-muted/50"
+            >
               <TableCell className="w-[40px]">
                 <div className="p-1 rounded">
                   <Skeleton className="h-4 w-4" />
@@ -119,32 +149,70 @@ export function ProductTable({
           ))}
         </TableBody>
       </Table>
-    )
+    );
   }
 
   return (
     <>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40px]"></TableHead>
-            <TableHead className="w-[100px]">Imagen</TableHead>
-            <TableHead className="w-[100px]">Nombre</TableHead>
-            <TableHead className="w-[120px]">Precio</TableHead>
-            <TableHead className="w-[180px]">Categoría</TableHead>
-            <TableHead className="w-[80px]">Visible</TableHead>
-            <TableHead className="w-[100px]">Acciones</TableHead>
-          </TableRow>
+            <TableRow>
+              <TableHead className="w-[40px]"></TableHead>
+                <TableHead className="w-[100px]">
+                  <div className="flex items-center justify-center">
+                    <ImageIcon className="h-4 w-4 mr-1" />
+                    Imagen
+                  </div>
+                </TableHead>
+                <TableHead className="w-[100px]">
+                  <div className="flex items-center justify-start">
+                    <Store className="h-4 w-4 mr-1" />
+                    Nombre
+                  </div>
+                </TableHead>
+                <TableHead className="w-[120px]">
+                  <div className="flex items-center justify-center">
+                    <Tag className="h-4 w-4 mr-1" />
+                    Precio
+                  </div>
+                </TableHead>
+              <TableHead className="w-[180px]">
+                <div className="flex items-center justify-center">
+                  <Box className="h-4 w-4 mr-1" />
+                  Categoría
+                </div>
+              </TableHead>
+              <TableHead className="w-[80px]">
+                <div className="flex items-center justify-center">
+                  <Eye className="h-4 w-4 mr-1" />
+                  Visible
+                </div>
+              </TableHead>
+              <TableHead className="w-[100px]">
+                <div className="flex items-center justify-center">
+                  <Globe className="h-4 w-4 mr-1" />
+                  Acciones
+                </div>
+              </TableHead>
+            </TableRow>
         </TableHeader>
         <TableBody>
           {products.map((product) => {
-            const isExpanded = expandedProducts.has(product.id)
-            const hasVariants = product.variants && product.variants.length > 1
-            const mainVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null
+            const isExpanded = expandedProducts.has(product.id);
+            const hasVariants = product.variants && product.variants.length > 1;
+            const mainVariant =
+              product.variants && product.variants.length > 0
+                ? product.variants[0]
+                : null;
 
             return (
               <React.Fragment key={product.id}>
-                <TableRow className={cn("transition-colors hover:bg-muted/50", isExpanded && "bg-muted/50")}>
+                <TableRow
+                  className={cn(
+                    "transition-colors hover:bg-muted/50",
+                    isExpanded && "bg-muted/50"
+                  )}
+                >
                   <TableCell className="w-[40px]">
                     {hasVariants && (
                       <button
@@ -152,47 +220,70 @@ export function ProductTable({
                         onClick={() => toggleExpand(product.id)}
                         className="p-1 hover:bg-muted rounded"
                       >
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                       </button>
                     )}
                   </TableCell>
                   <TableCell className="w-[100px]">
-                    <div className="relative w-16 h-16 rounded-md overflow-hidden">
+                    <div className="relative w-36 h-36 rounded-xs overflow-hidden">
                       <Image
                         src={
-                          product.images && product.images[0]?.src ? product.images[0].src : "/placeholderkaury2.png"
+                          product.images && product.images[0]?.src
+                            ? product.images[0].src.replace("original", "small")
+                            : "/placeholderkaury2.png"
                         }
                         alt={product.name?.es || "Imagen producto"}
                         fill
                         className="object-cover"
                         onError={(event) => {
-                          event.currentTarget.onerror = null
-                          event.currentTarget.src = "/placeholderkaury2.png"
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/placeholderkaury2.png";
                         }}
                       />
                     </div>
                   </TableCell>
                   <TableCell className="w-[100px] font-medium">
-                    <div className="truncate max-w-[100px]" title={product.name?.es || "Sin nombre"}>
+                    <div
+                      className="truncate max-w-[100px]"
+                      title={product.name?.es || "Sin nombre"}
+                    >
                       {product.name?.es || "Sin nombre"}
                     </div>
                   </TableCell>
-                  <TableCell className="w-[120px]">{formatPrice(mainVariant?.unit_price)}</TableCell>
+                  <TableCell className="w-[120px]">
+                    <div className="flex items-center justify-center font-extrabold">
+                      {formatPrice(mainVariant?.unit_price)}
+                    </div>
+                  </TableCell>
                   <TableCell className="w-[180px]">
                     {product.categories?.map((category: ProductCategory) => (
-                      <Badge key={category.id} variant="secondary" className="mr-1">
+                      <Badge
+                        key={category.id}
+                        variant="secondary"
+                        className="m-1 rounded-sm"
+                      >
                         {category.name?.es}{" "}
-                        {category.subcategories?.[0]?.name?.es ? `/ ${category.subcategories[0].name.es}` : ""}
+                        {category.subcategories?.[0]?.name?.es
+                          ? `/ ${category.subcategories[0].name.es}`
+                          : ""}
                       </Badge>
                     ))}
                   </TableCell>
                   <TableCell className="w-[80px]">
+                    <div className="flex items-center justify-center">
+
                     {product.showInStore ? (
                       <Eye className="h-4 w-4 text-green-500" />
                     ) : (
                       <EyeOff className="h-4 w-4 text-gray-500" />
                     )}
+                    </div>
                   </TableCell>
+                  
                   <TableCell className="w-[100px]">
                     <div className="flex items-center gap-1">
                       <Link href={`/products/edit/${product.id}`}>
@@ -213,20 +304,31 @@ export function ProductTable({
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>¿Estás realmente seguro?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              ¿Estás realmente seguro?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Esta acción no se puede deshacer. Se eliminará permanentemente el producto
-                              <span className="font-medium"> "{product.name?.es}"</span>.
+                              Esta acción no se puede deshacer. Se eliminará
+                              permanentemente el producto
+                              <span className="font-medium">
+                                {" "}
+                                "{product.name?.es}"
+                              </span>
+                              .
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+                            <AlertDialogCancel disabled={isDeleting}>
+                              Cancelar
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleConfirmDelete(product.id)}
                               disabled={isDeleting}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              {isDeleting ? "Eliminando..." : "Confirmar Eliminación"}
+                              {isDeleting
+                                ? "Eliminando..."
+                                : "Confirmar Eliminación"}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -236,29 +338,28 @@ export function ProductTable({
                 </TableRow>
                 {isExpanded &&
                   product.variants?.map((variant: ProductVariant) => (
-                    <TableRow key={variant.id} className="bg-muted/25 hover:bg-muted/40">
-                      <TableCell></TableCell> {/* Columna vacía para el botón de expandir */}
+                    <TableRow
+                      key={variant.id}
+                      className="bg-muted/25 hover:bg-muted/40"
+
+                    >
+                      <TableCell></TableCell>{" "}
+                      
+                      <TableCell></TableCell>{" "}
+                      <TableCell>{variant.id}</TableCell>{" "}
                       <TableCell>
-                        <div className="relative w-12 h-12 rounded-md overflow-hidden ml-4">
-                          {" "}
-                          {/* Añadido margen */}
-                          <Image
-                            src={
-                              variant.imageId
-                                ? product.images?.find((img) => img.id.toString() === variant.imageId)?.src ||
-                                  "/placeholderkaury2.png"
-                                : mainVariant && product.images && product.images[0]?.src
-                                  ? product.images[0].src
-                                  : "/placeholderkaury2.png"
-                            }
-                            alt={variant.value || "Imagen variante"}
-                            fill
-                            className="object-cover"
-                            onError={(event) => {
-                              event.currentTarget.onerror = null
-                              event.currentTarget.src = "/placeholderkaury2.png"
-                            }}
-                          />
+                        <div className="flex items-center">
+                        {formatPrice(variant.unit_price)}{" "}
+                        {variant.promotionalPrice && (
+                          <span className="text-xs text-green-600 ml-1">
+                            (Promo: {formatPrice(variant.promotionalPrice)})
+                          </span>
+                        )}
+                        {product.useGlobalPrices ? (
+                          <Globe className="text-blue-500 ml-2 w-4 h-4 text-xs" />
+                        ) : (
+                          <CircleDollarSign className="text-gray-500 ml-2 w-4 h-4 text-xs" />
+                        )}
                         </div>
                       </TableCell>
                       <TableCell className="pl-8">
@@ -270,35 +371,69 @@ export function ProductTable({
                               Object.entries(variant.attr)
                                 .filter(([_, value]) => value) // Filtrar valores nulos o undefined
                                 .map(([key, value], index, array) => (
-                                  <span key={key}>
-                                    {value}
+                                  <span key={key} className="">
+                                    {key}: {" "}
+                                    <span className="font-bold">{value}</span>
                                     {index < array.length - 1 ? " / " : ""}
                                   </span>
                                 ))}
                           </p>
-                          {variant.sku && <p className="text-xs text-muted-foreground">SKU: {variant.sku}</p>}
+                          {variant.sku && (
+                            <p className="text-xs text-muted-foreground">
+                              SKU: {variant.sku}
+                            </p>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {formatPrice(variant.unit_price)}{" "}
-                        {variant.promotionalPrice && (
-                          <span className="text-xs text-green-600 ml-1">
-                            (Promo: {formatPrice(variant.promotionalPrice)})
-                          </span>
-                        )}
+                        <div className="flex items-center justify-center relative w-12 h-12 rounded-md overflow-hidden w-[70px]">
+                          {variant.stock && variant.stock && product.stockManagement === true ? <><span className="font-bold">{variant.stock}</span> u</> : "Infinito"}
+                          {product.stockManagement ? (
+                            <Blocks className="h-4 w-4 text-orange-500 ml-2" />
+                          ) : (
+                            <Infinity className="h-4 w-4 text-gray-500 ml-2" />
+                          )}
+                        </div>
                       </TableCell>
-                      <TableCell></TableCell> {/* Categoría ya está en la fila principal */}
-                      <TableCell></TableCell> {/* Visibilidad ya está en la fila principal */}
-                      <TableCell></TableCell> {/* Acciones ya están en la fila principal */}
+                      <TableCell></TableCell>{" "}
+                      {/* Columna vacía para el botón de expandir */}
+{/*                       <TableCell>
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden ml-4">
+                           <Image
+                            src={
+                              variant.imageId
+                                ? product.images?.find((img) => img.id.toString() === variant.imageId)?.src ||
+                                  "/placeholderkaury2.png"
+                                : mainVariant && product.images && product.images[0]?.src
+                                  ? product.images[0].src.replace("original", "small")
+                                  : "/placeholderkaury2.png"
+                            }
+                            alt={variant.value || "Imagen variante"}
+                            fill
+                            className="object-cover"
+                            onError={(event) => {
+                              event.currentTarget.onerror = null
+                              event.currentTarget.src = "/placeholderkaury2.png"
+                            }}
+                          />
+                        </div>
+                      </TableCell> */}
+                     
+                      
+                    
+                    
                     </TableRow>
                   ))}
               </React.Fragment>
-            )
+            );
           })}
           {/* Esqueletos para carga de siguientes páginas */}
           {isFetchingNextPage &&
             Array.from({ length: 10 }).map((_, index) => (
-              <TableRow key={`fetch-skel-${index}`} className="transition-colors hover:bg-muted/50">
+              <TableRow
+                key={`fetch-skel-${index}`}
+                className="transition-colors hover:bg-muted/50"
+              >
                 <TableCell className="w-[40px]">
                   <div className="p-1 rounded">
                     <Skeleton className="h-4 w-4" />
@@ -341,9 +476,15 @@ export function ProductTable({
       {/* Mensajes de estado al final de la tabla */}
       <div className="text-center mt-4 mb-4 text-sm text-muted-foreground">
         {isFetchingNextPage ? "Cargando más productos..." : ""}
-        {!isFetchingNextPage && !hasNextPage && products.length > 0 && "Has llegado al final."}
-        {!isLoading && !isFetchingNextPage && products.length === 0 && "No se encontraron productos."}
+        {!isFetchingNextPage &&
+          !hasNextPage &&
+          products.length > 0 &&
+          "Has llegado al final."}
+        {!isLoading &&
+          !isFetchingNextPage &&
+          products.length === 0 &&
+          "No se encontraron productos."}
       </div>
     </>
-  )
+  );
 }

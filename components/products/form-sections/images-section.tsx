@@ -57,7 +57,7 @@ export function ImagesSection() {
                   className="relative aspect-square border rounded-lg overflow-hidden group shadow-md bg-muted/20"
                 >
                   <Image
-                    src={image.url || image.src}
+                    src={image.url?.replace("original", "small") || image.src?.replace("original", "small")}
                     alt={`Imagen ${index + 1}${image.filename ? ` - ${image.filename}` : ''}`}
                     fill
                     sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16.67vw"
