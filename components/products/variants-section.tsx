@@ -18,6 +18,7 @@ interface VariantsSectionProps {
   initialGlobalCost?: string | null
   onGlobalCostChange: (value: string) => void
   onDialogOpenChange: (value: boolean) => void
+  isDialogOpen: boolean
 }
 
 export function VariantsSection({ 
@@ -32,6 +33,7 @@ export function VariantsSection({
   onGlobalPromotionalPriceChange,
   initialGlobalCost,
   onGlobalCostChange,
+  isDialogOpen,
   onDialogOpenChange
 }: VariantsSectionProps) {
   return (
@@ -57,6 +59,7 @@ export function VariantsSection({
           initialGlobalCost={initialGlobalCost}
           onGlobalCostChange={onGlobalCostChange}
           onDialogOpenChange={onDialogOpenChange}
+          isDialogOpen={isDialogOpen}
         />
       </CardContent>
     </Card>

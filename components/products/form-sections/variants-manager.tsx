@@ -85,6 +85,8 @@ interface VariantsManagerProps {
   onGlobalPromotionalPriceChange: (value: string) => void;
   initialGlobalCost?: string | null;
   onGlobalCostChange: (value: string) => void;
+  onDialogOpenChange: (value: boolean) => void;
+  isDialogOpen: boolean;
 }
 
 const isVariantConfirmed = (variant: ProductVariant) => {
@@ -106,9 +108,11 @@ export function VariantsManager({
   onGlobalPromotionalPriceChange,
   initialGlobalCost,
   onGlobalCostChange,
+  onDialogOpenChange,
+  isDialogOpen,
 }: VariantsManagerProps) {
   const images = useSelector((state: RootState) => state.products.images);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false);
   const [currentVariant, setCurrentVariant] = useState<ProductVariant | null>(
     null
@@ -203,7 +207,7 @@ export function VariantsManager({
       stockManagement: stockManagement,
     });
     setEditIndex(null);
-    setIsDialogOpen(true);
+    onDialogOpenChange(true);
   };
 
   const handleEditVariant = (variant: ProductVariant, index: number) => {
@@ -229,7 +233,7 @@ export function VariantsManager({
           : variant.cost,
     });
     setEditIndex(index);
-    setIsDialogOpen(true);
+    onDialogOpenChange(true);
   };
 
   const handleDeleteVariant = (index: number) => {
@@ -272,7 +276,7 @@ export function VariantsManager({
     }
 
     onChange(updatedVariants);
-    setIsDialogOpen(false);
+    onDialogOpenChange(false);
   };
 
   const updateVariantField = (field: string, value: any) => {
@@ -742,7 +746,7 @@ export function VariantsManager({
             setCurrentVariant(null);
             setEditIndex(null);
           }
-          setIsDialogOpen(open);
+          onDialogOpenChange(open);
         }}
       >
         <DialogContent
@@ -1071,7 +1075,7 @@ export function VariantsManager({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setIsDialogOpen(false);
+                  onDialogOpenChange(false);
                 }}
               >
                 Cancelar

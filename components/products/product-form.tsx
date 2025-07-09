@@ -278,13 +278,15 @@ export function ProductForm({
     }));
   };
 
-  const onSubmit = async (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues, send: boolean) => {
+    if (!send) {
+      return;
+    }
     try {
       setIsSubmitting(true);
       const transformedCategories =
         transformCategoriesForApi(selectedCategories);
 
-      console.log(variants, "variants");
 
       const productData = {
         ...data,
@@ -307,7 +309,7 @@ export function ProductForm({
           : null,
       };
 
-      if (context === "edit" && product) {
+      if (context === "edit" && product && !isDialogOpen) {
         const result = (await updateProduct.mutateAsync({
           productId: product.id,
           productData: productData as ProductFormState,
@@ -353,10 +355,8 @@ export function ProductForm({
         const result = (await createProduct.mutateAsync(
           productData as ProductFormState
         )) as ApiResponse;
-        console.log(result, "result");
 
         if (result.status === "error") {
-          console.log(result, "result");
           // Mostrar errores de campos en el formulario de forma dinámica
           if (result.errors?.fieldErrors) {
             setApiFieldErrorsDynamically(
@@ -408,9 +408,9 @@ export function ProductForm({
       }
       setIsSubmitting(false);
       return;
-    } /* finally {
+    } finally {
       setIsSubmitting(false);
-    } */
+    }
   };
 
   // Modificar los campos de dimensiones para usar el formulario directamente
@@ -451,13 +451,15 @@ export function ProductForm({
 
   const handleFormSubmit = form.handleSubmit((data) => {
     // Si el modal de variantes está abierto, no permitir el submit
-    if (isDialogOpen) {
+    if (isDialogOpen === true) {
       return;
     }
-    onSubmit(data);
-    setTimeout(() => {
-      router.push("/products/list");
-    }, 1500);
+    else {
+      onSubmit(data, true);
+      setTimeout(() => {
+        router.push("/products/list");
+      }, 1500);
+    }
   });
 
   return (
@@ -515,6 +517,7 @@ export function ProductForm({
                   form.setValue("globalCost", value)
                 }
                 onDialogOpenChange={setIsDialogOpen}
+                isDialogOpen={isDialogOpen}
               />
 
               {/* Códigos */}
