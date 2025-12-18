@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { DashboardSidebar } from '@/components/dashboard/sidebar/dashboard-sidebar'
 import { Menu, Bell, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/providers/auth-context'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { logout } = useAuth()
 
   return (
     <div className="fixed inset-0 bg-[#0A0A0A] overflow-hidden">
@@ -32,7 +34,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]">
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]"
+              onClick={logout}
+            >
               <User className="h-5 w-5" />
             </Button>
           </div>

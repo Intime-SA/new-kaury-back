@@ -6,6 +6,7 @@ import { Providers } from "../providers/providers"
 import { DashboardLayout } from "@/components/dashboard/layout/dashboard-layout"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/providers/theme-provider"
+import { AuthProvider } from "@/providers/auth-context"
 
 const montserrat = Montserrat({ 
   subsets: ["latin"],
@@ -94,11 +95,14 @@ export default function RootLayout({
       </head>
       <body className={`${montserrat.variable} font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          
           <Providers>
+            <AuthProvider>
             <DashboardLayout>
               {children}
             </DashboardLayout>
             <Toaster />
+            </AuthProvider>
           </Providers>
         </ThemeProvider>
       </body>
