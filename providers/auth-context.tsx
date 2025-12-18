@@ -31,7 +31,6 @@ const validateAdminCredentials = (user: User): boolean => {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
-
   // Mostrar loading mientras se verifica la autenticación
   if (loading) {
     return (
@@ -41,17 +40,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  // Si estamos en la página de login, no proteger
-  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-    return <>{children}</>
-  }
-
-  // Si no hay usuario autenticado, redirigir a login
+  // Si no hay usuario autenticado, mostrar pantalla de carga mientras redirige
   if (!user) {
-    if (typeof window !== 'undefined') {
-      router.push("/login")
-    }
-    return null
+    router.push("/login")
   }
 
   // Si hay usuario autenticado, mostrar el contenido protegido
@@ -96,11 +87,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null)
       }
+
       setLoading(false)
+
+      // Manejar redirecciones después de actualizar el estado
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          const currentPath = window.location.pathname
+
+          if (!user && currentPath !== '/login') {
+            // No hay usuario y no estamos en login → redirigir a login
+            router.push('/login')
+          } else if (user && currentPath === '/login') {
+            // Hay usuario y estamos en login → redirigir a dashboard
+            router.push('/')
+          }
+        }
+      }, 100)
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [router])
 
   const login = async (email: string, password: string) => {
     try {
