@@ -14,6 +14,10 @@ interface AuthContextType {
   logout: () => Promise<void>
 }
 
+interface ProtectedRouteProps {
+  children: React.ReactNode
+}
+
 // Constantes para validación de credenciales admin
 const ADMIN_EMAIL = "admin@kaurymdp.com"
 const ADMIN_UID = "x3ZZHckzV5R7rCJ0Usk3y88Zxdd2"
@@ -21,6 +25,37 @@ const ADMIN_UID = "x3ZZHckzV5R7rCJ0Usk3y88Zxdd2"
 // Función helper para validar credenciales de admin
 const validateAdminCredentials = (user: User): boolean => {
   return user.email === ADMIN_EMAIL && user.uid === ADMIN_UID
+}
+
+// Componente para proteger rutas
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <div className="text-white">Verificando autenticación...</div>
+      </div>
+    )
+  }
+
+  // Si estamos en la página de login, no proteger
+  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+    return <>{children}</>
+  }
+
+  // Si no hay usuario autenticado, redirigir a login
+  if (!user) {
+    if (typeof window !== 'undefined') {
+      router.push("/login")
+    }
+    return null
+  }
+
+  // Si hay usuario autenticado, mostrar el contenido protegido
+  return <>{children}</>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -43,9 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Token vencido, cerrar sesión
             await signOut(auth)
             setUser(null)
-            setLoading(false)
-            router.push("/login")
-            return
           } else {
             // Validar credenciales de admin
             if (validateAdminCredentials(user)) {
@@ -54,33 +86,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Usuario no autorizado, cerrar sesión
               await signOut(auth)
               setUser(null)
-              setLoading(false)
-              router.push("/login")
-              return
             }
           }
         } catch (error) {
           console.error("Error verificando token:", error)
           await signOut(auth)
           setUser(null)
-          setLoading(false)
-          router.push("/login")
-          return
         }
       } else {
         setUser(null)
-        setLoading(false)
-        // Redirigir a login si no hay usuario autenticado
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          router.push("/login")
-        }
-        return
       }
       setLoading(false)
     })
 
     return () => unsubscribe()
-  }, [router])
+  }, [])
 
   const login = async (email: string, password: string) => {
     try {
