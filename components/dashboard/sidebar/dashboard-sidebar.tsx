@@ -47,7 +47,6 @@ const navigation = [
           { name: 'Pagos', href: '/settings/payments', icon: Tag },
         ]
       },
-      { name: 'Ayuda', href: '#', icon: HelpCircle, enabled: false },
     ],
   },
 ]
