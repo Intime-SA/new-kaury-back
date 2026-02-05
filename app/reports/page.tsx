@@ -372,11 +372,9 @@ export default function ReportsPage() {
   }
 
   // Handler para cambio de fechas
+  // El hook formatea internamente como YYYY-MM-DD, sin horas
   const handleDateRangeChange = (range: DateRange) => {
-    // Ajustar endDate para incluir todo el día
-    const endOfDay = new Date(range.to)
-    endOfDay.setHours(23, 59, 59, 999)
-    setDateRange(range.from, endOfDay)
+    setDateRange(range.from, range.to)
   }
 
   // Transformar datos para las gráficas

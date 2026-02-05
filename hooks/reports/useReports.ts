@@ -18,9 +18,18 @@ const getEndOfMonth = (): Date => {
     return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 };
 
-// Helper para formatear fecha a ISO string
-const formatToISO = (date: Date): string => {
-    return date.toISOString();
+// Helper para formatear fecha a ISO string SIN conversión de zona horaria
+// Usa el día/mes/año LOCAL para evitar que el día cambie por diferencia horaria
+const formatToLocalISO = (date: Date, isEndOfDay: boolean = false): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    // Para startDate: inicio del día (00:00:00.000Z)
+    // Para endDate: fin del día (23:59:59.999Z)
+    const time = isEndOfDay ? '23:59:59.999Z' : '00:00:00.000Z';
+    
+    return `${year}-${month}-${day}T${time}`;
 };
 
 export interface UseReportsFilters {
@@ -53,10 +62,10 @@ export const useReports = (initialFilters?: Partial<UseReportsFilters>): UseRepo
         endDate: initialFilters?.endDate ?? getEndOfMonth(),
     });
 
-    // Parámetros formateados para la API
+    // Parámetros formateados para la API (ISO con día local, sin conversión UTC)
     const queryParams: GetReportsParams = useMemo(() => ({
-        startDate: formatToISO(filters.startDate),
-        endDate: formatToISO(filters.endDate),
+        startDate: formatToLocalISO(filters.startDate, false),  // 00:00:00.000Z
+        endDate: formatToLocalISO(filters.endDate, true),       // 23:59:59.999Z
     }), [filters.startDate, filters.endDate]);
 
     // Query para obtener los reportes
