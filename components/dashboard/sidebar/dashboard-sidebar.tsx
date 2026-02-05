@@ -30,7 +30,7 @@ const navigation = [
   {
     title: 'ANÁLISIS',
     items: [
-      { name: 'Reportes', href: '#', icon: BarChart2, enabled: false },
+      { name: 'Reportes', href: '/reports', icon: BarChart2, enabled: true },
     ],
   },
   {
