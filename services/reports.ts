@@ -11,8 +11,28 @@ export interface ReportsData {
     totalAmount: ReportDataPoint[];
 }
 
+export interface EventsData {
+    visitsCount: ReportDataPoint[];
+    visitsValue: ReportDataPoint[];
+    viewProductCount: ReportDataPoint[];
+    viewProductValue: ReportDataPoint[];
+    addToCartCount: ReportDataPoint[];
+    addToCartValue: ReportDataPoint[];
+    createOrderCount: ReportDataPoint[];
+    createOrderValue: ReportDataPoint[];
+    purchaseCount: ReportDataPoint[];
+    purchaseValue: ReportDataPoint[];
+    totalEvents: ReportDataPoint[];
+    conversionRate: ReportDataPoint[];
+}
+
 export interface ReportsApiResponse {
     data: ReportsData;
+    status: number;
+}
+
+export interface EventsApiResponse {
+    data: EventsData;
     status: number;
 }
 
@@ -42,6 +62,33 @@ export const getReportsService = async (params: GetReportsParams): Promise<Repor
     }
 
     const result: ReportsApiResponse = await response.json();
+
+    if (result.status !== 200 || !result.data) {
+        throw new Error('API response structure is not as expected');
+    }
+
+    return result.data;
+};
+
+// --- Servicio para Obtener Reportes de Eventos ---
+export const getEventsReportsService = async (params: GetReportsParams): Promise<EventsData> => {
+    const { startDate, endDate } = params;
+
+    const queryParams = new URLSearchParams({
+        startDate,
+        endDate,
+    });
+
+    console.log(`Fetching events reports (service) with params: ${queryParams.toString()}`);
+
+    const response = await fetch(`${API_BASE_URL}/reports/events?${queryParams.toString()}`);
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.message || `Error fetching events reports: ${response.statusText}`);
+    }
+
+    const result: EventsApiResponse = await response.json();
 
     if (result.status !== 200 || !result.data) {
         throw new Error('API response structure is not as expected');
