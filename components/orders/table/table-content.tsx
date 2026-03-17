@@ -1,4 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Receipt } from "lucide-react"
 import { TableSkeleton } from "./table-skeleton"
 import { OrderTableRow } from "./table-row"
 import type { Order } from "@/types/orders"
@@ -47,6 +48,9 @@ export function TableContent({
               />
             </TableHead>
             <TableHead className="w-[120px]">ID</TableHead>
+            <TableHead className="w-[60px] text-center" title="Comprobante asociado">
+              <Receipt className="h-4 w-4 mx-auto text-muted-foreground" />
+            </TableHead>
             <TableHead className="w-[180px]">Fecha</TableHead>
             <TableHead className="w-[180px]">Total</TableHead>
             <TableHead className="w-[120px]">Productos</TableHead>
@@ -57,7 +61,7 @@ export function TableContent({
         </TableHeader>
         <TableBody>
           {loading || isSearching ? (
-            <TableSkeleton rows={10} />
+            <TableSkeleton rows={10} compact={!!selectedOrderId} />
           ) : (
             <>
               {orders.map((order) => (
@@ -75,7 +79,7 @@ export function TableContent({
             </>
           )}
           {isFetchingNextPage && searchTerm === "" && (
-            <TableSkeleton rows={10} />
+            <TableSkeleton rows={10} compact={!!selectedOrderId} />
           )}
         </TableBody>
       </Table>

@@ -137,5 +137,6 @@ export interface Order {
     provincia: string
     codigoPostal: string
   }
+  requestPaymentId?: string
 }
   

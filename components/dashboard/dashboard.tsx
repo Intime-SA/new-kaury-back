@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContent } from "@/components/dashboard/content/dashboard-content"
 import { ThemeProvider } from "@/providers/theme-provider"
@@ -9,7 +10,9 @@ export default function Dashboard() {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <SidebarProvider>
         <div className="flex min-h-screen bg-background w-[100vw]">
-          <DashboardContent />
+          <Suspense fallback={null}>
+            <DashboardContent />
+          </Suspense>
         </div>
       </SidebarProvider>
     </ThemeProvider>

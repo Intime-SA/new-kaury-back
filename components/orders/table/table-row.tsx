@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, Receipt } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn, formatISODate } from "@/lib/utils"
 import { OrderStatus } from "../status/order-status"
@@ -65,6 +65,13 @@ export function OrderTableRow({
       </TableCell>
       <TableCell className="w-[120px] font-medium">
         #{order.numberOrder}
+      </TableCell>
+      <TableCell className="w-[60px] text-center">
+        {order.requestPaymentId ? (
+          <Receipt className="h-4 w-4 text-emerald-500 mx-auto" title="Comprobante asociado" />
+        ) : (
+          <span className="text-muted-foreground/40">—</span>
+        )}
       </TableCell>
       <TableCell className="w-[180px]">
         {formatISODate(order.date)}

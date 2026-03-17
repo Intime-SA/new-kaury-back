@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, ShoppingBag, Package, Users, BarChart2, Settings, HelpCircle, Tag, List, Archive } from 'lucide-react'
+import { Home, ShoppingBag, Package, Users, BarChart2, Settings, HelpCircle, Tag, List, Archive, Receipt } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -31,6 +31,12 @@ const navigation = [
     title: 'ANÁLISIS',
     items: [
       { name: 'Reportes', href: '/reports', icon: BarChart2, enabled: true },
+    ],
+  },
+  {
+    title: 'ADMIN',
+    items: [
+      { name: 'Comprobantes de Pago', href: '/admin/payment-requests', icon: Receipt, enabled: true },
     ],
   },
   {
