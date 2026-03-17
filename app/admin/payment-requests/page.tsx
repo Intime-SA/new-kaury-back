@@ -361,13 +361,13 @@ function PaymentCard({
           </div>
 
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            {hasOrders ? (
-              pr.status === 'cancelada' ? (
-                <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px] px-1.5 py-0 gap-1">
-                  <XCircle className="h-2.5 w-2.5" />
-                  Cancelada
-                </Badge>
-              ) : isPendiente ? (
+            {pr.status === 'cancelada' ? (
+              <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px] px-1.5 py-0 gap-1">
+                <XCircle className="h-2.5 w-2.5" />
+                Cancelada
+              </Badge>
+            ) : hasOrders ? (
+              isPendiente ? (
                 <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0 gap-1">
                   <Clock className="h-2.5 w-2.5" />
                   Confirmar pago
@@ -1489,7 +1489,7 @@ export default function PaymentRequestsAdminPage() {
                   const canAutoMatch = !hasOrders
                   const canAssociateOrder = !hasOrders
                   const currentStatus = selectedPayment.status
-                  const allowedStatuses = (['nueva', 'pagoRecibido', 'cancelada'] as const)
+                  const allowedStatuses = (['pending', 'nueva', 'pagoRecibido', 'cancelada'] as const)
                   const statusOptions = [
                     ...allowedStatuses,
                     ...(['empaquetada', 'archivada'] as const).filter(
