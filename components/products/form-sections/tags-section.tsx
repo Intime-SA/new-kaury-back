@@ -15,17 +15,17 @@ interface TagsSectionProps {
 export function TagsSection({ control }: TagsSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Star className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-soft">
+          <Star className="h-5 w-5" />
+        </span>
         <div className="w-full">
           <CardTitle className="flex justify-between items-center gap-2">
             Tags, Marca y SEO
-            <div className="inline-flex items-center gap-2 text-sm font-normal text-blue-600 ml-2">
+            <div className="inline-flex items-center gap-2 text-xs font-normal text-primary">
               <Wand2 className="h-3 w-3" />
               Generar con IA
-              <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs">
-                Próximamente
-              </Badge>
+              <Badge variant="soft" className="text-[10px]">Próximamente</Badge>
             </div>
           </CardTitle>
           <CardDescription>Creá palabras clave y facilitá la búsqueda</CardDescription>

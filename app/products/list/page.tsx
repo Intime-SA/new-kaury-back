@@ -212,50 +212,56 @@ function ProductListContent() {
 
   if (status === "error") {
     return (
-      <div className="container mx-auto py-6 max-w-7xl text-destructive">
-        Error al cargar los productos:{" "}
-        {(error as Error)?.message || "Error desconocido"}
+      <div className="container mx-auto py-6 max-w-7xl">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Error al cargar los productos: {(error as Error)?.message || "Error desconocido"}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Productos</h1>
+    <div className="container mx-auto py-6 max-w-7xl space-y-6 animate-fade-up">
+      <div className="flex flex-wrap gap-3 justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Productos</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Gestioná tu catálogo, stock y categorías
+          </p>
+        </div>
         <Link href="/products/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Crear Producto
+          <Button variant="gradient" className="gap-2">
+            <Plus className="h-4 w-4" /> Crear producto
           </Button>
         </Link>
       </div>
 
       {/* Importar productos desde Excel */}
-      <div className="mb-6">
-        <ImportProductsSection
-          onFileSelected={handleFileSelected}
-          onConfirm={handleAnalyze}
-          onClear={handleClear}
-          selectedFile={selectedFile}
-          rowsReadyCount={rowsReadyCount}
-          analyzeLoading={analyzeImportMutation.isLoading}
-          analyzeData={analyzeImportMutation.data}
-        />
-      </div>
+      <ImportProductsSection
+        onFileSelected={handleFileSelected}
+        onConfirm={handleAnalyze}
+        onClear={handleClear}
+        selectedFile={selectedFile}
+        rowsReadyCount={rowsReadyCount}
+        analyzeLoading={analyzeImportMutation.isLoading}
+        analyzeData={analyzeImportMutation.data}
+      />
 
       <ProductFilters />
 
-      <ScrollArea className="rounded-md border">
-        <ProductTable
-          products={products ?? []}
-          isLoading={isLoading ?? true}
-          isDeleting={deleteProduct.isLoading}
-          isFetchingNextPage={isFetchingNextPage ?? false}
-          loadMoreRef={loadMoreRef}
-          onDeleteProduct={handleDelete}
-          hasNextPage={hasNextPage ?? false}
-        />
-      </ScrollArea>
+      <div className="rounded-2xl border border-border/70 bg-card shadow-soft overflow-hidden">
+        <ScrollArea className="">
+          <ProductTable
+            products={products ?? []}
+            isLoading={isLoading ?? true}
+            isDeleting={deleteProduct.isLoading}
+            isFetchingNextPage={isFetchingNextPage ?? false}
+            loadMoreRef={loadMoreRef}
+            onDeleteProduct={handleDelete}
+            hasNextPage={hasNextPage ?? false}
+          />
+        </ScrollArea>
+      </div>
 
       <ImportAnalyzeModal
         open={showAnalyzeModal}
@@ -299,13 +305,16 @@ export default function ProductList() {
 
 function ProductListPageSkeleton() {
   return (
-    <div className="container mx-auto py-6 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-10 w-32" />
+    <div className="container mx-auto py-6 max-w-7xl space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-10 w-36 rounded-xl" />
       </div>
-      <Skeleton className="h-[180px] w-full rounded-md border mb-6" />
-      <Skeleton className="h-[400px] w-full rounded-md border" />
+      <Skeleton className="h-[180px] w-full rounded-2xl" />
+      <Skeleton className="h-[400px] w-full rounded-2xl" />
     </div>
   );
 }

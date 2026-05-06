@@ -15,8 +15,10 @@ interface DimensionsSectionProps {
 export function DimensionsSection({ control, handleDimensionChange }: DimensionsSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Weight className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+          <Weight className="h-5 w-5" />
+        </span>
         <div>
           <CardTitle>Peso y dimensiones</CardTitle>
           <CardDescription>Ingresá los datos para calcular el costo de envío</CardDescription>
@@ -41,7 +43,7 @@ export function DimensionsSection({ control, handleDimensionChange }: Dimensions
                       }}
                     />
                   </FormControl>
-                  <div className="flex items-center justify-center bg-muted border border-l-0 rounded-r-md px-3">
+                  <div className="flex items-center justify-center bg-muted border border-l-0 border-border rounded-r-xl px-3 text-xs font-medium text-muted-foreground -ml-px">
                     kg
                   </div>
                 </div>
@@ -67,7 +69,7 @@ export function DimensionsSection({ control, handleDimensionChange }: Dimensions
                       }}
                     />
                   </FormControl>
-                  <div className="flex items-center justify-center bg-muted border border-l-0 rounded-r-md px-3">
+                  <div className="flex items-center justify-center bg-muted border border-l-0 border-border rounded-r-xl px-3 text-xs font-medium text-muted-foreground -ml-px">
                     cm
                   </div>
                 </div>
@@ -93,7 +95,7 @@ export function DimensionsSection({ control, handleDimensionChange }: Dimensions
                       }}
                     />
                   </FormControl>
-                  <div className="flex items-center justify-center bg-muted border border-l-0 rounded-r-md px-3">
+                  <div className="flex items-center justify-center bg-muted border border-l-0 border-border rounded-r-xl px-3 text-xs font-medium text-muted-foreground -ml-px">
                     cm
                   </div>
                 </div>
@@ -119,7 +121,7 @@ export function DimensionsSection({ control, handleDimensionChange }: Dimensions
                       }}
                     />
                   </FormControl>
-                  <div className="flex items-center justify-center bg-muted border border-l-0 rounded-r-md px-3">
+                  <div className="flex items-center justify-center bg-muted border border-l-0 border-border rounded-r-xl px-3 text-xs font-medium text-muted-foreground -ml-px">
                     cm
                   </div>
                 </div>

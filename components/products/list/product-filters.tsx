@@ -178,32 +178,32 @@ export function ProductFilters() {
 
     if (filters.productName) {
       chips.push(
-        <Badge key="name" variant="secondary" className="flex items-center gap-1 mr-2 mb-2">
+        <Badge key="name" variant="soft" className="flex items-center gap-1.5 pr-1">
           <Search className="h-3 w-3" />
           {filters.productName}
-          <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("productName")} />
+          <button type="button" onClick={() => handleClearFilter("productName")} className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"><X className="h-3 w-3" /></button>
         </Badge>,
       )
     }
 
     if (filters.minPrice !== null || filters.maxPrice !== null) {
       chips.push(
-        <Badge key="price" variant="secondary" className="flex items-center gap-1 mr-2 mb-2">
+        <Badge key="price" variant="soft" className="flex items-center gap-1.5 pr-1">
           <DollarSign className="h-3 w-3" />
           {filters.minPrice !== null ? `Desde $${filters.minPrice}` : ""}
           {filters.minPrice !== null && filters.maxPrice !== null ? " - " : ""}
           {filters.maxPrice !== null ? `Hasta $${filters.maxPrice}` : ""}
-          <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("price")} />
+          <button type="button" onClick={() => handleClearFilter("price")} className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"><X className="h-3 w-3" /></button>
         </Badge>,
       )
     }
 
     if (filters.inStock !== null) {
       chips.push(
-        <Badge key="stock" variant="secondary" className="flex items-center gap-1 mr-2 mb-2">
+        <Badge key="stock" variant="soft" className="flex items-center gap-1.5 pr-1">
           <Package2 className="h-3 w-3" />
           {filters.inStock ? "Con Stock" : "Sin Stock"}
-          <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("inStock")} />
+          <button type="button" onClick={() => handleClearFilter("inStock")} className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"><X className="h-3 w-3" /></button>
         </Badge>,
       )
     }
@@ -212,13 +212,13 @@ export function ProductFilters() {
        const formattedFrom = filters.createdAtFrom ? new Date(filters.createdAtFrom + 'T00:00:00').toLocaleDateString('es-AR') : '';
       const formattedTo = filters.createdAtTo ? new Date(filters.createdAtTo + 'T00:00:00').toLocaleDateString('es-AR') : '';
       chips.push(
-        <Badge key="created" variant="secondary" className="flex items-center gap-1 mr-2 mb-2">
+        <Badge key="created" variant="soft" className="flex items-center gap-1.5 pr-1">
           <Calendar className="h-3 w-3" />
           Creado:
           {formattedFrom ? ` Desde ${formattedFrom}` : ""}
           {formattedFrom && formattedTo ? " - " : ""}
           {formattedTo ? ` Hasta ${formattedTo}` : ""}
-          <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("creationDate")} />
+          <button type="button" onClick={() => handleClearFilter("creationDate")} className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"><X className="h-3 w-3" /></button>
         </Badge>,
       )
     }
@@ -227,13 +227,13 @@ export function ProductFilters() {
       const formattedFrom = filters.updatedAtFrom ? new Date(filters.updatedAtFrom + 'T00:00:00').toLocaleDateString('es-AR') : '';
       const formattedTo = filters.updatedAtTo ? new Date(filters.updatedAtTo + 'T00:00:00').toLocaleDateString('es-AR') : '';
       chips.push(
-        <Badge key="updated" variant="secondary" className="flex items-center gap-1 mr-2 mb-2">
+        <Badge key="updated" variant="soft" className="flex items-center gap-1.5 pr-1">
           <RefreshCw className="h-3 w-3" />
           Actualizado:
           {formattedFrom ? ` Desde ${formattedFrom}` : ""}
           {formattedFrom && formattedTo ? " - " : ""}
           {formattedTo ? ` Hasta ${formattedTo}` : ""}
-          <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("updateDate")} />
+          <button type="button" onClick={() => handleClearFilter("updateDate")} className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"><X className="h-3 w-3" /></button>
         </Badge>,
       )
     }
@@ -243,14 +243,14 @@ export function ProductFilters() {
 
 
   return (
-    <div className="mb-6 space-y-4">
+    <div className="space-y-3">
       {/* Barra de búsqueda y filtros */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar productos..."
-            className="pl-9"
+            placeholder="Buscar productos por nombre..."
+            className="pl-10"
             value={localProductName}
             onChange={handleLocalProductNameChange}
           />
@@ -261,7 +261,7 @@ export function ProductFilters() {
             <Button variant="outline" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               Filtros
-              {hasFilters && <span className="ml-1 h-2 w-2 rounded-full bg-sky-500"></span>}
+              {hasFilters && <span className="ml-1 h-2 w-2 rounded-full bg-gradient-brand animate-pulse-soft"></span>}
               <ChevronDown className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -392,13 +392,13 @@ export function ProductFilters() {
       </div>
 
       {hasFilters && (
-        <div className="flex flex-wrap items-center gap-y-2">
+        <div className="flex flex-wrap items-center gap-2">
           {renderFilterChips()}
-           {renderFilterChips().length > 0 && (
-             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs ml-2" onClick={handleResetFilters}>
+          {renderFilterChips().length > 0 && (
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleResetFilters}>
               Limpiar todos
-             </Button>
-           )}
+            </Button>
+          )}
         </div>
       )}
     </div>

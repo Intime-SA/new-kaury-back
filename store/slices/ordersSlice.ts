@@ -11,9 +11,17 @@ interface OrdersState {
   isAllSelected: boolean
 }
 
+// Devuelve el inicio del día actual (00:00 hora local) en ISO.
+// Se evalúa al cargar el slice → cada nueva sesión arranca con la fecha de hoy.
+const getTodayISO = (): string => {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d.toISOString()
+}
+
 const initialState: OrdersState = {
   status: 'todas',
-  selectedDate: null,
+  selectedDate: getTodayISO(),
   searchNumber: '',
   currentPage: 1,
   selectedOrders: [],

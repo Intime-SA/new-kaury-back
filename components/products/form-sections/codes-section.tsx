@@ -11,8 +11,10 @@ interface CodesSectionProps {
 export function CodesSection({ control }: CodesSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Barcode className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+          <Barcode className="h-5 w-5" />
+        </span>
         <div>
           <CardTitle>Códigos</CardTitle>
           <CardDescription>Información para identificar tu producto</CardDescription>

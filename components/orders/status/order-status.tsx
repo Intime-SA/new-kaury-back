@@ -13,37 +13,44 @@ const statusConfig = {
   todas: {
     label: 'Todas',
     icon: Clock,
-    className: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 border-secondary/30 shadow-secondary/30',
+    className: 'bg-muted text-muted-foreground border-border',
+    dot: 'bg-muted-foreground',
   },
   nueva: {
     label: 'Pendiente',
     icon: Clock,
-    className: 'bg-yellow-500/90 text-white hover:bg-yellow-500 border-yellow-600/30 shadow-yellow-500/30',
+    className: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
   },
   empaquetada: {
     label: 'Empaquetada',
     icon: Package,
-    className: 'bg-blue-500/90 text-white hover:bg-blue-500 border-blue-600/30 shadow-blue-500/30',
+    className: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
   },
   pagoRecibido: {
     label: 'Recibido',
     icon: CreditCard,
-    className: 'bg-green-500/90 text-white hover:bg-green-500 border-green-600/30 shadow-green-500/30',
+    className: 'bg-success/10 text-success border-success/20',
+    dot: 'bg-success',
   },
   enviada: {
     label: 'En Distribución',
     icon: Truck,
-    className: 'bg-green-500/90 text-white hover:bg-green-500 border-green-600/30 shadow-green-500/30',
+    className: 'bg-success/10 text-success border-success/20',
+    dot: 'bg-success',
   },
   cancelada: {
     label: 'Cancelada',
     icon: XCircle,
-    className: 'bg-red-500/90 text-white hover:bg-red-500 border-red-600/30 shadow-red-500/30',
+    className: 'bg-destructive/10 text-destructive border-destructive/20',
+    dot: 'bg-destructive',
   },
   archivada: {
     label: 'Archivada',
     icon: Archive,
-    className: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 border-secondary/30 shadow-secondary/30',
+    className: 'bg-muted text-muted-foreground border-border',
+    dot: 'bg-muted-foreground',
   },
 }
 
@@ -53,15 +60,15 @@ export function OrderStatus({ status }: OrderStatusProps) {
 
   return (
     <div className="flex items-center justify-center">
-      <div 
+      <div
         className={cn(
-          "inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 select-none gap-2 shadow-[0_2px_10px] cursor-default",
+          "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition-all gap-1.5 select-none cursor-default",
           config.className
         )}
       >
-        <config.icon className="h-4 w-4" />
+        <span className={cn("h-1.5 w-1.5 rounded-full", config.dot)} />
         <span>{config.label}</span>
       </div>
     </div>
   )
-} 
+}

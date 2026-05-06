@@ -45,22 +45,22 @@ export function CategoryList() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto py-6 space-y-6 animate-fade-up">
+      <div className="flex flex-wrap gap-3 justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Categorías</h1>
-          <p className="text-muted-foreground mt-1">
-            Para organizar tus productos, creá categorías y subcategorías que aparecerán en el menú de la tienda.
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Categorías</h1>
+          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+            Organizá tus productos creando categorías y subcategorías que aparecerán en el menú de la tienda.
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button variant="gradient" onClick={() => setIsDialogOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
           Crear categoría
         </Button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Buscar categorías..."
           className="pl-10"
@@ -69,12 +69,12 @@ export function CategoryList() {
         />
       </div>
 
-      <div className="bg-card rounded-lg shadow-sm">
+      <div className="rounded-2xl border border-border/70 bg-card shadow-soft overflow-hidden">
         <CategoriesManager searchTerm={searchTerm} />
       </div>
 
-      <CategoryDialog 
-        open={isDialogOpen} 
+      <CategoryDialog
+        open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onSave={handleSaveCategory}
       />

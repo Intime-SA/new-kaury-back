@@ -15,18 +15,13 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
-  User,
-  Mail,
   Phone,
   Calendar,
-  FileText,
   Filter,
   Loader2,
-  Pencil,
   X,
   MapPin,
 } from "lucide-react";
-import Link from "next/link";
 import { UserDetails } from "@/components/users/user-details";
 import { UserFilters } from "@/components/users/user-filters";
 import { Badge } from "@/components/ui/badge";
@@ -124,7 +119,7 @@ export function UsersTable() {
 
     if (clientFilters.searchTerm) {
       chips.push(
-        <Badge key="searchTerm" variant="secondary" className="flex items-center gap-1">
+        <Badge key="searchTerm" variant="soft" className="flex items-center gap-1">
           <Search className="h-3 w-3" />
           {clientFilters.searchTerm}
           <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("searchTerm")} />
@@ -134,7 +129,7 @@ export function UsersTable() {
     
     if (clientFilters.province) {
       chips.push(
-        <Badge key="province" variant="secondary" className="flex items-center gap-1 capitalize">
+        <Badge key="province" variant="soft" className="flex items-center gap-1 capitalize">
           <MapPin className="h-3 w-3" />
           {clientFilters.province}
           <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleClearFilter("province")} />
@@ -146,7 +141,7 @@ export function UsersTable() {
       const formattedFrom = clientFilters.registrationDateFrom ? formatDate(clientFilters.registrationDateFrom) : '';
       const formattedTo = clientFilters.registrationDateTo ? formatDate(clientFilters.registrationDateTo) : '';
       chips.push(
-        <Badge key="registrationDate" variant="secondary" className="flex items-center gap-1">
+        <Badge key="registrationDate" variant="soft" className="flex items-center gap-1">
           <Calendar className="h-3 w-3" />
           Registro:
           {formattedFrom ? ` Desde ${formattedFrom}` : ""}
@@ -224,13 +219,13 @@ export function UsersTable() {
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+    <Card className="p-5 sm:p-6 animate-fade-up">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre, apellido, email, provincia, dni..."
-            className="pl-8"
+            placeholder="Buscar por nombre, email, provincia, dni..."
+            className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -239,25 +234,25 @@ export function UsersTable() {
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2"
+            className="gap-2"
           >
             <Filter className="h-4 w-4" />
             Filtros
-            {showFilters ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
-          <Button 
-            variant="default" 
+          <Button
+            variant="gradient"
             onClick={handleExport}
             disabled={isExporting}
+            className="gap-2"
           >
             {isExporting ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Exportando...</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Exportando...
+              </>
             ) : (
-              'Exportar'
+              "Exportar"
             )}
           </Button>
         </div>
@@ -280,15 +275,15 @@ export function UsersTable() {
 
       {showFilters && <UserFilters />}
 
-      <div className="rounded-md border">
+      <div className="rounded-2xl border border-border/70 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-10"></TableHead>
-              <TableHead className="w-[180px]">Nombre</TableHead>
+              <TableHead className="min-w-[260px]">Nombre</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Acciones</TableHead>
-              <TableHead>Fecha Registro</TableHead>
+              <TableHead className="w-[140px]">Acciones</TableHead>
+              <TableHead className="w-[140px]">Fecha registro</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -326,37 +321,45 @@ export function UsersTable() {
                 <>
                   <TableRow
                     key={client.id}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer transition-colors"
                     onClick={() => toggleExpand(client.id)}
                   >
                     <TableCell>
-                      {expandedUser === client.id ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground">
+                        {expandedUser === client.id ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </span>
                     </TableCell>
                     <TableCell className="font-medium">
-                      {client.name} {client.apellido}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-white text-[11px] font-semibold shadow-soft">
+                          {(client.name?.charAt(0) || "?").toUpperCase()}
+                          {(client.apellido?.charAt(0) || "").toUpperCase()}
+                        </span>
+                        <span className="font-semibold text-foreground truncate">
+                          {client.name} {client.apellido}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell>{client.email}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <span className="block truncate">{client.email}</span>
+                    </TableCell>
 
-                    
                     <TableCell>
                       <div className="flex items-center justify-start gap-1">
                         {client.telefono &&
                           (() => {
-                            const cleanedNumber = client.telefono.replace(
-                              /\D/g,
-                              ""
-                            );
+                            const cleanedNumber = client.telefono.replace(/\D/g, "");
                             const whatsappUrl = `https://wa.me/${cleanedNumber}`;
                             return (
                               <a
                                 href={whatsappUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center h-8 w-8 rounded-md text-green-600 hover:bg-muted"
+                                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-success hover:bg-success/10 transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                                 title="Contactar por WhatsApp"
                               >
@@ -364,24 +367,6 @@ export function UsersTable() {
                               </a>
                             );
                           })()}
-                        <Link
-                          href={`/clients/edit/${client.id}`}
-                          passHref
-                          legacyBehavior
-                        >
-                          <a
-                            onClick={(e) => e.stopPropagation()}
-                            title="Editar Cliente"
-                          >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -391,8 +376,8 @@ export function UsersTable() {
                     </TableCell>
                   </TableRow>
                   {expandedUser === client.id && (
-                    <TableRow className="bg-muted/20 hover:bg-muted/30">
-                      <TableCell colSpan={5} className="p-4">
+                    <TableRow className="bg-muted/30 hover:bg-muted/40">
+                      <TableCell colSpan={5} className="p-5">
                         {client.datosEnvio ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
                             <div className="font-medium text-muted-foreground col-span-full mb-1">

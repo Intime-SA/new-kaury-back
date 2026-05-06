@@ -51,16 +51,10 @@ export default function ShippingRatesPage() {
     try {
       setLoading(true)
       const rates = await shippingRatesService.getAll({
-        dimensiones: {
-          weight: 1,
-          length: 1,
-          width: 1,
-          height: 1,
-        },
+        dimensiones: { weight: 1, length: 1, width: 1, height: 1 },
         codigoPostal: "1000",
         tipoEntregaServicio: "Domicilio",
       })
-      console.log("Respuesta de rates:", rates)
       setShippingRates(rates.rates)
     } catch (error) {
       toast({
@@ -75,7 +69,6 @@ export default function ShippingRatesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("editingRate:", editingRate)
     try {
       const rateData = {
         ...formData,
@@ -86,16 +79,10 @@ export default function ShippingRatesPage() {
 
       if (editingRate && editingRate._id) {
         await shippingRatesService.update(editingRate._id, rateData)
-        toast({
-          title: "Éxito",
-          description: "Tarifa actualizada correctamente",
-        })
+        toast({ title: "Éxito", description: "Tarifa actualizada correctamente" })
       } else {
         await shippingRatesService.create(rateData)
-        toast({
-          title: "Éxito",
-          description: "Tarifa creada correctamente",
-        })
+        toast({ title: "Éxito", description: "Tarifa creada correctamente" })
       }
 
       setIsDialogOpen(false)
@@ -103,11 +90,7 @@ export default function ShippingRatesPage() {
       resetForm()
       loadShippingRates()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo guardar la tarifa",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "No se pudo guardar la tarifa", variant: "destructive" })
     }
   }
 
@@ -146,17 +129,22 @@ export default function ShippingRatesPage() {
     setIsDialogOpen(true)
   }
 
-  const filteredRates = shippingRates
-  console.log("filteredRates:", filteredRates)
+  const filteredRates = shippingRates.filter(
+    (r) =>
+      !searchTerm ||
+      r.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.productType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.deliveredType.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const getDeliveryTypeColor = (type: string) => {
+  const getDeliveryTypeBadgeVariant = (type: string) => {
     switch (type.toLowerCase()) {
       case "domicilio":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20"
+        return "info"
       case "a sucursal":
-        return "bg-green-500/10 text-green-500 border-green-500/20"
+        return "success"
       default:
-        return "bg-gray-500/10 text-gray-500 border-gray-500/20"
+        return "soft"
     }
   }
 
@@ -164,130 +152,111 @@ export default function ShippingRatesPage() {
     if (!deleteId) return
     try {
       await shippingRatesService.delete(deleteId)
-      toast({
-        title: "Éxito",
-        description: "Tarifa eliminada correctamente",
-      })
+      toast({ title: "Éxito", description: "Tarifa eliminada correctamente" })
       loadShippingRates()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la tarifa",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "No se pudo eliminar la tarifa", variant: "destructive" })
     } finally {
       setIsDeleteDialogOpen(false)
       setDeleteId(null)
     }
   }
 
+  const stats = {
+    total: shippingRates.length,
+    avgPrice:
+      shippingRates.length > 0
+        ? Math.round(shippingRates.reduce((acc, r) => acc + r.price, 0) / shippingRates.length)
+        : 0,
+    avgDays:
+      shippingRates.length > 0
+        ? Math.round(
+            shippingRates.reduce(
+              (acc, r) => acc + (Number.parseInt(r.deliveryTimeMin) + Number.parseInt(r.deliveryTimeMax)) / 2,
+              0
+            ) / shippingRates.length
+          )
+        : 0,
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Cargando tarifas de envío...</div>
+      <div className="min-h-screen p-6">
+        <div className="flex items-center justify-center h-64 text-muted-foreground gap-2">
+          <span className="h-4 w-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          Cargando tarifas de envío...
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screentext-white p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 animate-fade-up">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-3 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg">
-              <Truck className="h-6 w-6 text-white" />
-            </div>
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-brand text-white shadow-pop">
+              <Truck className="h-5 w-5" />
+            </span>
             <div>
-              <h1 className="text-2xl font-bold">Tarifas de Envío</h1>
-              <p className="text-white">Gestiona las tarifas y opciones de envío</p>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Tarifas de envío</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Gestioná las tarifas y opciones de envío</p>
             </div>
           </div>
-          <Button onClick={openCreateDialog} className="bg-[#DE1A32] hover:bg-orange-600 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Tarifa
+          <Button onClick={openCreateDialog} variant="gradient" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nueva tarifa
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-transparent border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Tarifas</CardTitle>
-              <Package className="h-4 w-4 text-white" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{shippingRates.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-transparent border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Precio Promedio</CardTitle>
-              <DollarSign className="h-4 w-4 text-white" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                $
-                {shippingRates.length > 0
-                  ? (shippingRates.reduce((acc, rate) => acc + rate.price, 0) / shippingRates.length).toLocaleString(
-                      "es-AR",
-                    )
-                  : "0"}{" "}
-                ARS
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 stagger">
+          {[
+            { title: "Total tarifas", value: stats.total, icon: Package, accent: "from-rose-500/15 to-red-500/15 text-primary" },
+            { title: "Precio promedio", value: `$${stats.avgPrice.toLocaleString("es-AR")}`, icon: DollarSign, accent: "from-emerald-400/15 to-teal-500/15 text-success" },
+            { title: "Tiempo promedio", value: `${stats.avgDays} días`, icon: Clock, accent: "from-sky-400/15 to-cyan-500/15 text-info" },
+          ].map((s) => (
+            <div
+              key={s.title}
+              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-soft transition-all duration-300 hover:shadow-card"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{s.title}</p>
+                  <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">{s.value}</p>
+                </div>
+                <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${s.accent}`}>
+                  <s.icon className="h-4 w-4" />
+                </span>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-transparent border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Tiempo Promedio</CardTitle>
-              <Clock className="h-4 w-4 text-white" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                {shippingRates.length > 0
-                  ? Math.round(
-                      shippingRates.reduce(
-                        (acc, rate) =>
-                          acc + (Number.parseInt(rate.deliveryTimeMin) + Number.parseInt(rate.deliveryTimeMax)) / 2,
-                        0,
-                      ) / shippingRates.length,
-                    )
-                  : "0"}{" "}
-                días
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          ))}
         </div>
 
         {/* Search and View Toggle */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar tarifas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-transparent border-gray-700 text-white"
+              className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 p-1 rounded-xl border border-border/60 bg-card">
             <Button
-              variant={viewMode === "cards" ? "default" : "outline"}
+              variant={viewMode === "cards" ? "gradient" : "ghost"}
               size="sm"
               onClick={() => setViewMode("cards")}
-              className={viewMode === "cards" ? "bg-[#DE1A32] hover:bg-orange-600 text-white" : ""}
             >
               Cards
             </Button>
             <Button
-              variant={viewMode === "table" ? "default" : "outline"}
+              variant={viewMode === "table" ? "gradient" : "ghost"}
               size="sm"
               onClick={() => setViewMode("table")}
-              className={viewMode === "table" ? "bg-[#DE1A32] hover:bg-orange-600" : ""}
             >
               Tabla
             </Button>
@@ -296,43 +265,43 @@ export default function ShippingRatesPage() {
 
         {/* Content */}
         {viewMode === "cards" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredRates.map((rate) => (
-              <Card key={rate._id} className="bg-transparent border-gray-800 hover:border-gray-700 transition-colors">
-                <CardHeader>
+              <Card key={rate._id} className="group">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <Badge className={getDeliveryTypeColor(rate.deliveredType)}>{rate.deliveredType}</Badge>
-                    <div className="flex gap-2">
+                    <Badge variant={getDeliveryTypeBadgeVariant(rate.deliveredType)}>{rate.deliveredType}</Badge>
+                    <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="sm"
+                        size="icon-sm"
                         variant="ghost"
                         onClick={() => handleEdit(rate)}
-                        className="h-8 w-8 p-0 hover:bg-gray-800"
+                        className="h-8 w-8"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
-                        size="sm"
+                        size="icon-sm"
                         variant="ghost"
                         onClick={() => handleDeleteClick(rate._id)}
-                        className="h-8 w-8 p-0 hover:bg-red-900/20 hover:text-red-400"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <CardTitle className="text-lg text-white">{rate.productName}</CardTitle>
-                  <CardDescription className="text-gray-400">{rate.productType}</CardDescription>
+                  <CardTitle className="text-lg mt-2">{rate.productName}</CardTitle>
+                  <CardDescription>{rate.productType}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Precio:</span>
-                    <span className="text-xl font-bold text-green-400">${rate.price.toLocaleString("es-AR")} ARS</span>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">Precio</span>
+                    <span className="text-lg font-bold text-success">${rate.price.toLocaleString("es-AR")}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Tiempo de entrega:</span>
-                    <span className="text-white">
-                      {rate.deliveryTimeMin} - {rate.deliveryTimeMax} días
+                  <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">Entrega</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {rate.deliveryTimeMin} – {rate.deliveryTimeMax} días
                     </span>
                   </div>
                 </CardContent>
@@ -340,49 +309,44 @@ export default function ShippingRatesPage() {
             ))}
           </div>
         ) : (
-          <Card className="bg-transparent border-gray-800">
+          <Card className="overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800">
-                  <TableHead className="text-gray-400">Producto</TableHead>
-                  <TableHead className="text-gray-400">Tipo</TableHead>
-                  <TableHead className="text-gray-400">Entrega</TableHead>
-                  <TableHead className="text-gray-400">Precio</TableHead>
-                  <TableHead className="text-gray-400">Tiempo</TableHead>
-                  <TableHead className="text-gray-400">Acciones</TableHead>
+                <TableRow>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Entrega</TableHead>
+                  <TableHead>Precio</TableHead>
+                  <TableHead>Tiempo</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRates.map((rate) => (
-                  <TableRow key={rate._id} className="border-gray-800">
-                    <TableCell className="text-white font-medium">{rate.productName}</TableCell>
-                    <TableCell className="text-gray-300">{rate.productType}</TableCell>
+                  <TableRow key={rate._id}>
+                    <TableCell className="font-semibold text-foreground">{rate.productName}</TableCell>
+                    <TableCell className="text-muted-foreground">{rate.productType}</TableCell>
                     <TableCell>
-                      <Badge className={getDeliveryTypeColor(rate.deliveredType)}>{rate.deliveredType}</Badge>
+                      <Badge variant={getDeliveryTypeBadgeVariant(rate.deliveredType)}>{rate.deliveredType}</Badge>
                     </TableCell>
-                    <TableCell className="text-green-400 font-medium">
-                      ${rate.price.toLocaleString("es-AR")} ARS
+                    <TableCell className="text-success font-semibold">
+                      ${rate.price.toLocaleString("es-AR")}
                     </TableCell>
-                    <TableCell className="text-gray-300">
-                      {rate.deliveryTimeMin} - {rate.deliveryTimeMax} días
+                    <TableCell className="text-muted-foreground">
+                      {rate.deliveryTimeMin} – {rate.deliveryTimeMax} días
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(rate)}
-                          className="h-8 w-8 p-0 hover:bg-gray-800"
-                        >
-                          <Edit className="h-4 w-4" />
+                      <div className="flex justify-end gap-1">
+                        <Button size="icon-sm" variant="ghost" onClick={() => handleEdit(rate)} className="h-8 w-8">
+                          <Edit className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          size="sm"
+                          size="icon-sm"
                           variant="ghost"
                           onClick={() => handleDeleteClick(rate._id)}
-                          className="h-8 w-8 p-0 hover:bg-red-900/20 hover:text-red-400"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>
@@ -395,49 +359,47 @@ export default function ShippingRatesPage() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="bg-[#09090B] border-gray-800 text-white">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingRate ? "Editar Tarifa" : "Nueva Tarifa de Envío"}</DialogTitle>
-              <DialogDescription className="text-gray-400">
-                {editingRate ? "Modifica los datos de la tarifa" : "Completa los datos para crear una nueva tarifa"}
+              <DialogTitle>{editingRate ? "Editar tarifa" : "Nueva tarifa de envío"}</DialogTitle>
+              <DialogDescription>
+                {editingRate ? "Modificá los datos de la tarifa" : "Completá los datos para crear una nueva tarifa"}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="deliveredType">Tipo de Entrega</Label>
+                  <Label htmlFor="deliveredType">Tipo de entrega</Label>
                   <Select
                     value={formData.deliveredType}
                     onValueChange={(value) => setFormData({ ...formData, deliveredType: value })}
                   >
-                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectContent>
                       <SelectItem value="Domicilio">Domicilio</SelectItem>
                       <SelectItem value="A sucursal">A sucursal</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="productType">Tipo de Producto</Label>
+                  <Label htmlFor="productType">Tipo de producto</Label>
                   <Input
                     id="productType"
                     value={formData.productType}
                     onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
-                    className="bg-gray-800 border-gray-700"
-                    placeholder="ej: Envío Clásico"
+                    placeholder="ej: Envío clásico"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="productName">Nombre del Producto</Label>
+                <Label htmlFor="productName">Nombre del producto</Label>
                 <Input
                   id="productName"
                   value={formData.productName}
                   onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-                  className="bg-gray-800 border-gray-700"
                   placeholder="ej: Andreani"
                   required
                 />
@@ -449,46 +411,38 @@ export default function ShippingRatesPage() {
                   type="number"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="bg-gray-800 border-gray-700"
                   placeholder="ej: 9500"
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="deliveryTimeMin">Tiempo Mínimo (días)</Label>
+                  <Label htmlFor="deliveryTimeMin">Tiempo mínimo (días)</Label>
                   <Input
                     id="deliveryTimeMin"
                     value={formData.deliveryTimeMin}
                     onChange={(e) => setFormData({ ...formData, deliveryTimeMin: e.target.value })}
-                    className="bg-gray-800 border-gray-700"
                     placeholder="ej: 2"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="deliveryTimeMax">Tiempo Máximo (días)</Label>
+                  <Label htmlFor="deliveryTimeMax">Tiempo máximo (días)</Label>
                   <Input
                     id="deliveryTimeMax"
                     value={formData.deliveryTimeMax}
                     onChange={(e) => setFormData({ ...formData, deliveryTimeMax: e.target.value })}
-                    className="bg-gray-800 border-gray-700"
                     placeholder="ej: 5"
                     required
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="border-gray-700"
-                >
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-[#DE1A32] text-white hover:bg-orange-600">
-                  {editingRate ? "Actualizar" : "Crear"} Tarifa
+                <Button type="submit" variant="gradient">
+                  {editingRate ? "Actualizar" : "Crear"} tarifa
                 </Button>
               </DialogFooter>
             </form>
@@ -497,26 +451,21 @@ export default function ShippingRatesPage() {
 
         {/* Delete Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="bg-[#09090B] border border-gray-800 text-white max-w-md mx-auto">
+          <DialogContent className="max-w-md mx-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold mb-2">¿Eliminar tarifa?</DialogTitle>
-              <div className="flex items-center gap-3 mt-2 mb-4">
-                <Trash2 className="h-7 w-7 text-red-500" />
-                <span className="text-gray-400 text-lg">Esta acción no se puede deshacer.</span>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+                <Trash2 className="h-5 w-5" />
               </div>
+              <DialogTitle className="text-center">¿Eliminar tarifa?</DialogTitle>
+              <DialogDescription className="text-center">
+                Esta acción no se puede deshacer.
+              </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteDialogOpen(false)}
-                className="border-gray-700 px-6 py-2 text-lg"
-              >
+            <DialogFooter className="gap-2 sm:gap-3 sm:justify-center">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button
-                onClick={confirmDelete}
-                className="bg-[#DE1A32] text-white hover:bg-orange-600 px-6 py-2 text-lg"
-              >
+              <Button variant="destructive" onClick={confirmDelete}>
                 Eliminar
               </Button>
             </DialogFooter>

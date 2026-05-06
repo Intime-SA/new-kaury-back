@@ -16,16 +16,14 @@ interface SocialSectionProps {
 export function SocialSection({ control }: SocialSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <div className="flex gap-1">
-          <Instagram className="h-10 w-10" />
-        </div>
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 text-white shadow-soft">
+          <Instagram className="h-5 w-5" />
+        </span>
         <div className="w-full">
           <CardTitle className="flex justify-between items-center gap-2">
             Instagram y Google Shopping
-            <Badge variant="secondary" className="bg-muted text-muted-foreground">
-              Próximamente
-            </Badge>
+            <Badge variant="soft">Próximamente</Badge>
           </CardTitle>
           <CardDescription>
             Destacá tus productos en las vidrieras virtuales de Instagram y Google gratuitamente.

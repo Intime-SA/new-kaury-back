@@ -134,12 +134,12 @@ const STATUS_DESCRIPTIONS: Record<RequestPaymentStatus, string> = {
 }
 
 const STATUS_COLORS: Record<RequestPaymentStatus, string> = {
-  pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  nueva: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  pagoRecibido: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  empaquetada: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-  archivada: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  cancelada: 'bg-red-500/20 text-red-400 border-red-500/30',
+  pending: 'bg-warning/10 text-warning border-warning/20',
+  nueva: 'bg-info/10 text-info border-info/20',
+  pagoRecibido: 'bg-success/10 text-success border-success/20',
+  empaquetada: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
+  archivada: 'bg-muted text-muted-foreground border-border',
+  cancelada: 'bg-destructive/10 text-destructive border-destructive/20',
 }
 
 const STATUS_ICONS: Record<RequestPaymentStatus, React.ReactNode> = {
@@ -362,18 +362,18 @@ function PaymentCard({
 
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             {pr.status === 'cancelada' ? (
-              <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px] px-1.5 py-0 gap-1">
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 gap-1">
                 <XCircle className="h-2.5 w-2.5" />
                 Cancelada
               </Badge>
             ) : hasOrders ? (
               isPendiente ? (
-                <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0 gap-1">
+                <Badge variant="warning" className="text-[10px] px-1.5 py-0 gap-1">
                   <Clock className="h-2.5 w-2.5" />
                   Confirmar pago
                 </Badge>
               ) : (
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 py-0 gap-1">
+                <Badge variant="success" className="text-[10px] px-1.5 py-0 gap-1">
                   <CheckCircle2 className="h-2.5 w-2.5" />
                   Recibido
                 </Badge>
@@ -381,7 +381,7 @@ function PaymentCard({
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-[10px] px-1.5 py-0 gap-1">
+                  <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/30 text-[10px] px-1.5 py-0 gap-1">
                     <LinkIcon className="h-2.5 w-2.5" />
                     Sin asociar
                   </Badge>
@@ -543,11 +543,11 @@ function OrderSelector({
 
         {/* Hints banner */}
         {(amountHint || phoneHint) && (
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+          <div className="rounded-xl bg-warning/10 border border-warning/20 p-3">
             <div className="flex items-start gap-2">
-              <Sparkles className="h-4 w-4 text-amber-500 mt-0.5" />
+              <Sparkles className="h-4 w-4 text-warning mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-amber-500">Sugerencias basadas en el comprobante</p>
+                <p className="text-sm font-medium text-warning">Sugerencias basadas en el comprobante</p>
                 <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
                   {amountHint && (
                     <span className="flex items-center gap-1">
@@ -563,7 +563,7 @@ function OrderSelector({
                   )}
                 </div>
                 {matchCount > 0 && (
-                  <p className="text-xs text-emerald-500 mt-1.5">
+                  <p className="text-xs text-success mt-1.5">
                     {matchCount} orden{matchCount !== 1 ? 'es' : ''} coincide{matchCount === 1 ? '' : 'n'} con el monto (±5%)
                   </p>
                 )}
@@ -618,7 +618,7 @@ function OrderSelector({
                         key={order._id}
                         className={cn(
                           isAutoMatch &&
-                            'bg-emerald-500/5 border-l-4 border-l-emerald-500 hover:bg-emerald-500/10'
+                            'bg-success/5 border-l-4 border-l-success hover:bg-success/10'
                         )}
                       >
                         <TableCell className="font-medium">
@@ -626,7 +626,7 @@ function OrderSelector({
                             {isAutoMatch && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="text-emerald-500">
+                                  <span className="text-success">
                                     <Sparkles className="h-3.5 w-3.5" />
                                   </span>
                                 </TooltipTrigger>
@@ -642,14 +642,14 @@ function OrderSelector({
                         <TableCell>{name}</TableCell>
                         <TableCell className="text-muted-foreground">{phone}</TableCell>
                         <TableCell className="text-right">
-                          <span className={isAutoMatch ? 'text-emerald-500 font-semibold' : ''}>
+                          <span className={isAutoMatch ? 'text-success font-semibold' : ''}>
                             {formatCurrency(order.total)}
                           </span>
                         </TableCell>
                         <TableCell>
                           <Button
                             size="sm"
-                            variant={isAutoMatch ? 'default' : 'outline'}
+                            variant={isAutoMatch ? 'gradient' : 'outline'}
                             onClick={() => {
                               onSelect(order)
                               onOpenChange(false)
@@ -901,25 +901,23 @@ export default function PaymentRequestsAdminPage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
-
-        <div className="relative z-10 p-4 lg:p-6">
+      <div className="min-h-screen">
+        <div className="relative z-10 p-3 sm:p-4 lg:p-6">
         <div className="mx-auto max-w-7xl space-y-5">
           {/* Header */}
           <header className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                  </div>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-brand text-white shadow-pop">
+                    <CreditCard className="h-5 w-5" />
+                  </span>
                   <div>
-                    <h1 className="text-xl font-bold tracking-tight text-foreground">
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                       Comprobantes de Pago
                     </h1>
-                    <p className="text-sm text-muted-foreground">
-                      Procesa y asocia comprobantes a órdenes del CRM
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      Procesá y asociá comprobantes a órdenes del CRM
                     </p>
                   </div>
                 </div>
@@ -1053,18 +1051,18 @@ export default function PaymentRequestsAdminPage() {
             <KpiCard
               title="Total comprobantes"
               value={kpis?.total ?? pagination?.total ?? payments.length}
-              icon={<Receipt className="h-4 w-4 text-foreground" />}
+              icon={<Receipt className="h-4 w-4" />}
               description="Cantidad total de comprobantes en el período seleccionado"
-              accentColor="bg-muted"
+              accentColor="bg-gradient-brand-soft text-primary"
               onClick={() => setFilters((f) => ({ ...f, kpiFilter: 'all', page: 1 }))}
               isActive={filters.kpiFilter === 'all'}
             />
             <KpiCard
               title="Sin asociar"
               value={kpis?.sinAsociar ?? payments.filter((p) => !p.orderIds?.length).length}
-              icon={<Link2 className="h-4 w-4 text-orange-400" />}
+              icon={<Link2 className="h-4 w-4" />}
               description="Comprobantes que aún no tienen órdenes asociadas"
-              accentColor="bg-orange-500/20"
+              accentColor="bg-orange-500/10 text-orange-600"
               percentage={
                 (kpis?.total ?? payments.length) > 0
                   ? ((kpis?.sinAsociar ?? 0) / (kpis?.total ?? payments.length)) * 100
@@ -1076,9 +1074,9 @@ export default function PaymentRequestsAdminPage() {
             <KpiCard
               title="Pendientes confirmar"
               value={kpis?.pendientes ?? payments.filter(isAsociadoPendiente).length}
-              icon={<Clock className="h-4 w-4 text-amber-400" />}
+              icon={<Clock className="h-4 w-4" />}
               description="Asociados a órdenes pero pendientes de confirmar el pago"
-              accentColor="bg-amber-500/20"
+              accentColor="bg-warning/10 text-warning"
               percentage={
                 (kpis?.total ?? payments.length) > 0
                   ? ((kpis?.pendientes ?? 0) / (kpis?.total ?? payments.length)) * 100
@@ -1090,9 +1088,9 @@ export default function PaymentRequestsAdminPage() {
             <KpiCard
               title="Pago recibido"
               value={kpis?.pagoRecibido ?? payments.filter(isPagoRecibido).length}
-              icon={<Banknote className="h-4 w-4 text-emerald-400" />}
+              icon={<Banknote className="h-4 w-4" />}
               description="Comprobantes con pago confirmado y procesado"
-              accentColor="bg-emerald-500/20"
+              accentColor="bg-success/10 text-success"
               percentage={
                 (kpis?.total ?? payments.length) > 0
                   ? ((kpis?.pagoRecibido ?? 0) / (kpis?.total ?? payments.length)) * 100
@@ -1153,10 +1151,10 @@ export default function PaymentRequestsAdminPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Column 1: Pending payments */}
             <Card className="overflow-hidden flex flex-col">
-              <CardHeader className="py-3 px-4 border-b border-border bg-amber-500/5">
+              <CardHeader className="py-3 px-4 border-b border-border/60 bg-warning/5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-amber-400" />
+                    <Clock className="h-4 w-4 text-warning" />
                     <CardTitle className="text-sm font-semibold">Pendientes de pago</CardTitle>
                   </div>
                   <Badge variant="secondary" className="text-xs">
@@ -1195,10 +1193,10 @@ export default function PaymentRequestsAdminPage() {
 
             {/* Column 2: Received payments */}
             <Card className="overflow-hidden flex flex-col">
-              <CardHeader className="py-3 px-4 border-b border-border bg-emerald-500/5">
+              <CardHeader className="py-3 px-4 border-b border-border/60 bg-success/5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-emerald-400" />
+                    <Banknote className="h-4 w-4 text-success" />
                     <CardTitle className="text-sm font-semibold">Pago recibido</CardTitle>
                   </div>
                   <Badge variant="secondary" className="text-xs">
@@ -1452,28 +1450,29 @@ export default function PaymentRequestsAdminPage() {
                   selectedPayment.orderIds.length > 0 &&
                   isPendientePago(selectedPayment) &&
                   selectedPayment.status !== 'cancelada' && (
-                    <Card className="border-emerald-500/30 bg-emerald-500/5">
+                    <Card className="border-success/30 bg-success/5">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-emerald-500/20">
-                            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                          <div className="p-2 rounded-xl bg-success/15 text-success">
+                            <CheckCircle2 className="h-5 w-5" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-emerald-400">
-                              Orden asociada - Pendiente de confirmar
+                            <p className="font-semibold text-success">
+                              Orden asociada · pendiente de confirmar
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              Confirma que el pago fue recibido correctamente para actualizar el estado de la orden.
+                              Confirmá que el pago fue recibido correctamente para actualizar el estado de la orden.
                             </p>
                             <Button
                               onClick={() => handleConfirmPayment(selectedPayment._id)}
                               disabled={updatingId === selectedPayment._id}
-                              className="mt-3 bg-emerald-600 hover:bg-emerald-700"
+                              variant="success"
+                              className="mt-3 gap-2"
                             >
                               {updatingId === selectedPayment._id ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                <CheckCircle2 className="h-4 w-4" />
                               )}
                               Confirmar pago recibido
                             </Button>

@@ -56,9 +56,9 @@ export function DashboardContent() {
 
   return (
     <div className="flex-1">
-      <div className="p-6">
+      <div className="px-3 sm:px-5 py-4">
         <div className="flex">
-          <div className={`flex-1 ${selectedOrder ? 'pr-[35%]' : ''}`}>
+          <div className={`flex-1 ${selectedOrder ? 'pr-[380px]' : ''}`}>
             <Orders
               orders={orders}
               loading={isLoading}
@@ -71,9 +71,9 @@ export function DashboardContent() {
               onSelectOrder={setSelectedOrder}
               selectedOrderId={selectedOrder?._id ?? selectedOrder?.id}
             />
-          </div>  
+          </div>
           {selectedOrder && (
-            <div className="fixed top-20 right-10 w-[calc(30%-1.5rem)] h-[calc(100vh-3rem)] overflow-y-auto bg-background border rounded-lg shadow-lg z-[9999]">
+            <div className="fixed top-20 right-4 w-[360px] h-[calc(100vh-6rem)] overflow-y-auto scroll-hidden bg-card border border-border/70 rounded-2xl shadow-card z-[9999] animate-slide-up">
               <OrderDetails order={selectedOrder} onClose={() => setSelectedOrder(null)} />
             </div>
           )}

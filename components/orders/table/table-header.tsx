@@ -13,15 +13,24 @@ import { OrdersKPIs } from "../kpis/orders-kpis"
 import * as XLSX from 'xlsx'
 import { OrderActions } from "./table-actions"
 import { useOrderStateManagement } from "@/hooks/orders/useOrderStateManagement"
+import { OrdersStatusTabs } from "../tabs/orders-tabs"
 
 interface TableHeaderProps {
   searchTerm: string
   setSearchTerm: (value: string) => void
   reports: any
   loading: boolean
+  ordersCount?: {
+    nueva: number
+    empaquetada: number
+    pagoRecibido: number
+    enviada: number
+    cancelada: number
+    archivada: number
+  }
 }
 
-export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: TableHeaderProps) {
+export function TableHeader({ searchTerm, setSearchTerm, reports, loading, ordersCount }: TableHeaderProps) {
   const dispatch = useDispatch()
   const { selectedDate, selectedOrders } = useSelector((state: RootState) => state.orders)
 
@@ -143,30 +152,61 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
     XLSX.writeFile(wb, `ordenes_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
+  // Detectar si la fecha seleccionada es hoy (para el subtítulo)
+  const isToday = (() => {
+    if (!selectedDate) return false
+    const sel = new Date(selectedDate)
+    const today = new Date()
+    return (
+      sel.getFullYear() === today.getFullYear() &&
+      sel.getMonth() === today.getMonth() &&
+      sel.getDate() === today.getDate()
+    )
+  })()
+
   return (
-    <div className="flex-none">
-      {!selectedDate && (
-        <span className="text-sm text-muted-foreground">Últimas horas</span>
-      )}
+    <div className="flex-none space-y-4 animate-fade-up">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Órdenes</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {!selectedDate
+              ? "Resumen general (sin filtro de fecha)"
+              : isToday
+              ? "Operación de hoy en tiempo real"
+              : `Filtrado por ${format(new Date(selectedDate), "PPP", { locale: es })}`}
+          </p>
+        </div>
+        {ordersCount && (
+          <OrdersStatusTabs orders={ordersCount} className="ml-auto max-w-full" />
+        )}
+      </div>
+
       <OrdersKPIs
         reports={reports}
         loading={loading}
         hasDateFilter={!!selectedDate}
       />
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
+                size="sm"
                 className={cn(
-                  "h-8 w-[180px] justify-start text-left font-normal",
+                  "h-9 w-[200px] justify-start text-left font-normal gap-2",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
-                <Calendar className="mr-2 h-4 w-4" />
+                <Calendar className="h-4 w-4" />
                 {selectedDate ? (
-                  format(new Date(selectedDate), "PPP", { locale: es })
+                  isToday ? (
+                    <span className="font-medium">Hoy · {format(new Date(selectedDate), "d MMM", { locale: es })}</span>
+                  ) : (
+                    format(new Date(selectedDate), "PPP", { locale: es })
+                  )
                 ) : (
                   <span>Seleccionar fecha</span>
                 )}
@@ -187,9 +227,36 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
                   }}
                   initialFocus
                 />
+                <div className="flex justify-between items-center gap-1 p-2 border-t border-border/60">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary"
+                    onClick={() => {
+                      const today = new Date()
+                      today.setHours(0, 0, 0, 0)
+                      dispatch(setSelectedDate(today.toISOString()))
+                    }}
+                  >
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Hoy
+                  </Button>
+                  {selectedDate && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => dispatch(setSelectedDate(""))}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Limpiar
+                    </Button>
+                  )}
+                </div>
               </div>
             </PopoverContent>
-            {selectedOrders.length > 0 && (
+          </Popover>
+
+          {selectedOrders.length > 0 && (
             <OrderActions
               actions={bulkActions}
               onActionClick={handleBulkOrderAction}
@@ -197,57 +264,48 @@ export function TableHeader({ searchTerm, setSearchTerm, reports, loading }: Tab
               selectedCount={selectedOrdersCount}
             />
           )}
-            {selectedDate && (
-              <div className="flex justify-end p-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2"
-                  onClick={() => dispatch(setSelectedDate(""))}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Limpiar
-                </Button>
-              </div>
-            )}
-          </Popover>
         </div>
 
-        <div className="flex justify-end flex-1 items-center space-x-2">
-          <div className="relative w-[150px] lg:w-[250px]">
+        <div className="flex flex-1 sm:justify-end items-center gap-2">
+          <div className="relative w-full sm:w-[260px]">
             <Input
               placeholder="Buscar órdenes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-8 pr-8"
+              className="h-9 pr-9"
             />
             {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+              <button
+                type="button"
+                aria-label="Limpiar"
+                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                 onClick={() => {
                   setSearchTerm("")
                   dispatch(setSelectedDate(""))
                 }}
               >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </Button>
+                <X className="h-3.5 w-3.5" />
+              </button>
             )}
           </div>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleDownloadExcel}
             disabled={selectedOrders.length === 0}
-            className="h-8"
+            className="h-9 gap-2"
           >
-            <Download className="h-4 w-4 mr-2" />
-            Descargar Excel ({selectedOrders.length})
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Excel</span>
+            {selectedOrders.length > 0 && (
+              <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-brand px-1.5 text-[10px] font-semibold text-white">
+                {selectedOrders.length}
+              </span>
+            )}
           </Button>
         </div>
       </div>
     </div>
   )
-} 
+}

@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/providers/theme-provider"
 
 export default function Dashboard() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
       <SidebarProvider>
-        <div className="flex min-h-screen bg-background w-[100vw]">
+        <div className="flex min-h-screen bg-transparent w-full">
           <Suspense fallback={null}>
             <DashboardContent />
           </Suspense>

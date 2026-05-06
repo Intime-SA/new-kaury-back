@@ -32,13 +32,13 @@ export function BatchProgressModal({
   const getStatusIcon = () => {
     switch (job?.status) {
       case 'completed':
-        return <CheckCircle className="h-6 w-6 text-green-500" />
+        return <CheckCircle className="h-5 w-5 text-success" />
       case 'failed':
-        return <AlertCircle className="h-6 w-6 text-red-500" />
+        return <AlertCircle className="h-5 w-5 text-destructive" />
       case 'processing':
-        return <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
+        return <Loader2 className="h-5 w-5 text-primary animate-spin" />
       default:
-        return <Clock className="h-6 w-6 text-gray-500" />
+        return <Clock className="h-5 w-5 text-muted-foreground" />
     }
   }
 
@@ -60,13 +60,13 @@ export function BatchProgressModal({
   const getStatusColor = () => {
     switch (job?.status) {
       case 'completed':
-        return 'bg-green-100 text-green-800'
+        return 'bg-success/10 text-success'
       case 'failed':
-        return 'bg-red-100 text-red-800'
+        return 'bg-destructive/10 text-destructive'
       case 'processing':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-primary/10 text-primary'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-muted text-muted-foreground'
     }
   }
 

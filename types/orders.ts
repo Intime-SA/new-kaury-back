@@ -81,6 +81,16 @@ export interface OrderItem {
   image?: string | string[]
   productId?: string
   descuento?: number
+  isGift?: boolean
+  giftId?: string
+}
+
+export interface GiftItemSummary {
+  giftId: string
+  productId: string
+  variantId: string
+  name: string
+  quantity: number
 }
 
 export interface InfoEntrega {
@@ -101,6 +111,7 @@ export interface InfoEntrega {
 export interface TipoDePago {
   pagoEfectivo: boolean
   pagoTransferencia: boolean
+  pagoMercadoPago?: boolean
 }
 
 export interface Order {
@@ -138,5 +149,10 @@ export interface Order {
     codigoPostal: string
   }
   requestPaymentId?: string
+  subtotal?: number
+  costoEnvio?: number
+  couponCode?: string | null
+  couponType?: "percent" | "fixed" | null
+  couponDiscount?: number
+  giftItems?: GiftItemSummary[]
 }
-  

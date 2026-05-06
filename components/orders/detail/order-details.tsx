@@ -5,8 +5,9 @@ import { OrderStatus, OrderStatusType } from "@/components/orders/status/order-s
 import { formatFirebaseTimestamp, formatISODate } from "@/lib/utils"
 import { CustomerInfoCard } from "./customer-info-card"
 import { OrderProductsCard } from "./order-products-card"
-import type { OrderItem } from "@/types/orders"
-import { X, Download, MessageCircle, Receipt, ExternalLink, Loader2, FileText } from "lucide-react"
+import type { OrderItem, GiftItemSummary, TipoDePago } from "@/types/orders"
+import { X, Download, Receipt, ExternalLink, Loader2, FileText, Truck, CreditCard, Banknote, Tag, StickyNote, BadgePercent, Gift, Wallet } from "lucide-react"
+import { KauryWhatsapp } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { PDFDownloadLink } from "@react-pdf/renderer"
 import { OrderPDF } from "./order-pdf"
@@ -40,8 +41,55 @@ interface OrderDetailsProps {
     tipoEnvio: number
     envioSeleccionado?: string
     requestPaymentId?: string
+    canalVenta?: string
+    note?: string
+    tipoDePago?: TipoDePago
+    cupon?: {
+      codigo?: string
+      descuento?: number
+      tipo?: string
+    } | null
+    cuponCodigo?: string
+    cuponDescuento?: number
+    descuento?: number
+    recargo?: number
+    subtotal?: number
+    costoEnvio?: number
+    couponCode?: string | null
+    couponType?: "percent" | "fixed" | null
+    couponDiscount?: number
+    giftItems?: GiftItemSummary[]
   }
   onClose: () => void
+}
+
+const formatARS = (n: number) =>
+  n.toLocaleString("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 0, maximumFractionDigits: 2 })
+
+// Convierte códigos camelCase/kebab del backend en texto legible
+// "envioDomicilio" → "Envío a domicilio", "retiroSucursal" → "Retiro en sucursal"
+const formatShippingMethod = (raw?: string | null): string => {
+  if (!raw) return "—"
+  const v = raw.trim()
+  const mapping: Record<string, string> = {
+    enviodomicilio: "Envío a domicilio",
+    envioadomicilio: "Envío a domicilio",
+    retirosucursal: "Retiro en sucursal",
+    retirashowroom: "Retiro en showroom",
+    retiroenshowroom: "Retiro en showroom",
+    showroom: "Retiro en showroom",
+    correoargentino: "Correo Argentino",
+    andreani: "Andreani",
+    oca: "OCA",
+  }
+  const key = v.toLowerCase().replace(/[\s_-]/g, "")
+  if (mapping[key]) return mapping[key]
+  // Fallback: separar camelCase y capitalizar
+  const spaced = v
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase()
 }
 
 const PDFButton = ({ order }: { order: OrderDetailsProps['order'] }) => {
@@ -160,9 +208,9 @@ const WhatsAppButton = ({ order }: { order: OrderDetailsProps['order'] }) => {
       onClick={handleWhatsAppClick}
       disabled={!hasPhone}
       title={hasPhone ? "Contactar por WhatsApp" : "No hay teléfono disponible"}
-      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+      className="text-success hover:bg-success/10"
     >
-      <MessageCircle className="h-4 w-4" />
+      <KauryWhatsapp className="h-4 w-4" />
     </Button>
   );
 };
@@ -211,34 +259,41 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
 
   return (
     <>
-    <Card className="h-full overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">#{order.numberOrder}</CardTitle>
-        <div className="flex items-center gap-2">
+    <Card className="h-full overflow-auto scroll-hidden border-0 rounded-2xl shadow-none">
+      <CardHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border/60 flex flex-row items-center justify-between space-y-0 pb-2.5 px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Orden</p>
+          <CardTitle className="text-base font-bold mt-0.5 truncate">
+            <span className="text-primary">#</span>{order.numberOrder}
+          </CardTitle>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           <PDFButton order={order} />
           <WhatsAppButton order={order} />
           <OrderStatus status={order.status} />
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button variant="ghost" size="icon-sm" onClick={onClose} className="h-7 w-7">
+            <X className="h-3.5 w-3.5" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3 px-4 pt-4 pb-5">
+        {/* Badges de información de pago/promos */}
+        <OrderBadges order={order} />
+
         {/* Fecha, Total y Comprobante (fila compacta) */}
-        <div className="flex flex-wrap items-start gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Fecha</p>
-            <p className="font-medium">{formatISODate(order.date)}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-border/70 bg-muted/30 p-2.5">
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Fecha</p>
+            <p className="mt-0.5 text-xs font-semibold">{formatISODate(order.date)}</p>
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-xl font-bold">${order.total.toLocaleString("es-ES", {
-              style: "currency",
-              currency: "ARS",
-            })}</p>
+          <div className="rounded-lg border border-border/70 bg-gradient-brand-soft p-2.5">
+            <p className="text-[9px] uppercase tracking-wider text-primary/70">Total</p>
+            <p className="mt-0.5 text-sm font-bold text-foreground">
+              {order.total.toLocaleString("es-ES", { style: "currency", currency: "ARS" })}
+            </p>
           </div>
           {order.requestPaymentId && (
-            <div className="flex-1 min-w-[220px] rounded-lg border border-border bg-muted/20 overflow-hidden flex">
+            <div className="col-span-2 rounded-xl border border-success/20 bg-success/5 overflow-hidden flex">
               {paymentLoading ? (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 w-full">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -308,10 +363,15 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
         <CustomerInfoCard info={order.infoEntrega}/>
 
         {/* Productos */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">Productos</h3>
+        <div className="space-y-2">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Productos · {order.orderItems?.length || 0}
+          </h3>
           <OrderProductsCard items={order.orderItems} />
         </div>
+
+        {/* Desglose del total */}
+        <OrderTotalBreakdown order={order} />
       </CardContent>
     </Card>
 
@@ -346,4 +406,167 @@ export function OrderDetails({ order, onClose }: OrderDetailsProps) {
     )}
     </>
   )
-} 
+}
+
+// ============================================================================
+// Helpers de cálculo (cupón, recargo, surcharge derivado)
+// ============================================================================
+function getOrderComputed(order: OrderDetailsProps["order"]) {
+  const subtotal =
+    Number(order.subtotal ?? order.orderItems?.reduce((acc, it) => acc + (it.unit_price || 0) * (it.quantity || 0), 0) ?? 0)
+  const costoEnvio = Number(order.costoEnvio ?? 0)
+
+  // Cupón: priorizar nuevo schema (couponCode/couponDiscount), caer en legacy
+  const couponCode = order.couponCode ?? order.cupon?.codigo ?? order.cuponCodigo ?? null
+  const couponDiscount = Number(
+    order.couponDiscount ?? order.cupon?.descuento ?? order.cuponDescuento ?? order.descuento ?? 0
+  )
+
+  // Recargo derivado o explícito (transferencia + retiro suele tener)
+  const recargoExplicito = Number(order.recargo ?? 0)
+  const expectedBeforeSurcharge = Math.max(0, subtotal + costoEnvio - couponDiscount)
+  const surchargeDerivado = Math.max(0, Number(order.total) - expectedBeforeSurcharge)
+  const recargo = recargoExplicito > 0 ? recargoExplicito : surchargeDerivado
+  const surchargePct =
+    expectedBeforeSurcharge > 0 ? Math.round((recargo / expectedBeforeSurcharge) * 100) : 0
+
+  const giftItems: GiftItemSummary[] = order.giftItems || []
+
+  return { subtotal, costoEnvio, couponCode, couponDiscount, recargo, surchargePct, giftItems }
+}
+
+// ============================================================================
+// Badges de información (pago, envío, recargo, cupón, regalos)
+// ============================================================================
+function OrderBadges({ order }: { order: OrderDetailsProps["order"] }) {
+  const tipoDePago = order.tipoDePago
+  const isMP = !!tipoDePago?.pagoMercadoPago
+  const isTransfer = !!tipoDePago?.pagoTransferencia
+  const isCash = !!tipoDePago?.pagoEfectivo
+  const isPickup = order.tipoEnvio === 2
+
+  const { couponCode, couponDiscount, recargo, surchargePct, giftItems } = getOrderComputed(order)
+  const hasSurcharge = isTransfer && isPickup && recargo > 1
+  const hasCoupon = !!couponCode && couponDiscount > 0
+  const hasGifts = giftItems.length > 0
+
+  const badges: React.ReactNode[] = []
+
+  if (isMP) {
+    badges.push(
+      <span key="mp" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-info/10 text-info border border-info/30">
+        <CreditCard className="h-2.5 w-2.5" /> Mercado Pago
+      </span>,
+    )
+  }
+  if (isTransfer) {
+    badges.push(
+      <span key="tr" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-info/10 text-info border border-info/30">
+        <Wallet className="h-2.5 w-2.5" /> Transferencia
+      </span>,
+    )
+  }
+  if (isCash) {
+    badges.push(
+      <span key="ca" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-success/10 text-success border border-success/30">
+        <Banknote className="h-2.5 w-2.5" /> Efectivo
+      </span>,
+    )
+  }
+  if (hasSurcharge) {
+    badges.push(
+      <span key="sur" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-warning/10 text-warning border border-warning/30">
+        <BadgePercent className="h-2.5 w-2.5" />
+        Recargo{surchargePct > 0 ? ` ${surchargePct}%` : ""} (+{formatARS(recargo)})
+      </span>,
+    )
+  }
+  if (hasCoupon) {
+    badges.push(
+      <span key="cp" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary border border-primary/30">
+        <Tag className="h-2.5 w-2.5" />
+        Cupón {couponCode} (−{formatARS(couponDiscount)})
+      </span>,
+    )
+  }
+  if (hasGifts) {
+    badges.push(
+      <span key="gf" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-pink-500/10 text-pink-600 border border-pink-500/30">
+        <Gift className="h-2.5 w-2.5" />
+        {giftItems.length === 1 ? "Regalo incluido" : `${giftItems.length} regalos`}
+      </span>,
+    )
+  }
+  badges.push(
+    <span
+      key="env"
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border"
+    >
+      <Truck className="h-2.5 w-2.5" />
+      {isPickup ? "Retiro en showroom" : formatShippingMethod(order.envioSeleccionado) || "Envío a domicilio"}
+    </span>,
+  )
+
+  if (badges.length === 0) return null
+  return <div className="flex flex-wrap gap-1.5">{badges}</div>
+}
+
+// ============================================================================
+// Desglose del total + nota
+// ============================================================================
+function OrderTotalBreakdown({ order }: { order: OrderDetailsProps["order"] }) {
+  const { subtotal, costoEnvio, couponCode, couponDiscount, recargo } = getOrderComputed(order)
+  const hasBreakdown = subtotal > 0 || costoEnvio > 0 || couponDiscount > 0 || recargo > 0
+
+  return (
+    <>
+      {order.note && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-3 flex items-start gap-2.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground mt-0.5">
+            <StickyNote className="h-3 w-3" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Nota</p>
+            <p className="text-xs text-foreground">{order.note}</p>
+          </div>
+        </div>
+      )}
+
+      {hasBreakdown && (
+        <div className="rounded-xl border border-border/70 bg-muted/20 p-3 space-y-1.5">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+            Desglose
+          </h3>
+          {subtotal > 0 && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-medium text-foreground">{formatARS(subtotal)}</span>
+            </div>
+          )}
+          {costoEnvio > 0 && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">Envío</span>
+              <span className="font-medium text-foreground">{formatARS(costoEnvio)}</span>
+            </div>
+          )}
+          {couponDiscount > 0 && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">Cupón {couponCode || ""}</span>
+              <span className="font-medium text-success">−{formatARS(couponDiscount)}</span>
+            </div>
+          )}
+          {recargo > 1 && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">Recargo</span>
+              <span className="font-medium text-warning">+{formatARS(recargo)}</span>
+            </div>
+          )}
+          <div className="border-t border-border/60 pt-1.5 flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">Total</span>
+            <span className="text-sm font-bold text-foreground">{formatARS(Number(order.total))}</span>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

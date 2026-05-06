@@ -69,18 +69,28 @@ export function Orders({
     return acc;
   }, {} as Record<string, number>);
 
+  const ordersCountForTabs = {
+    nueva: ordersCount["nueva"] || 0,
+    empaquetada: ordersCount["empaquetada"] || 0,
+    pagoRecibido: ordersCount["pagoRecibido"] || 0,
+    enviada: ordersCount["enviada"] || 0,
+    cancelada: ordersCount["cancelada"] || 0,
+    archivada: ordersCount["archivada"] || 0,
+  }
+
   const content = (
-    <div className="flex flex-col h-[calc(100vh-200px)]">
+    <div className="flex flex-col gap-4 h-[calc(100vh-200px)]">
       <OrdersTableHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         reports={reports}
         loading={loading}
+        ordersCount={ordersCountForTabs}
       />
       <div className="flex-1 min-h-0">
-        <Card className="h-full">
+        <Card className="h-full overflow-hidden">
           <CardContent className="p-0 h-full flex flex-col">
-            <div className="sticky top-0 z-10 bg-background border-b">
+            <div className="flex-1 overflow-auto custom-scrollbar">
               <TableContent
                 orders={orders}
                 isSearching={isSearching}
@@ -92,9 +102,7 @@ export function Orders({
                 handleOrderAction={handleOrderAction}
                 loading={loading}
               />
-              <div className="flex-1">
-                <div ref={ref} className="w-full" />
-              </div>
+              <div ref={ref} className="w-full h-2" />
             </div>
           </CardContent>
         </Card>
@@ -104,14 +112,7 @@ export function Orders({
 
   return (
     <OrdersTabs
-      orders={{
-        nueva: ordersCount["nueva"] || 0,
-        empaquetada: ordersCount["empaquetada"] || 0,
-        pagoRecibido: ordersCount["pagoRecibido"] || 0,
-        enviada: ordersCount["enviada"] || 0,
-        cancelada: ordersCount["cancelada"] || 0,
-        archivada: ordersCount["archivada"] || 0,
-      }}
+      orders={ordersCountForTabs}
       content={content}
     />
   );
