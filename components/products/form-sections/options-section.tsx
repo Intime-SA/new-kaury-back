@@ -11,8 +11,10 @@ interface OptionsSectionProps {
 export function OptionsSection({ control }: OptionsSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Settings className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+          <Settings className="h-5 w-5" />
+        </span>
         <div>
           <CardTitle>Más opciones</CardTitle>
           <CardDescription>Configuraciones adicionales del producto</CardDescription>
@@ -23,7 +25,7 @@ export function OptionsSection({ control }: OptionsSectionProps) {
           control={control}
           name="freeShipping"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/70 bg-muted/30 p-4 transition-colors hover:bg-muted/50">
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
@@ -41,7 +43,7 @@ export function OptionsSection({ control }: OptionsSectionProps) {
           control={control}
           name="showInStore"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/70 bg-muted/30 p-4 transition-colors hover:bg-muted/50">
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
@@ -59,7 +61,7 @@ export function OptionsSection({ control }: OptionsSectionProps) {
           control={control}
           name="featured"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/70 bg-muted/30 p-4 transition-colors hover:bg-muted/50">
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>

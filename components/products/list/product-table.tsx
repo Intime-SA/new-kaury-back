@@ -209,8 +209,8 @@ export function ProductTable({
               <React.Fragment key={product.id}>
                 <TableRow
                   className={cn(
-                    "transition-colors hover:bg-muted/50",
-                    isExpanded && "bg-muted/50"
+                    "transition-colors hover:bg-accent/40",
+                    isExpanded && "bg-accent/30"
                   )}
                 >
                   <TableCell className="w-[40px]">
@@ -229,7 +229,7 @@ export function ProductTable({
                     )}
                   </TableCell>
                   <TableCell className="w-[100px]">
-                    <div className="relative w-36 h-36 rounded-xs overflow-hidden">
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden ring-1 ring-border/60 shadow-soft transition-transform duration-300 hover:scale-[1.04]">
                       <Image
                         src={
                           product.images && product.images[0]?.src
@@ -255,51 +255,56 @@ export function ProductTable({
                     </div>
                   </TableCell>
                   <TableCell className="w-[120px]">
-                    <div className="flex items-center justify-center font-extrabold">
+                    <div className="flex items-center justify-center font-bold text-foreground">
                       {formatPrice(mainVariant?.unit_price)}
                     </div>
                   </TableCell>
                   <TableCell className="w-[180px]">
-                    {product.categories?.map((category: ProductCategory) => (
-                      <Badge
-                        key={category.id}
-                        variant="secondary"
-                        className="m-1 rounded-sm"
-                      >
-                        {category.name?.es}{" "}
-                        {category.subcategories?.[0]?.name?.es
-                          ? `/ ${category.subcategories[0].name.es}`
-                          : ""}
-                      </Badge>
-                    ))}
+                    <div className="flex flex-wrap gap-1">
+                      {product.categories?.map((category: ProductCategory) => (
+                        <Badge
+                          key={category.id}
+                          variant="soft"
+                          className="rounded-full"
+                        >
+                          {category.name?.es}{" "}
+                          {category.subcategories?.[0]?.name?.es
+                            ? `· ${category.subcategories[0].name.es}`
+                            : ""}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell className="w-[80px]">
                     <div className="flex items-center justify-center">
-
-                    {product.showInStore ? (
-                      <Eye className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
-                    )}
+                      {product.showInStore ? (
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-success/10 text-success" title="Visible en tienda">
+                          <Eye className="h-3.5 w-3.5" />
+                        </span>
+                      ) : (
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground" title="Oculto">
+                          <EyeOff className="h-3.5 w-3.5" />
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   
                   <TableCell className="w-[100px]">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-end gap-1">
                       <Link href={`/products/edit/${product.id}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Pencil className="h-4 w-4" />
+                        <Button variant="ghost" size="icon-sm" className="h-8 w-8 hover:bg-accent">
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
                       </Link>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            size="icon-sm"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             disabled={isDeleting}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -340,8 +345,7 @@ export function ProductTable({
                   product.variants?.map((variant: ProductVariant) => (
                     <TableRow
                       key={variant.id}
-                      className="bg-muted/25 hover:bg-muted/40"
-
+                      className="bg-muted/30 hover:bg-muted/50"
                     >
                       <TableCell></TableCell>{" "}
                       
@@ -474,12 +478,17 @@ export function ProductTable({
       <div ref={loadMoreRef} style={{ height: "1px" }} />
 
       {/* Mensajes de estado al final de la tabla */}
-      <div className="text-center mt-4 mb-4 text-sm text-muted-foreground">
-        {isFetchingNextPage ? "Cargando más productos..." : ""}
+      <div className="text-center my-6 text-sm text-muted-foreground">
+        {isFetchingNextPage ? (
+          <span className="inline-flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+            Cargando más productos...
+          </span>
+        ) : null}
         {!isFetchingNextPage &&
           !hasNextPage &&
           products.length > 0 &&
-          "Has llegado al final."}
+          "Llegaste al final del catálogo"}
         {!isLoading &&
           !isFetchingNextPage &&
           products.length === 0 &&

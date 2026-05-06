@@ -42,15 +42,16 @@ export function ImagesSection() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ImageIcon className="h-6 w-6" />
-          Imágenes del Producto
-        </CardTitle>
-        <CardDescription>
-          Sube y gestiona las imágenes de tu producto. La primera imagen será la
-          principal. Arrastra con el asa para cambiar el orden.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-soft">
+          <ImageIcon className="h-5 w-5" />
+        </span>
+        <div>
+          <CardTitle>Imágenes del producto</CardTitle>
+          <CardDescription>
+            La primera imagen será la principal. Arrastrá para reordenar.
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <ImageUploader />
@@ -79,9 +80,9 @@ export function ImagesSection() {
                             ref={draggableProvided.innerRef}
                             {...draggableProvided.draggableProps}
                             className={cn(
-                              "relative aspect-square border rounded-lg overflow-hidden group shadow-md bg-muted/20 touch-manipulation",
+                              "relative aspect-square border border-border/60 rounded-xl overflow-hidden group shadow-soft bg-muted/30 touch-manipulation transition-all duration-200 hover:shadow-card",
                               snapshot.isDragging &&
-                                "z-50 ring-2 ring-primary shadow-lg"
+                                "z-50 ring-2 ring-primary shadow-pop scale-[1.02]"
                             )}
                             style={draggableProvided.draggableProps.style}
                           >
@@ -116,7 +117,7 @@ export function ImagesSection() {
                               </Button>
                             </div>
                             {index === 0 && (
-                              <span className="absolute top-1 left-1 z-10 bg-primary text-primary-foreground text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                              <span className="absolute top-1.5 left-1.5 z-10 bg-gradient-brand text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-pop">
                                 Principal
                               </span>
                             )}

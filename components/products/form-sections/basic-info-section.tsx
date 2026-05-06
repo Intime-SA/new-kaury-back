@@ -19,8 +19,10 @@ interface BasicInfoSectionProps {
 export function BasicInfoSection({ control, generateDescription }: BasicInfoSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Info className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+          <Info className="h-5 w-5" />
+        </span>
         <div>
           <CardTitle>Información básica</CardTitle>
           <CardDescription>Información principal del producto</CardDescription>

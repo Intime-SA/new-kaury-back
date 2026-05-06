@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Package, Plus } from "lucide-react";
+import { ArrowLeft, Package, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 interface HeaderSectionProps {
@@ -13,52 +13,51 @@ interface HeaderSectionProps {
 
 export function HeaderSection({
   context,
-  onSaveComplete,
   onSubmit,
   isSubmitting,
 }: HeaderSectionProps) {
   return (
-    <>
-      <div className="pb-4">
-        <Link href="/products/list">
-          <ArrowLeft className="h-10 w-10" />
-        </Link>
-      </div>
-      <div className="flex justify-between items-center mb-6 bg-card p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Package className="h-8 w-8" />
-              {context === "edit" ? "Editar Producto" : "Nuevo Producto"}
+    <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-soft">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link
+            href="/products/list"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+            aria-label="Volver"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-brand text-white shadow-pop">
+            <Package className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              {context === "edit" ? "Editar producto" : "Nuevo producto"}
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Completa la información de tu producto
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Completá la información de tu producto
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <div>
-            <Link href="/products/list">
-              <Button variant="outline">Cancelar</Button>
-            </Link>
-          </div>
-          <div>
-            <Button onClick={onSubmit} disabled={isSubmitting}>
+        <div className="flex items-center gap-2 ml-auto">
+          <Link href="/products/list">
+            <Button variant="outline">Cancelar</Button>
+          </Link>
+          <Button variant="gradient" onClick={onSubmit} disabled={isSubmitting} className="gap-2">
             {isSubmitting ? (
               <>
-                <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Guardando...
               </>
             ) : (
               <>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 {context === "edit" ? "Guardar cambios" : "Crear producto"}
-                </>
-              )}
-            </Button>
-          </div>
+              </>
+            )}
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

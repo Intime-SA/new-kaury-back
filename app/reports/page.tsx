@@ -188,11 +188,11 @@ function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePickerProps)
         <Button
           variant="outline"
           className={cn(
-            'h-10 justify-start text-left font-normal bg-secondary/50 border-border hover:bg-secondary hover:border-muted-foreground/30 transition-all duration-200',
+            'h-10 justify-start text-left font-normal gap-2',
             !dateRange && 'text-muted-foreground'
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
           {dateRange?.from ? (
             dateRange.to ? (
               <span className="text-foreground">
@@ -209,10 +209,10 @@ function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePickerProps)
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+      <PopoverContent className="w-auto p-0" align="start">
         <div className="flex">
-          <div className="flex flex-col gap-1 p-3 border-r border-border">
-            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">Presets</p>
+          <div className="flex flex-col gap-1 p-3 border-r border-border/60">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-2">Presets</p>
             {presets.map((preset) => (
               <Button
                 key={preset.label}
@@ -264,44 +264,48 @@ interface MetricCardProps {
 function MetricCard({ title, value, subtitle, icon, trend, color, delay = 0 }: MetricCardProps) {
   return (
     <div
-      className="group relative overflow-hidden rounded-xl bg-card border border-border p-6 transition-all duration-300 hover:border-muted-foreground/30 hover:shadow-lg hover:shadow-black/20 animate-fade-up"
+      className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-6 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card animate-fade-up"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div
+        className="absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-50 blur-2xl transition-opacity group-hover:opacity-80"
+        style={{ backgroundColor: `${color}25` }}
+      />
 
-      <div className="flex items-start justify-between">
+      <div className="relative flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
+          <p className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{value}</p>
           {subtitle && (
             <p className="text-xs text-muted-foreground">{subtitle}</p>
           )}
         </div>
 
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
-          style={{ backgroundColor: `${color}15` }}
+          className="flex h-11 w-11 items-center justify-center rounded-xl shadow-soft transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+          style={{ backgroundColor: `${color}1A`, color }}
         >
-          <div style={{ color }}>{icon}</div>
+          {icon}
         </div>
       </div>
 
       {trend !== undefined && (
-        <div className="mt-4 flex items-center gap-1">
-          {trend >= 0 ? (
-            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
-          ) : (
-            <ArrowDownRight className="h-4 w-4 text-red-500" />
-          )}
-          <span className={cn('text-sm font-medium', trend >= 0 ? 'text-emerald-500' : 'text-red-500')}>
+        <div className="relative mt-4 flex items-center gap-1.5 text-xs">
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold",
+              trend >= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive",
+            )}
+          >
+            {trend >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {Math.abs(trend)}%
           </span>
-          <span className="text-sm text-muted-foreground">vs período anterior</span>
+          <span className="text-muted-foreground">vs período anterior</span>
         </div>
       )}
 
       <div
-        className="absolute bottom-0 left-0 h-1 w-full opacity-50"
+        className="absolute bottom-0 left-0 h-1 w-full"
         style={{ background: `linear-gradient(90deg, ${color}, transparent)` }}
       />
     </div>
@@ -312,7 +316,7 @@ function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
 
   return (
-    <div className="rounded-lg border border-border bg-card/95 backdrop-blur-sm p-3 shadow-xl">
+    <div className="rounded-xl border border-border/70 bg-card/95 backdrop-blur-md p-3 shadow-card">
       <p className="text-sm font-medium text-foreground mb-2">{label}</p>
       {payload.map((entry: any, index: number) => (
         <div key={index} className="flex items-center gap-2 text-sm">
@@ -344,12 +348,12 @@ interface ChartCardProps {
 function ChartCard({ title, subtitle, children, delay = 0 }: ChartCardProps) {
   return (
     <div
-      className="rounded-xl bg-card border border-border p-6 transition-all duration-300 hover:border-muted-foreground/30 animate-fade-up"
+      className="rounded-2xl bg-card border border-border/70 p-6 shadow-soft transition-all duration-300 hover:shadow-card animate-fade-up"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
       <div className="h-[320px]">{children}</div>
     </div>
@@ -495,28 +499,28 @@ function EventsCharts({ chartData, delay = 0 }: { chartData: any[], delay?: numb
 
 function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-background p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header skeleton */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-2">
-            <div className="h-8 w-32 rounded-lg bg-muted animate-pulse" />
-            <div className="h-4 w-48 rounded-lg bg-muted animate-pulse" />
+            <div className="h-7 w-32 skeleton" />
+            <div className="h-4 w-56 skeleton" />
           </div>
-          <div className="h-10 w-64 rounded-lg bg-muted animate-pulse" />
+          <div className="h-10 w-64 skeleton rounded-xl" />
         </div>
 
         {/* Cards skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-border p-6">
+            <div key={i} className="rounded-2xl border border-border/70 bg-card p-6 shadow-soft">
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
-                  <div className="h-4 w-20 rounded bg-muted animate-pulse" />
-                  <div className="h-8 w-24 rounded bg-muted animate-pulse" />
-                  <div className="h-3 w-32 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-20 skeleton" />
+                  <div className="h-8 w-28 skeleton" />
+                  <div className="h-3 w-24 skeleton" />
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-muted animate-pulse" />
+                <div className="h-11 w-11 rounded-xl skeleton" />
               </div>
             </div>
           ))}
@@ -525,12 +529,12 @@ function LoadingSkeleton() {
         {/* Charts skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-border p-6">
-              <div className="space-y-2 mb-6">
-                <div className="h-5 w-32 rounded bg-muted animate-pulse" />
-                <div className="h-4 w-48 rounded bg-muted animate-pulse" />
+            <div key={i} className="rounded-2xl border border-border/70 bg-card p-6 shadow-soft">
+              <div className="space-y-2 mb-5">
+                <div className="h-5 w-40 skeleton" />
+                <div className="h-3 w-56 skeleton" />
               </div>
-              <div className="h-[320px] rounded-lg bg-muted animate-pulse" />
+              <div className="h-[320px] rounded-xl skeleton" />
             </div>
           ))}
         </div>
@@ -612,17 +616,17 @@ export default function ReportsPage() {
   // Estado de error
   if (isAnyError) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <XCircle className="w-8 h-8 text-destructive" />
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center space-y-4 rounded-2xl border border-destructive/20 bg-destructive/5 p-8 max-w-md">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-destructive/15 flex items-center justify-center">
+            <XCircle className="w-7 h-7 text-destructive" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground">Error al cargar reportes</h2>
-          <p className="text-muted-foreground max-w-md">
+          <h2 className="text-lg font-semibold text-foreground">Error al cargar reportes</h2>
+          <p className="text-sm text-muted-foreground">
             {combinedError?.message || 'Ocurrió un error inesperado al cargar los datos.'}
           </p>
-          <Button onClick={handleRefetch} className="mt-4">
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button onClick={handleRefetch} variant="gradient" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
             Reintentar
           </Button>
         </div>
@@ -633,37 +637,33 @@ export default function ReportsPage() {
 
   // Render principal con datos
   return (
-    <div className="min-h-screen bg-background">
-      {/* Subtle grid background */}
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
-
-      <div className="relative z-10 p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen">
+      <div className="relative z-10 p-3 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
-          <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-up">
+          <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-up">
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Reportes</h1>
                 {isAnyFetching && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Actualizando...</span>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                    <span className="text-xs">Actualizando...</span>
                   </div>
                 )}
               </div>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Análisis de rendimiento y métricas de ventas
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <DateRangePicker dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleRefetch}
                 disabled={isAnyFetching}
-                className="bg-secondary/50 border-border hover:bg-secondary hover:border-muted-foreground/30"
               >
                 <RefreshCw className={cn('h-4 w-4', isAnyFetching && 'animate-spin')} />
               </Button>
@@ -672,7 +672,7 @@ export default function ReportsPage() {
 
           {/* Tabs para Órdenes vs Eventos */}
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
                 Órdenes
@@ -686,13 +686,13 @@ export default function ReportsPage() {
             {/* Contenido de Órdenes */}
             <TabsContent value="orders" className="space-y-6">
               {!data || chartData.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center space-y-4">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                      <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+                <div className="flex items-center justify-center py-16 rounded-2xl border border-dashed border-border/70 bg-card/40">
+                  <div className="text-center space-y-3">
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-brand-soft flex items-center justify-center shadow-soft">
+                      <ShoppingCart className="w-7 h-7 text-primary" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">No hay datos de órdenes</h3>
-                    <p className="text-muted-foreground max-w-md">
+                    <h3 className="text-base font-semibold text-foreground">No hay datos de órdenes</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
                       No se encontraron datos de órdenes para el rango de fechas seleccionado.
                     </p>
                   </div>
@@ -840,46 +840,52 @@ export default function ReportsPage() {
 
               {/* Summary Stats Órdenes */}
               <div
-                className="rounded-xl bg-card border border-border p-6 animate-fade-up"
+                className="rounded-2xl border border-border/70 bg-gradient-brand-soft p-6 shadow-soft animate-fade-up"
                 style={{ animationDelay: '400ms' }}
               >
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="h-5 w-5 text-emerald-500" />
-                  <h3 className="text-lg font-semibold text-foreground">Resumen del Período</h3>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-brand text-white shadow-pop">
+                    <TrendingUp className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Resumen del período</h3>
+                    <p className="text-xs text-muted-foreground">Métricas calculadas a partir de tus datos</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Tasa de Conversión</p>
-                    <p className="text-2xl font-semibold text-foreground">
-                      {totals && totals.totalOrders > 0
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    {
+                      label: 'Tasa de conversión',
+                      value: `${totals && totals.totalOrders > 0
                         ? ((totals.totalSales / totals.totalOrders) * 100).toFixed(1)
-                        : 0}%
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ticket Promedio</p>
-                    <p className="text-2xl font-semibold text-foreground">
-                      {totals && totals.totalSales > 0
+                        : 0}%`,
+                    },
+                    {
+                      label: 'Ticket promedio',
+                      value: totals && totals.totalSales > 0
                         ? formatCurrency(totals.totalAmount / totals.totalSales)
-                        : '$0'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Órdenes/Día</p>
-                    <p className="text-2xl font-semibold text-foreground">
-                      {totals && chartData.length > 0
+                        : '$0',
+                    },
+                    {
+                      label: 'Órdenes/día',
+                      value: totals && chartData.length > 0
                         ? Math.round(totals.totalOrders / chartData.length)
-                        : 0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ingresos/Día</p>
-                    <p className="text-2xl font-semibold text-foreground">
-                      {totals && chartData.length > 0
+                        : 0,
+                    },
+                    {
+                      label: 'Ingresos/día',
+                      value: totals && chartData.length > 0
                         ? formatCurrency(totals.totalAmount / chartData.length)
-                        : '$0'}
-                    </p>
-                  </div>
+                        : '$0',
+                    },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-xl bg-card/70 backdrop-blur p-4 border border-border/50">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+                      <p className="mt-1.5 text-xl font-bold tracking-tight text-foreground">
+                        {stat.value}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
                 </>
@@ -889,13 +895,13 @@ export default function ReportsPage() {
             {/* Contenido de Eventos */}
             <TabsContent value="events" className="space-y-6">
               {!eventsData || eventsChartData.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center space-y-4">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                      <Activity className="w-8 h-8 text-muted-foreground" />
+                <div className="flex items-center justify-center py-16 rounded-2xl border border-dashed border-border/70 bg-card/40">
+                  <div className="text-center space-y-3">
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-brand-soft flex items-center justify-center shadow-soft">
+                      <Activity className="w-7 h-7 text-primary" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">No hay datos de eventos</h3>
-                    <p className="text-muted-foreground max-w-md">
+                    <h3 className="text-base font-semibold text-foreground">No hay datos de eventos</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
                       No se encontraron datos de eventos para el rango de fechas seleccionado.
                     </p>
                   </div>

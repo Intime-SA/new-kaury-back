@@ -29,8 +29,10 @@ export function PreviewSection({
 }: PreviewSectionProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Store className="h-10 w-10" />
+      <CardHeader className="flex flex-row items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-soft">
+          <Store className="h-5 w-5" />
+        </span>
         <div>
           <CardTitle>Vista previa</CardTitle>
           <CardDescription>Así se verá tu producto en la tienda</CardDescription>

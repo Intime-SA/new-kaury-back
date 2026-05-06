@@ -93,9 +93,14 @@ export default function EditProductPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-6 max-w-7xl bg-background text-foreground dark">
-        <div className="flex justify-center items-center h-[50vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="container mx-auto py-6 max-w-7xl">
+        <div className="flex flex-col gap-3 justify-center items-center h-[50vh]">
+          <div className="h-12 w-12 rounded-2xl bg-gradient-brand p-[3px] shadow-pop animate-pulse-soft">
+            <div className="flex h-full w-full items-center justify-center rounded-[12px] bg-card">
+              <div className="h-5 w-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">Cargando producto...</p>
         </div>
       </div>
     )
@@ -103,9 +108,9 @@ export default function EditProductPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-6 max-w-7xl bg-background text-foreground dark">
-        <div className="flex justify-center items-center h-[50vh]">
-          <p className="text-red-500">Error: {error}</p>
+      <div className="container mx-auto py-6 max-w-7xl">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Error: {error}
         </div>
       </div>
     )
@@ -113,16 +118,16 @@ export default function EditProductPage() {
 
   if (!product) {
     return (
-      <div className="container mx-auto py-6 max-w-7xl bg-background text-foreground dark">
-        <div className="flex justify-center items-center h-[50vh]">
-          <p>Producto no encontrado</p>
+      <div className="container mx-auto py-6 max-w-7xl">
+        <div className="rounded-2xl border border-border/70 bg-card p-12 text-center text-muted-foreground">
+          Producto no encontrado
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-7xl bg-background text-foreground dark">
+    <div className="container mx-auto py-6 max-w-7xl animate-fade-up">
       <ProductForm context="edit" product={product} />
     </div>
   )

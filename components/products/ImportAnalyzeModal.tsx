@@ -65,11 +65,15 @@ export const ImportAnalyzeModal: React.FC<ImportAnalyzeModalProps> = ({ open, on
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <FileText className="h-6 w-6 text-blue-600" />
-            Análisis de Importación
-          </DialogTitle>
-          <DialogDescription>Revisa los cambios que se aplicarán antes de confirmar la importación</DialogDescription>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand text-white shadow-pop">
+              <FileText className="h-5 w-5" />
+            </span>
+            <div>
+              <DialogTitle>Análisis de importación</DialogTitle>
+              <DialogDescription>Revisá los cambios que se aplicarán antes de confirmar</DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6 overflow-y-auto">
@@ -201,7 +205,7 @@ export const ImportAnalyzeModal: React.FC<ImportAnalyzeModalProps> = ({ open, on
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                            <Badge variant="warning">
                               <RefreshCw className="h-3 w-3 mr-1" />
                               Pendiente
                             </Badge>
@@ -272,21 +276,22 @@ export const ImportAnalyzeModal: React.FC<ImportAnalyzeModalProps> = ({ open, on
           </Button>
           <Button
             onClick={onConfirm}
+            variant="gradient"
             disabled={analysis.summary.totalToUpdate === 0 || importLoading}
-            className="bg-green-600 hover:bg-green-700"
+            className="gap-2"
           >
             {importLoading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                 </svg>
                 Importando...
-              </span>
+              </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Confirmar e Importar ({analysis.summary.totalToUpdate} cambios)
+                <RefreshCw className="h-4 w-4" />
+                Confirmar e importar ({analysis.summary.totalToUpdate})
               </>
             )}
           </Button>

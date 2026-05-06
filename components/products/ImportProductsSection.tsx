@@ -3,7 +3,7 @@
 import type React from "react"
 import { useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Upload, FileSpreadsheet, X, Check } from "lucide-react"
+import { Upload, FileSpreadsheet, X, Check, Loader2 } from "lucide-react"
 
 interface ImportProductsSectionProps {
   onFileSelected: (file: File) => void
@@ -22,7 +22,6 @@ export function ImportProductsSection({
   selectedFile,
   rowsReadyCount,
   analyzeLoading,
-  analyzeData,
 }: ImportProductsSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -34,54 +33,67 @@ export function ImportProductsSection({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {!selectedFile ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          className="text-sm bg-zinc-900 border-zinc-700 text-zinc-100 hover:bg-zinc-800"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Importar Excel
-        </Button>
-      ) : (
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-sm text-zinc-100 bg-zinc-800 px-2 py-1 rounded">
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="max-w-32 truncate">{selectedFile.name}</span>
-          </div>
-          <Button
-            size="sm"
-            onClick={onConfirm}
-            className="bg-green-600 hover:bg-green-700 text-xs px-2"
-            disabled={rowsReadyCount === 0 || analyzeLoading}
-          >
-            {analyzeLoading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin h-3 w-3 mr-1" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                Analizando...
-              </span>
-            ) : (
-              <>
-                <Check className="h-3 w-3 mr-1" />
-                Confirmar
-              </>
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClear}
-            className="text-xs px-2 text-zinc-400 hover:text-zinc-200"
-          >
-            <X className="h-3 w-3" />
-          </Button>
+    <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-soft">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary">
+          <FileSpreadsheet className="h-5 w-5" />
         </div>
-      )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">Carga masiva de productos</p>
+          <p className="text-xs text-muted-foreground">
+            Subí un archivo Excel para actualizar precios y stock en lote
+          </p>
+        </div>
+
+        {!selectedFile ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Importar Excel
+          </Button>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-muted/40 px-3 py-1.5 text-xs text-foreground">
+              <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
+              <span className="max-w-[160px] truncate font-medium">{selectedFile.name}</span>
+              <span className="ml-1 inline-flex h-4 items-center rounded-full bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
+                {rowsReadyCount} filas
+              </span>
+            </div>
+            <Button
+              size="sm"
+              variant="gradient"
+              onClick={onConfirm}
+              disabled={rowsReadyCount === 0 || analyzeLoading}
+              className="gap-1.5"
+            >
+              {analyzeLoading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                <>
+                  <Check className="h-3.5 w-3.5" />
+                  Analizar
+                </>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onClear}
+              className="h-8 w-8"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       <input
         type="file"
@@ -90,12 +102,6 @@ export function ImportProductsSection({
         onChange={handleInputChange}
         className="hidden"
       />
-
-      {selectedFile && (
-        <span className="ml-2 text-xs text-zinc-400">
-          {rowsReadyCount} filas listas para procesar
-        </span>
-      )}
     </div>
   )
 }
